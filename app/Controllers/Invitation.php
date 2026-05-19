@@ -97,6 +97,7 @@ class Invitation extends BaseController
 			'story'			=> [
 				'intro'	=> $story['intro'] ?? '',
 			],
+			'accounts'		=> $this->store->read('accounts.json'),
 		];
 
 		return view('invitation/index', $data);

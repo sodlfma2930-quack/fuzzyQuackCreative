@@ -9,7 +9,7 @@ $routes->get('/', static function () {
 	return view('home');
 });
 $routes->get('seungchul-hyunji', 'Invitation::index');
-$routes->post('rsvp', 'Rsvp::store');
+// $routes->post('rsvp', 'Rsvp::store');
 $routes->get('gallery', 'Invitation::gallery');
 $routes->get('travel-guide', 'TravelGuide::index');
 

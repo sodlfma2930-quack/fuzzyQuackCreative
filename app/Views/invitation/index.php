@@ -83,50 +83,29 @@
 			</div>
 		</section>
 
-		<section class="rsvp" data-rsvp>
-			<h2 class="section-title">참석 여부 알려줘</h2>
-			<form class="rsvp__form" id="rsvpForm" novalidate>
-				<div class="field">
-					<label for="name">이름</label>
-					<input id="name" name="name" type="text" required maxlength="50">
-					<p class="field__error" data-error="name"></p>
+		<section class="account">
+			<h2 class="section-title">마음 전하실 곳</h2>
+			<p class="account__intro">축하의 마음을 전해주시면 감사히 잘 쓰겠습니다.</p>
+			<?php foreach ($accounts ?? [] as $group) : ?>
+				<div class="account__group">
+					<button type="button" class="account__toggle" data-account-toggle>
+						<span class="account__toggle-label"><?= esc($group['label'] ?? '') ?></span>
+						<span class="account__toggle-icon">+</span>
+					</button>
+					<div class="account__list" data-account-list hidden>
+						<?php foreach ($group['items'] ?? [] as $item) : ?>
+							<div class="account__item">
+								<div class="account__info">
+									<span class="account__bank"><?= esc($item['bank'] ?? '') ?></span>
+									<span class="account__number"><?= esc($item['number'] ?? '') ?></span>
+									<span class="account__holder"><?= esc($item['holder'] ?? '') ?></span>
+								</div>
+								<button type="button" class="account__copy" data-copy-account="<?= esc($item['number'] ?? '') ?>">복사</button>
+							</div>
+						<?php endforeach ?>
+					</div>
 				</div>
-				<div class="field">
-					<label for="phone">연락처</label>
-					<input id="phone" name="phone" type="tel" required pattern="[0-9]{9,13}" placeholder="01012345678">
-					<p class="field__error" data-error="phone"></p>
-				</div>
-				<div class="field">
-					<label for="guests">동반 인원</label>
-					<select id="guests" name="guests" required>
-						<option value="0">혼자 참석</option>
-						<option value="1">1명</option>
-						<option value="2">2명</option>
-						<option value="3">3명</option>
-						<option value="4">4명</option>
-					</select>
-					<p class="field__error" data-error="guests"></p>
-				</div>
-				<fieldset class="field field--radio">
-					<legend>참석 여부</legend>
-					<label>
-						<input type="radio" name="attendance" value="yes" required>
-						참석할게
-					</label>
-					<label>
-						<input type="radio" name="attendance" value="no" required>
-						어려울 것 같아
-					</label>
-					<p class="field__error" data-error="attendance"></p>
-				</fieldset>
-				<div class="field">
-					<label for="message">축하 메시지 (선택)</label>
-					<textarea id="message" name="message" rows="3" maxlength="255" placeholder="짧은 메시지를 남겨줘."></textarea>
-					<p class="field__error" data-error="message"></p>
-				</div>
-				<button type="submit" class="button" data-submit>참석 여부 보내기</button>
-				<p class="rsvp__feedback" data-feedback></p>
-			</form>
+			<?php endforeach ?>
 		</section>
 
 		<section class="map">
@@ -166,11 +145,30 @@
 	</main>
 	<script>
 		window.APP_CONFIG = {
-			rsvpEndpoint: '<?= site_url('rsvp') ?>',
 			galleryEndpoint: '<?= site_url('gallery') ?>',
 			shareUrl: '<?= esc($share['page'] ?? site_url()) ?>'
 		};
 	</script>
 	<script src="<?= base_url('js/invitation.js') ?>" defer></script>
+	<script>
+		document.querySelectorAll('[data-account-toggle]').forEach(btn => {
+			btn.addEventListener('click', () => {
+				const list = btn.parentElement.querySelector('[data-account-list]');
+				const isOpen = !list.hidden;
+				list.hidden = isOpen;
+				btn.classList.toggle('open', !isOpen);
+			});
+		});
+		document.querySelectorAll('[data-copy-account]').forEach(btn => {
+			btn.addEventListener('click', () => {
+				const num = btn.dataset.copyAccount.replace(/-/g, '');
+				navigator.clipboard.writeText(num).then(() => {
+					btn.textContent = '복사됨';
+					btn.classList.add('copied');
+					setTimeout(() => { btn.textContent = '복사'; btn.classList.remove('copied'); }, 2000);
+				});
+			});
+		});
+	</script>
 </body>
 </html>
