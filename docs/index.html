@@ -43,14 +43,14 @@
 				<article class="profile">
 					<p class="profile__role">Groom</p>
 					<h3 class="profile__name">오승철</h3>
-					<p class="profile__parents">서로를 믿어준 우리 가족의 든든한 장남</p>
-					<a class="profile__contact" href="tel:01027100410">연락하기</a>
+					<p class="profile__parents">서로를 믿어준 우리 가족의 든든한 차남</p>
+					<a class="profile__contact" href="tel:010-0000-0000">연락하기</a>
 				</article>
 				<article class="profile">
 					<p class="profile__role">Bride</p>
 					<h3 class="profile__name">정현지</h3>
 					<p class="profile__parents">밝게 키워주신 사랑스러운 집의 장녀</p>
-					<a class="profile__contact" href="tel:01004102710">연락하기</a>
+					<a class="profile__contact" href="tel:010-0000-0000">연락하기</a>
 				</article>
 			</div>
 		</section>
@@ -94,15 +94,18 @@
 			<div class="gallery__viewport">
 				<div class="gallery__track">
 					<figure class="gallery__slide" data-slide="0">
-						<img src="https://images.unsplash.com/photo-1520854221050-0f4caff449fb?auto=format&fit=crop&w=900&q=80" alt="하늘 아래에서 손을 마주 잡은 두 사람">
+						<img src="./images/hero/holding-hands.jpg" alt="손을 마주 잡은 두 사람">
 					</figure>
 					<figure class="gallery__slide" data-slide="1">
-						<img src="https://images.unsplash.com/photo-1472653431158-6364773b2a56?auto=format&fit=crop&w=900&q=80" alt="햇살 가득한 들판에서 웃는 모습">
+						<img src="https://images.unsplash.com/photo-1520854221050-0f4caff449fb?auto=format&fit=crop&w=900&q=80" alt="하늘 아래에서 손을 마주 잡은 두 사람">
 					</figure>
 					<figure class="gallery__slide" data-slide="2">
-						<img src="https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=900&q=80" alt="하늘빛 배경의 캐주얼 웨딩 촬영">
+						<img src="https://images.unsplash.com/photo-1472653431158-6364773b2a56?auto=format&fit=crop&w=900&q=80" alt="햇살 가득한 들판에서 웃는 모습">
 					</figure>
 					<figure class="gallery__slide" data-slide="3">
+						<img src="https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=900&q=80" alt="하늘빛 배경의 캐주얼 웨딩 촬영">
+					</figure>
+					<figure class="gallery__slide" data-slide="4">
 						<img src="https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?auto=format&fit=crop&w=900&q=80" alt="블루 계열 플라워 부케와 반지">
 					</figure>
 				</div>
@@ -113,51 +116,73 @@
 			</div>
 		</section>
 
-		<section class="rsvp" data-rsvp>
-			<h2 class="section-title">참석 여부 알려줘</h2>
-			<p class="story__text" style="text-align:center; margin-bottom:12px;">데모 페이지라 제출해도 저장되지는 않지만, 화면 구성은 이렇게 보여줄 수 있어!</p>
-			<form class="rsvp__form" id="rsvpForm" novalidate>
-				<div class="field">
-					<label for="name">이름</label>
-					<input id="name" name="name" type="text" required maxlength="50">
-					<p class="field__error" data-error="name"></p>
+		<section class="account">
+			<h2 class="section-title">마음 전하실 곳</h2>
+			<p class="account__intro">축하의 마음을 전해주시면 감사히 잘 쓰겠습니다.</p>
+			<div class="account__group">
+				<button type="button" class="account__toggle" data-account-toggle>
+					<span class="account__toggle-label">신랑측</span>
+					<span class="account__toggle-icon">+</span>
+				</button>
+				<div class="account__list" data-account-list hidden>
+					<div class="account__item">
+						<div class="account__info">
+							<span class="account__bank">카카오뱅크</span>
+							<span class="account__number">3333-00-0000000</span>
+							<span class="account__holder">오승철</span>
+						</div>
+						<button type="button" class="account__copy" data-copy-account="3333-00-0000000">복사</button>
+					</div>
+					<div class="account__item">
+						<div class="account__info">
+							<span class="account__bank">국민은행</span>
+							<span class="account__number">000-000000-00-000</span>
+							<span class="account__holder">오아버지</span>
+						</div>
+						<button type="button" class="account__copy" data-copy-account="000-000000-00-000">복사</button>
+					</div>
+					<div class="account__item">
+						<div class="account__info">
+							<span class="account__bank">신한은행</span>
+							<span class="account__number">000-000-000000</span>
+							<span class="account__holder">오어머니</span>
+						</div>
+						<button type="button" class="account__copy" data-copy-account="000-000-000000">복사</button>
+					</div>
 				</div>
-				<div class="field">
-					<label for="phone">연락처</label>
-					<input id="phone" name="phone" type="tel" required pattern="[0-9]{9,13}" placeholder="01012345678">
-					<p class="field__error" data-error="phone"></p>
+			</div>
+			<div class="account__group">
+				<button type="button" class="account__toggle" data-account-toggle>
+					<span class="account__toggle-label">신부측</span>
+					<span class="account__toggle-icon">+</span>
+				</button>
+				<div class="account__list" data-account-list hidden>
+					<div class="account__item">
+						<div class="account__info">
+							<span class="account__bank">카카오뱅크</span>
+							<span class="account__number">3333-00-0000000</span>
+							<span class="account__holder">정현지</span>
+						</div>
+						<button type="button" class="account__copy" data-copy-account="3333-00-0000000">복사</button>
+					</div>
+					<div class="account__item">
+						<div class="account__info">
+							<span class="account__bank">국민은행</span>
+							<span class="account__number">000-000000-00-000</span>
+							<span class="account__holder">정아버지</span>
+						</div>
+						<button type="button" class="account__copy" data-copy-account="000-000000-00-000">복사</button>
+					</div>
+					<div class="account__item">
+						<div class="account__info">
+							<span class="account__bank">신한은행</span>
+							<span class="account__number">000-000-000000</span>
+							<span class="account__holder">정어머니</span>
+						</div>
+						<button type="button" class="account__copy" data-copy-account="000-000-000000">복사</button>
+					</div>
 				</div>
-				<div class="field">
-					<label for="guests">동반 인원</label>
-					<select id="guests" name="guests" required>
-						<option value="0">혼자 참석</option>
-						<option value="1">1명</option>
-						<option value="2">2명</option>
-						<option value="3">3명</option>
-						<option value="4">4명</option>
-					</select>
-					<p class="field__error" data-error="guests"></p>
-				</div>
-				<fieldset class="field field--radio">
-					<legend>참석 여부</legend>
-					<label>
-						<input type="radio" name="attendance" value="yes" required>
-						참석할게
-					</label>
-					<label>
-						<input type="radio" name="attendance" value="no" required>
-						어려울 것 같아
-					</label>
-					<p class="field__error" data-error="attendance"></p>
-				</fieldset>
-				<div class="field">
-					<label for="message">축하 메시지 (선택)</label>
-					<textarea id="message" name="message" rows="3" maxlength="255" placeholder="짧은 메시지를 남겨줘."></textarea>
-					<p class="field__error" data-error="message"></p>
-				</div>
-				<button type="submit" class="button" data-submit>참석 여부 보내기</button>
-				<p class="rsvp__feedback" data-feedback></p>
-			</form>
+			</div>
 		</section>
 
 		<section class="map">
@@ -187,18 +212,30 @@
 		<section class="share">
 			<h2 class="section-title">청첩장 공유하기</h2>
 			<div class="share__buttons">
-				<a class="button button--ghost" href="https://sharer.kakao.com/talk?url=https%3A%2F%2Fyoursite%2Fseungchul-hyunji" target="_blank" rel="noopener noreferrer">카카오톡</a>
-				<a class="button button--ghost" href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fyoursite%2Fseungchul-hyunji" target="_blank" rel="noopener noreferrer">페이스북</a>
 				<button class="button button--ghost" type="button" data-copy>링크 복사</button>
 			</div>
-			<p class="story__text" style="text-align:center; margin-top:16px;">
-				정식 배포 시엔 위 공유 링크를 실제 배포 주소로 바꿔줘!
-			</p>
-			<p class="story__text" style="text-align:center; margin-top:12px;">
-				<span style="display:inline-block; margin-top:8px;">여행 가이드도 준비했어! → <a href="./travel-guide.html" style="color:#6aa9ff; text-decoration:underline;">대구 여행 가이드 보러가기</a></span>
-			</p>
 		</section>
 	</main>
 	<script src="./js/invitation.js" defer></script>
+	<script>
+		document.querySelectorAll('[data-account-toggle]').forEach(btn => {
+			btn.addEventListener('click', () => {
+				const list = btn.parentElement.querySelector('[data-account-list]');
+				const isOpen = !list.hidden;
+				list.hidden = isOpen;
+				btn.classList.toggle('open', !isOpen);
+			});
+		});
+		document.querySelectorAll('[data-copy-account]').forEach(btn => {
+			btn.addEventListener('click', () => {
+				const num = btn.dataset.copyAccount.replace(/-/g, '');
+				navigator.clipboard.writeText(num).then(() => {
+					btn.textContent = '복사됨';
+					btn.classList.add('copied');
+					setTimeout(() => { btn.textContent = '복사'; btn.classList.remove('copied'); }, 2000);
+				});
+			});
+		});
+	</script>
 </body>
 </html>
