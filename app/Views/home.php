@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>FuzzyQuackCreative</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;600&family=Noto+Sans+KR:wght@300;400;500&display=swap" rel="stylesheet">
+	<style>
+		*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+		body {
+			font-family: 'Noto Sans KR', -apple-system, sans-serif;
+			background: #0a0a0a; color: #f5f5f7;
+			min-height: 100vh; display: flex; align-items: center; justify-content: center;
+		}
+		.container { width: 100%; max-width: 720px; padding: 40px 20px; }
+		.logo {
+			text-align: center; margin-bottom: 48px;
+		}
+		.logo__title {
+			font-family: 'Outfit', sans-serif; font-size: 28px; font-weight: 600;
+			letter-spacing: -0.5px;
+		}
+		.logo__sub { font-size: 14px; color: #86868b; margin-top: 6px; }
+		.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; }
+		.card {
+			display: flex; flex-direction: column; justify-content: space-between;
+			background: #1c1c1e; border: 1px solid #2c2c2e; border-radius: 16px;
+			padding: 28px 24px; text-decoration: none; color: inherit;
+			transition: transform .2s, border-color .2s, background .2s;
+			min-height: 180px;
+		}
+		.card:hover { transform: translateY(-4px); border-color: #48484a; background: #2c2c2e; }
+		.card--disabled { opacity: .4; pointer-events: none; }
+		.card__icon { font-size: 32px; margin-bottom: 16px; }
+		.card__title { font-size: 18px; font-weight: 600; margin-bottom: 6px; }
+		.card__desc { font-size: 13px; color: #a1a1a6; line-height: 1.5; }
+		.card__badge {
+			display: inline-block; margin-top: 12px; padding: 3px 8px;
+			font-size: 11px; font-weight: 500; border-radius: 4px;
+			background: #333; color: #86868b; width: fit-content;
+		}
+		.card__badge--live { background: #0d3b1e; color: #30d158; }
+	</style>
+</head>
+<body>
+	<div class="container">
+		<div class="logo">
+			<h1 class="logo__title">FuzzyQuackCreative</h1>
+			<p class="logo__sub">승철 & 현지 웨딩 프로젝트</p>
+		</div>
+		<div class="cards">
+			<a class="card" href="<?= site_url('seungchul-hyunji') ?>">
+				<div>
+					<div class="card__icon">💌</div>
+					<div class="card__title">청첩장</div>
+					<div class="card__desc">모바일 청첩장 미리보기</div>
+				</div>
+				<span class="card__badge card__badge--live">Live</span>
+			</a>
+			<a class="card" href="<?= site_url('admin') ?>">
+				<div>
+					<div class="card__icon">⚙️</div>
+					<div class="card__title">관리자</div>
+					<div class="card__desc">텍스트 · 갤러리 이미지 관리</div>
+				</div>
+			</a>
+			<a class="card" href="<?= site_url('travel-guide') ?>">
+				<div>
+					<div class="card__icon">🗺️</div>
+					<div class="card__title">여행 가이드</div>
+					<div class="card__desc">대구 추천 스팟 · 맛집 안내</div>
+				</div>
+			</a>
+			<a class="card" href="<?= site_url('blog') ?>">
+				<div>
+					<div class="card__icon">📝</div>
+					<div class="card__title">Tech Blog</div>
+					<div class="card__desc">백엔드 기술 스택 · 매일 자동 포스팅</div>
+				</div>
+			</a>
+		</div>
+	</div>
+</body>
+</html>

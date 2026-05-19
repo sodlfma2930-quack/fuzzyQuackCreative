@@ -1,0 +1,22 @@
+[
+    {
+        "id": 1,
+        "src": "https:\/\/images.unsplash.com\/photo-1520854221050-0f4caff449fb?auto=format&fit=crop&w=900&q=80",
+        "alt": "하늘 아래에서 손을 마주 잡은 두 사람"
+    },
+    {
+        "id": 2,
+        "src": "https:\/\/images.unsplash.com\/photo-1472653431158-6364773b2a56?auto=format&fit=crop&w=900&q=80",
+        "alt": "햇살 가득한 들판에서 웃는 모습"
+    },
+    {
+        "id": 3,
+        "src": "https:\/\/images.unsplash.com\/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=900&q=80",
+        "alt": "하늘빛 배경의 캐주얼 웨딩 촬영"
+    },
+    {
+        "id": 4,
+        "src": "https:\/\/images.unsplash.com\/photo-1487412720507-e7ab37603c6f?auto=format&fit=crop&w=900&q=80",
+        "alt": "블루 계열 플라워 부케와 반지"
+    }
+]

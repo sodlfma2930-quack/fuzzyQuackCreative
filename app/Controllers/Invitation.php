@@ -2,41 +2,53 @@
 
 namespace App\Controllers;
 
+use App\Libraries\JsonStore;
 use CodeIgniter\HTTP\ResponseInterface;
 
 class Invitation extends BaseController
 {
 	protected $helpers	= ['url'];
+	private JsonStore	$store;
+
+	public function __construct()
+	{
+		$this->store = new JsonStore();
+	}
 
 	public function index(): string
 	{
+		$contents	= $this->store->read('contents.json');
+		$hero		= $contents['hero'] ?? [];
+		$couple		= $contents['couple'] ?? [];
+		$story		= $contents['story'] ?? [];
+
 		$pageSlug	= 'seungchul-hyunji';
 		$pageUrl	= site_url($pageSlug);
 		$pageUrlEnc	= rawurlencode($pageUrl);
 
 		$data	= [
-			'pageTitle'		=> '승철 & 현지의 초대장',
+			'pageTitle'		=> ($couple['groom_name'] ?? '신랑') . ' & ' . ($couple['bride_name'] ?? '신부') . '의 초대장',
 			'slug'			=> $pageSlug,
 			'hero'			=> [
-				'headline'	=> '열 해의 사랑, 이제는 한 집의 빛이 되는 날',
-				'subtitle'	=> '동갑내기 친구에서 부부로, 10년의 추억을 이어 사랑을 약속합니다.',
-				'date'		=> '2027년 4월 10일 토요일',
-				'time'		=> '오후 3시 30분',
+				'headline'	=> $hero['headline'] ?? '',
+				'subtitle'	=> $hero['subtitle'] ?? '',
+				'date'		=> $hero['date'] ?? '',
+				'time'		=> $hero['time'] ?? '',
 				'venue'		=> [
-					'name'		=> '대구 로터스 101 웨딩홀',
-					'address'	=> '경북 경산시 펜타힐즈2로 45',
+					'name'		=> $hero['venue_name'] ?? '',
+					'address'	=> $hero['venue_address'] ?? '',
 				],
 			],
 			'couple'		=> [
 				'groom'	=> [
-					'name'		=> '오승철',
-					'parents'	=> '서로를 믿어준 우리 가족의 든든한 장남',
-					'contact'	=> '010-2710-0410',
+					'name'		=> $couple['groom_name'] ?? '',
+					'parents'	=> $couple['groom_parents'] ?? '',
+					'contact'	=> $couple['groom_contact'] ?? '',
 				],
 				'bride'	=> [
-					'name'		=> '정현지',
-					'parents'	=> '밝게 키워주신 사랑스러운 집의 장녀',
-					'contact'	=> '010-0410-2710',
+					'name'		=> $couple['bride_name'] ?? '',
+					'parents'	=> $couple['bride_parents'] ?? '',
+					'contact'	=> $couple['bride_contact'] ?? '',
 				],
 			],
 			'schedule'		=> [
@@ -83,7 +95,7 @@ class Invitation extends BaseController
 				'facebook'	=> 'https://www.facebook.com/sharer/sharer.php?u='.$pageUrlEnc,
 			],
 			'story'			=> [
-				'intro'	=> "스무 살, 같은 반 친구였던 우리가 어느새 10년째 서로의 편이 되었습니다.\n웃음이 닮아가고 꿈이 겹쳐지던 시간들을 기억하며, 이제는 한 가정을 이루어 평생을 함께하려 합니다.\n밝고 따뜻한 마음으로, 우리의 새로운 계절을 함께 축복해주세요.",
+				'intro'	=> $story['intro'] ?? '',
 			],
 		];
 
@@ -97,28 +109,8 @@ class Invitation extends BaseController
 		]);
 	}
 
-	/**
-	 * @return list<array<string, string>>
-	 */
 	private function galleryItems(): array
 	{
-		return [
-			[
-				'src'		=> 'https://images.unsplash.com/photo-1520854221050-0f4caff449fb?auto=format&fit=crop&w=900&q=80',
-				'alt'		=> '하늘 아래에서 손을 마주 잡은 두 사람',
-			],
-			[
-				'src'		=> 'https://images.unsplash.com/photo-1472653431158-6364773b2a56?auto=format&fit=crop&w=900&q=80',
-				'alt'		=> '햇살 가득한 들판에서 웃는 모습',
-			],
-			[
-				'src'		=> 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=900&q=80',
-				'alt'		=> '하늘빛 배경의 캐주얼 웨딩 촬영',
-			],
-			[
-				'src'		=> 'https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?auto=format&fit=crop&w=900&q=80',
-				'alt'		=> '블루 계열 플라워 부케와 반지',
-			],
-		];
+		return $this->store->read('gallery.json');
 	}
 }

@@ -7,7 +7,7 @@
 	<title><?= esc($pageTitle ?? '여행 가이드') ?></title>
 	<link rel="preconnect" href="https://fonts.googleapis.com">
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-	<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600&family=Noto+Sans+KR:wght@300;400;500&display=swap" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&family=Noto+Sans+KR:wght@300;400;500&family=Noto+Serif+KR:wght@400;500&display=swap" rel="stylesheet">
 	<link rel="stylesheet" href="<?= base_url('css/travel.css') ?>">
 </head>
 <body>
@@ -17,7 +17,7 @@
 			<p class="guide-hero__label">Travel Picks</p>
 			<h1 class="guide-hero__title"><?= esc($pageTitle ?? '') ?></h1>
 			<p class="guide-hero__intro"><?= nl2br(esc($intro ?? '')) ?></p>
-			<a class="guide-hero__link" href="<?= site_url('seungchul-hyunji') ?>">청첩장으로 돌아가기</a>
+			<a class="guide-hero__link" href="<?= site_url('/') ?>">홈으로 돌아가기</a>
 		</div>
 	</header>
 
@@ -60,11 +60,11 @@
 		<section class="guide-section guide-section--cta">
 			<h2 class="section-title">Tip</h2>
 			<ul class="tip-list">
-				<li>예식 전날엔 수성못 야경, 당일엔 김광석 길에서 인증샷!</li>
-				<li>83타워 전망대는 예약하면 대기 줄 줄어들어.</li>
-				<li>막창은 웨이팅이 길 수 있어, 웨딩 다음날 점심 추천.</li>
+				<li>밀림은 주말 웨이팅이 길어요 — 평일 오후가 여유로워요.</li>
+				<li>컨트리맨즈 시카고피자는 조리 시간 30분, 미리 주문하세요.</li>
+				<li>롤링핀은 정원 자리가 인기 — 오픈런 추천!</li>
 			</ul>
-			<a class="guide-cta" href="<?= site_url('seungchul-hyunji') ?>">다시 초대장 보러 가기</a>
+			<a class="guide-cta" href="<?= site_url('/') ?>">홈으로 돌아가기</a>
 		</section>
 	</main>
 </body>

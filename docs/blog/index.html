@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Tech Blog — FuzzyQuackCreative</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;600&family=Noto+Sans+KR:wght@300;400;500&display=swap" rel="stylesheet">
+	<style>
+		*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+		body { font-family: 'Noto Sans KR', -apple-system, sans-serif; background: #fafafa; color: #1d1d1f; }
+		.header { background: #fff; border-bottom: 1px solid #e5e5ea; padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; }
+		.header__title { font-family: 'Outfit', sans-serif; font-size: 18px; font-weight: 600; }
+		.header__back { font-size: 14px; color: #0071e3; text-decoration: none; }
+		.container { max-width: 720px; margin: 0 auto; padding: 32px 20px; }
+		.post-list { list-style: none; display: flex; flex-direction: column; gap: 20px; }
+		.post-card {
+			display: flex; gap: 20px; background: #fff; border-radius: 12px; overflow: hidden;
+			box-shadow: 0 1px 3px rgba(0,0,0,.06); text-decoration: none; color: inherit;
+			transition: transform .15s, box-shadow .15s;
+		}
+		.post-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,.1); }
+		.post-card__thumb {
+			width: 160px; min-height: 140px; flex-shrink: 0; background: #e5e5ea;
+			display: flex; align-items: center; justify-content: center; color: #a1a1a6; font-size: 32px;
+		}
+		.post-card__body { padding: 20px; display: flex; flex-direction: column; justify-content: center; }
+		.post-card__date { font-size: 12px; color: #86868b; margin-bottom: 6px; }
+		.post-card__title { font-size: 17px; font-weight: 600; line-height: 1.4; margin-bottom: 8px; }
+		.post-card__excerpt { font-size: 13px; color: #6e6e73; line-height: 1.5; }
+		@media (max-width: 480px) {
+			.post-card { flex-direction: column; }
+			.post-card__thumb { width: 100%; min-height: 180px; }
+		}
+	</style>
+</head>
+<body>
+	<header class="header">
+		<div class="header__title">Tech Blog</div>
+		<a class="header__back" href="../home.html">← 홈으로</a>
+	</header>
+	<div class="container">
+		<ul class="post-list">
+			<li>
+				<a class="post-card" href="./auto-blog-posting-with-claude-remote-agent.html">
+					<div class="post-card__thumb">📝</div>
+					<div class="post-card__body">
+						<div class="post-card__date">2026-05-19</div>
+						<h2 class="post-card__title">Claude Code 원격 에이전트로 블로그 자동 포스팅하는 원리</h2>
+						<p class="post-card__excerpt">매일 아침 자동으로 블로그 글이 올라오는 원리가 궁금할 수 있다. 이건 Claude Code의 Remote Agent 기능을...</p>
+					</div>
+				</a>
+			</li>
+			<li>
+				<a class="post-card" href="./ci4-json-data-management.html">
+					<div class="post-card__thumb">📝</div>
+					<div class="post-card__body">
+						<div class="post-card__date">2026-05-19</div>
+						<h2 class="post-card__title">CodeIgniter 4에서 JSON 파일로 데이터 관리하기</h2>
+						<p class="post-card__excerpt">DB 없이도 간단한 프로젝트에서 데이터를 관리할 수 있다. CodeIgniter 4의 writable 디렉토리를 활용해...</p>
+					</div>
+				</a>
+			</li>
+		</ul>
+	</div>
+</body>
+</html>
