@@ -5,6 +5,12 @@
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 	<title><?= esc($pageTitle ?? '모바일 청첩장') ?></title>
+	<meta property="og:title" content="<?= esc($pageTitle ?? '모바일 청첩장') ?>">
+	<meta property="og:description" content="<?= esc($hero['date'] ?? '') ?> <?= esc($hero['time'] ?? '') ?> · <?= esc($hero['venue']['name'] ?? '') ?>">
+	<meta property="og:image" content="<?= base_url('images/hero/og-image.jpg') ?>">
+	<meta property="og:type" content="website">
+	<meta property="og:url" content="<?= current_url() ?>">
+	<meta name="description" content="<?= esc($hero['subtitle'] ?? '') ?>">
 	<link rel="preconnect" href="https://fonts.googleapis.com">
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 	<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&family=Noto+Sans+KR:wght@300;400;500&family=Noto+Serif+KR:wght@400;500&display=swap" rel="stylesheet">
