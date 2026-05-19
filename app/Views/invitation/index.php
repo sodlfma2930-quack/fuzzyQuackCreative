@@ -72,22 +72,20 @@
 			</ol>
 		</section>
 
-		<section class="gallery" data-gallery>
+		<section class="gallery">
 			<h2 class="section-title">우리의 추억</h2>
-			<div class="gallery__viewport">
-				<div class="gallery__track">
-					<?php foreach ($gallery ?? [] as $index => $item) : ?>
-						<figure class="gallery__slide" data-slide="<?= (int) $index ?>">
-							<img src="<?= esc($item['src'] ?? '') ?>" alt="<?= esc($item['alt'] ?? '') ?>">
-						</figure>
-					<?php endforeach ?>
-				</div>
-			</div>
-			<div class="gallery__controls">
-				<button type="button" class="gallery__button" data-action="prev" aria-label="이전 사진">‹</button>
-				<button type="button" class="gallery__button" data-action="next" aria-label="다음 사진">›</button>
+			<div class="gallery__grid">
+				<?php foreach ($gallery ?? [] as $item) : ?>
+					<figure class="gallery__thumb" data-lightbox="<?= esc($item['src'] ?? '') ?>">
+						<img src="<?= esc($item['src'] ?? '') ?>" alt="<?= esc($item['alt'] ?? '') ?>" loading="lazy">
+					</figure>
+				<?php endforeach ?>
 			</div>
 		</section>
+		<div class="lightbox" id="lightbox">
+			<button type="button" class="lightbox__close" aria-label="닫기">&times;</button>
+			<img class="lightbox__img" src="" alt="">
+		</div>
 
 		<section class="account">
 			<h2 class="section-title">마음 전하실 곳</h2>
@@ -174,6 +172,20 @@
 					setTimeout(() => { btn.textContent = '복사'; btn.classList.remove('copied'); }, 2000);
 				});
 			});
+		});
+		const lb = document.getElementById('lightbox');
+		const lbImg = lb.querySelector('.lightbox__img');
+		document.querySelectorAll('[data-lightbox]').forEach(el => {
+			el.addEventListener('click', () => {
+				lbImg.src = el.dataset.lightbox;
+				lbImg.alt = el.querySelector('img').alt;
+				lb.classList.add('active');
+			});
+		});
+		lb.addEventListener('click', e => {
+			if (e.target === lb || e.target.classList.contains('lightbox__close')) {
+				lb.classList.remove('active');
+			}
 		});
 	</script>
 </body>

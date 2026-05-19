@@ -1,27 +1,11 @@
 [
-    {
-        "id": 5,
-        "src": "/uploads/gallery/holding-hands.jpg",
-        "alt": "손을 마주 잡은 두 사람"
-    },
-    {
-        "id": 1,
-        "src": "https://images.unsplash.com/photo-1520854221050-0f4caff449fb?auto=format&fit=crop&w=900&q=80",
-        "alt": "하늘 아래에서 손을 마주 잡은 두 사람"
-    },
-    {
-        "id": 2,
-        "src": "https://images.unsplash.com/photo-1472653431158-6364773b2a56?auto=format&fit=crop&w=900&q=80",
-        "alt": "햇살 가득한 들판에서 웃는 모습"
-    },
-    {
-        "id": 3,
-        "src": "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=900&q=80",
-        "alt": "하늘빛 배경의 캐주얼 웨딩 촬영"
-    },
-    {
-        "id": 4,
-        "src": "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?auto=format&fit=crop&w=900&q=80",
-        "alt": "블루 계열 플라워 부케와 반지"
-    }
+    { "id": 1, "src": "/uploads/gallery/edit-1.jpg", "alt": "숲속에서 함께" },
+    { "id": 2, "src": "/uploads/gallery/edit-2.jpg", "alt": "벤치에 앉아 마주보며" },
+    { "id": 3, "src": "/uploads/gallery/edit-3.jpg", "alt": "한옥 담장 앞에서" },
+    { "id": 4, "src": "/uploads/gallery/holding-hands.jpg", "alt": "나무 아래 손잡고" },
+    { "id": 5, "src": "/uploads/gallery/photo-1.jpg", "alt": "숲길 산책" },
+    { "id": 6, "src": "/uploads/gallery/photo-2.jpg", "alt": "초록 배경 속 둘" },
+    { "id": 7, "src": "/uploads/gallery/photo-3.jpg", "alt": "한옥 마당에서" },
+    { "id": 8, "src": "/uploads/gallery/photo-4.jpg", "alt": "고목 아래 함께" },
+    { "id": 9, "src": "/uploads/gallery/photo-5.jpg", "alt": "한옥 마루에 앉아" }
 ]
