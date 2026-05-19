@@ -51,6 +51,13 @@
 			<p class="logo__sub">승철 & 현지 웨딩 프로젝트</p>
 		</div>
 		<div class="cards">
+			<a class="card" href="<?= site_url('checklist') ?>">
+				<div>
+					<div class="card__icon">✅</div>
+					<div class="card__title">체크리스트</div>
+					<div class="card__desc">웨딩 준비 할 일 관리</div>
+				</div>
+			</a>
 			<a class="card" href="<?= site_url('seungchul-hyunji') ?>">
 				<div>
 					<div class="card__icon">💌</div>

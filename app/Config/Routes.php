@@ -12,6 +12,8 @@ $routes->get('seungchul-hyunji', 'Invitation::index');
 // $routes->post('rsvp', 'Rsvp::store');
 $routes->get('gallery', 'Invitation::gallery');
 $routes->get('travel-guide', 'TravelGuide::index');
+$routes->get('checklist', 'Checklist::index');
+$routes->post('checklist/save', 'Checklist::save');
 
 $routes->get('admin', 'Admin::index');
 $routes->get('admin/texts', 'Admin::texts');
