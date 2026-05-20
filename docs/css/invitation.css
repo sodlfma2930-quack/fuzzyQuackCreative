@@ -523,9 +523,69 @@ a { color: inherit; text-decoration: none; }
 	color: var(--color-accent);
 }
 
+/* ── Animations ── */
+@keyframes fadeUp {
+	from { opacity: 0; transform: translateY(32px); }
+	to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+	from { opacity: 0; }
+	to { opacity: 1; }
+}
+
+@keyframes scaleIn {
+	from { opacity: 0; transform: scale(0.92); }
+	to { opacity: 1; transform: scale(1); }
+}
+
+.reveal {
+	opacity: 0;
+}
+
+.reveal.visible {
+	animation: fadeUp 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.reveal-fade.visible {
+	animation: fadeIn 1s ease forwards;
+}
+
+.reveal-scale.visible {
+	animation: scaleIn 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.stagger-1 { animation-delay: 0.08s; }
+.stagger-2 { animation-delay: 0.16s; }
+.stagger-3 { animation-delay: 0.24s; }
+.stagger-4 { animation-delay: 0.32s; }
+.stagger-5 { animation-delay: 0.40s; }
+.stagger-6 { animation-delay: 0.48s; }
+.stagger-7 { animation-delay: 0.56s; }
+.stagger-8 { animation-delay: 0.64s; }
+.stagger-9 { animation-delay: 0.72s; }
+
+.hero__content { animation: fadeUp 1.2s cubic-bezier(0.22, 1, 0.36, 1) 0.3s both; }
+.hero__label { animation: fadeIn 1.5s ease 0.1s both; }
+
+.gallery__thumb.reveal {
+	opacity: 0;
+}
+
+.gallery__thumb.reveal.visible {
+	animation: scaleIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.timeline__item.reveal {
+	opacity: 0;
+}
+
+.timeline__item.reveal.visible {
+	animation: fadeUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
 @media (min-width: 540px) {
 	.hero { max-height: 680px; }
-	.gallery__slide img { height: 320px; }
 	.share__buttons {
 		flex-direction: row;
 		justify-content: center;
@@ -533,5 +593,15 @@ a { color: inherit; text-decoration: none; }
 	.share__buttons .button {
 		min-width: 120px;
 		text-align: center;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.reveal, .reveal-fade, .reveal-scale,
+	.hero__content, .hero__label,
+	.gallery__thumb.reveal, .timeline__item.reveal {
+		animation: none !important;
+		opacity: 1 !important;
+		transform: none !important;
 	}
 }

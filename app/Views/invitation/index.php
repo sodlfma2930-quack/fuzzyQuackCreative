@@ -33,14 +33,14 @@
 			</div>
 		</section>
 
-		<section class="story">
+		<section class="story reveal">
 			<div class="story__card">
 				<h2 class="section-title">우리의 이야기</h2>
 				<p class="story__text"><?= nl2br(esc($story['intro'] ?? '')) ?></p>
 			</div>
 		</section>
 
-		<section class="couple">
+		<section class="couple reveal">
 			<div class="couple__profiles">
 				<article class="profile">
 					<p class="profile__role">Groom</p>
@@ -57,11 +57,11 @@
 			</div>
 		</section>
 
-		<section class="schedule">
+		<section class="schedule reveal">
 			<h2 class="section-title">예식 순서</h2>
 			<ol class="timeline">
 				<?php foreach ($schedule ?? [] as $item) : ?>
-					<li class="timeline__item">
+					<li class="timeline__item reveal">
 						<span class="timeline__time"><?= esc($item['time'] ?? '') ?></span>
 						<div class="timeline__body">
 							<h3 class="timeline__title"><?= esc($item['title'] ?? '') ?></h3>
@@ -72,11 +72,11 @@
 			</ol>
 		</section>
 
-		<section class="gallery">
+		<section class="gallery reveal">
 			<h2 class="section-title">우리의 추억</h2>
 			<div class="gallery__grid">
 				<?php foreach ($gallery ?? [] as $item) : ?>
-					<figure class="gallery__thumb" data-lightbox="<?= esc($item['src'] ?? '') ?>">
+					<figure class="gallery__thumb reveal" data-lightbox="<?= esc($item['src'] ?? '') ?>">
 						<img src="<?= esc($item['src'] ?? '') ?>" alt="<?= esc($item['alt'] ?? '') ?>" loading="lazy">
 					</figure>
 				<?php endforeach ?>
@@ -87,7 +87,7 @@
 			<img class="lightbox__img" src="" alt="">
 		</div>
 
-		<section class="account">
+		<section class="account reveal">
 			<h2 class="section-title">마음 전하실 곳</h2>
 			<p class="account__intro">축하의 마음을 전해주시면 감사히 잘 쓰겠습니다.</p>
 			<?php foreach ($accounts ?? [] as $group) : ?>
@@ -112,7 +112,7 @@
 			<?php endforeach ?>
 		</section>
 
-		<section class="map">
+		<section class="map reveal">
 			<h2 class="section-title">오시는 길</h2>
 			<div class="map__embed">
 				<iframe src="<?= esc($map['embedUrl'] ?? '') ?>" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
@@ -138,7 +138,7 @@
 			<?php endif ?>
 		</section>
 
-		<section class="share">
+		<section class="share reveal">
 			<h2 class="section-title">청첩장 공유하기</h2>
 			<div class="share__buttons">
 				<a class="button button--ghost" href="<?= esc($share['kakaotalk'] ?? '#') ?>" target="_blank" rel="noopener noreferrer">카카오톡</a>
@@ -187,6 +187,24 @@
 				lb.classList.remove('active');
 			}
 		});
+
+		const observer = new IntersectionObserver((entries) => {
+			entries.forEach((entry, i) => {
+				if (entry.isIntersecting) {
+					const el = entry.target;
+					const siblings = el.parentElement.querySelectorAll('.reveal');
+					const idx = Array.from(siblings).indexOf(el);
+					if (idx > 0 && el.classList.contains('gallery__thumb')) {
+						el.style.animationDelay = (idx * 0.06) + 's';
+					} else if (el.classList.contains('timeline__item')) {
+						el.style.animationDelay = (idx * 0.12) + 's';
+					}
+					el.classList.add('visible');
+					observer.unobserve(el);
+				}
+			});
+		}, { threshold: 0.15 });
+		document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
 	</script>
 </body>
 </html>
