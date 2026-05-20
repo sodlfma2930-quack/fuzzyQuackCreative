@@ -84,7 +84,9 @@
 		</section>
 		<div class="lightbox" id="lightbox">
 			<button type="button" class="lightbox__close" aria-label="닫기">&times;</button>
+			<button type="button" class="lightbox__nav lightbox__nav--prev" aria-label="이전">‹</button>
 			<img class="lightbox__img" src="" alt="">
+			<button type="button" class="lightbox__nav lightbox__nav--next" aria-label="다음">›</button>
 		</div>
 
 		<section class="account reveal">
@@ -175,17 +177,47 @@
 		});
 		const lb = document.getElementById('lightbox');
 		const lbImg = lb.querySelector('.lightbox__img');
-		document.querySelectorAll('[data-lightbox]').forEach(el => {
-			el.addEventListener('click', () => {
-				lbImg.src = el.dataset.lightbox;
-				lbImg.alt = el.querySelector('img').alt;
-				lb.classList.add('active');
-			});
-		});
+		const thumbs = Array.from(document.querySelectorAll('[data-lightbox]'));
+		let lbIndex = 0;
+		let scrollY = 0;
+
+		function lbOpen(i) {
+			lbIndex = i;
+			lbImg.src = thumbs[i].dataset.lightbox;
+			lbImg.alt = thumbs[i].querySelector('img').alt;
+			scrollY = window.scrollY;
+			document.body.style.top = -scrollY + 'px';
+			document.body.classList.add('lightbox-open');
+			lb.classList.add('active');
+		}
+		function lbClose() {
+			lb.classList.remove('active');
+			document.body.classList.remove('lightbox-open');
+			document.body.style.top = '';
+			window.scrollTo(0, scrollY);
+		}
+		function lbNav(dir) {
+			lbIndex = (lbIndex + dir + thumbs.length) % thumbs.length;
+			lbImg.style.opacity = 0;
+			setTimeout(() => {
+				lbImg.src = thumbs[lbIndex].dataset.lightbox;
+				lbImg.alt = thumbs[lbIndex].querySelector('img').alt;
+				lbImg.style.opacity = 1;
+			}, 150);
+		}
+
+		thumbs.forEach((el, i) => el.addEventListener('click', () => lbOpen(i)));
+		lb.querySelector('.lightbox__nav--prev').addEventListener('click', () => lbNav(-1));
+		lb.querySelector('.lightbox__nav--next').addEventListener('click', () => lbNav(1));
 		lb.addEventListener('click', e => {
-			if (e.target === lb || e.target.classList.contains('lightbox__close')) {
-				lb.classList.remove('active');
-			}
+			if (e.target === lb || e.target.classList.contains('lightbox__close')) lbClose();
+		});
+
+		let touchStartX = 0;
+		lb.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; }, { passive: true });
+		lb.addEventListener('touchend', e => {
+			const dx = e.changedTouches[0].clientX - touchStartX;
+			if (Math.abs(dx) > 50) lbNav(dx < 0 ? 1 : -1);
 		});
 
 		const observer = new IntersectionObserver((entries) => {
