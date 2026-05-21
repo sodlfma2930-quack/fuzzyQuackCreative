@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>WebAssembly(Wasm) 정리 — 브라우저에서 C++과 Rust가 돌아가는 시대 — Tech Blog</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;600;700&family=Noto+Sans+KR:wght@300;400;500;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+	<style>*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif; background: #f5f5f7; color: #1d1d1f; -webkit-font-smoothing: antialiased; }
+.header { background: rgba(255,255,255,.72); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-bottom: 1px solid rgba(0,0,0,.08); padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+.header__title { font-family: 'Outfit', sans-serif; font-size: 17px; font-weight: 600; color: #1d1d1f; }
+.header__back { font-size: 13px; color: #0071e3; text-decoration: none; display: flex; align-items: center; gap: 4px; transition: opacity .15s; }
+.header__back:hover { opacity: .7; }
+.hero { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 60px 20px 50px; text-align: center; color: #fff; }
+.hero__date { font-size: 13px; opacity: .75; margin-bottom: 12px; letter-spacing: .5px; }
+.hero__title { font-size: 30px; font-weight: 700; line-height: 1.35; max-width: 680px; margin: 0 auto; }
+.article { max-width: 720px; margin: -24px auto 60px; padding: 0 20px; }
+.article__body { background: #fff; border-radius: 16px; box-shadow: 0 1px 3px rgba(0,0,0,.06), 0 8px 24px rgba(0,0,0,.04); padding: 40px 36px; }
+.article__content { font-size: 16px; line-height: 2; color: #333; word-break: keep-all; }
+.article__content p { margin-bottom: 18px; } .article__content p:last-child { margin-bottom: 0; }
+.article__content h2 { font-size: 21px; font-weight: 700; color: #1d1d1f; margin: 44px 0 18px; padding-bottom: 10px; border-bottom: 2px solid #667eea; display: inline-block; }
+.article__content h2::before { content: ''; display: inline-block; width: 4px; height: 21px; background: #667eea; border-radius: 2px; margin-right: 10px; vertical-align: text-bottom; }
+.article__content pre { background: #1e1e2e; color: #cdd6f4; border-radius: 12px; padding: 20px 24px; margin: 20px 0; overflow-x: auto; font-family: 'Fira Code', monospace; font-size: 13.5px; line-height: 1.7; border: 1px solid rgba(255,255,255,.06); }
+.article__content code { font-family: 'Fira Code', monospace; font-size: 14px; background: #f0f0f5; color: #e74c8b; padding: 2px 7px; border-radius: 5px; }
+.article__content pre code { background: none; color: inherit; padding: 0; border-radius: 0; font-size: 13.5px; }
+.article__content strong { color: #1d1d1f; font-weight: 600; }
+.progress-bar { position: fixed; top: 0; left: 0; height: 3px; background: linear-gradient(90deg, #667eea, #764ba2); z-index: 200; width: 0; transition: width .1s linear; }
+@media (max-width: 600px) { .hero { padding: 40px 16px 36px; } .hero__title { font-size: 23px; } .article__body { padding: 28px 20px; border-radius: 12px; } .article__content { font-size: 15px; } .article__content h2 { font-size: 19px; } .article__content pre { padding: 16px; font-size: 12.5px; } }</style>
+</head>
+<body>
+	<div class="progress-bar" id="progressBar"></div>
+	<header class="header">
+		<div class="header__title">Tech Blog</div>
+		<a class="header__back" href="./index.html">← 목록으로</a>
+	</header>
+	<div class="hero">
+		<p class="hero__date">2026.05.21 15:40</p>
+		<h1 class="hero__title">WebAssembly(Wasm) 정리 — 브라우저에서 C++과 Rust가 돌아가는 시대</h1>
+	</div>
+	<article class="article">
+		<div class="article__body">
+			<div class="article__content" id="articleContent">JavaScript가 웹의 유일한 언어이던 시대는 끝났다.
+WebAssembly(줄여서 Wasm)는 브라우저에서 네이티브에 가까운 속도로 코드를 실행할 수 있게 해주는 기술이다.
+C, C++, Rust, Go 등으로 작성한 코드를 브라우저에서 바로 돌릴 수 있다.
+
+## WebAssembly란?
+
+Wasm은 웹 브라우저를 위한 저수준 바이너리 포맷이다.
+JavaScript처럼 소스 코드를 해석하는 게 아니라, 미리 컴파일된 바이너리를 실행한다.
+그래서 JavaScript보다 훨씬 빠르고, 네이티브 앱에 가까운 성능을 낸다.
+
+W3C 공식 웹 표준이며, Chrome, Firefox, Safari, Edge 모든 주요 브라우저에서 지원한다.
+
+## 왜 중요한가?
+
+기존에 웹에서 할 수 없던 것들이 가능해진다.
+
+게임 엔진: Unity, Unreal Engine이 Wasm으로 브라우저에서 3D 게임을 돌린다.
+영상/이미지 편집: Figma, Photoshop Web이 Wasm으로 구현. 설치 없이 브라우저에서 전문 툴 사용.
+코드 에디터: VS Code Web(vscode.dev)이 Wasm으로 언어 서버를 브라우저에서 실행.
+AI 추론: TensorFlow.js + Wasm 백엔드로 브라우저에서 ML 모델 실행. 서버 없이 추론 가능.
+데이터베이스: SQLite가 Wasm으로 포팅되어 브라우저에서 SQL 쿼리 실행 가능.
+
+이전에는 &quot;설치하세요&quot;라고 했던 것들이 &quot;링크 열면 됩니다&quot;로 바뀐다.
+
+## 어떻게 동작하나?
+
+1. C/C++/Rust 등으로 코드를 작성한다
+2. Emscripten(C/C++) 또는 wasm-pack(Rust)으로 .wasm 파일로 컴파일한다
+3. JavaScript에서 .wasm 파일을 로드하고 함수를 호출한다
+
+Rust 예시:
+
+#[wasm_bindgen]
+pub fn fibonacci(n: u32) -&gt; u32 {
+    match n {
+        0 =&gt; 0,
+        1 =&gt; 1,
+        _ =&gt; fibonacci(n - 1) + fibonacci(n - 2),
+    }
+}
+
+JavaScript에서 호출:
+
+import init, { fibonacci } from &#x27;./pkg/my_wasm.js&#x27;;
+await init();
+console.log(fibonacci(40)); // 네이티브 속도로 실행
+
+같은 피보나치를 JavaScript로 돌리면 수 초 걸리지만,
+Wasm으로 돌리면 수십 밀리초에 끝난다.
+
+## Wasm의 활용 범위 — 브라우저 밖으로
+
+2026년 현재, Wasm은 브라우저 밖에서도 주목받고 있다.
+
+WASI(WebAssembly System Interface)는 Wasm을 서버와 엣지에서 실행할 수 있게 해주는 표준이다.
+Docker의 공동 창업자가 &quot;Wasm이 2008년에 있었다면 Docker를 만들 필요가 없었을 것&quot;이라고 말한 적이 있다.
+
+Cloudflare Workers: 엣지에서 Wasm 실행. 전 세계 300개 이상 PoP에서 밀리초 단위 응답.
+Fastly Compute: Wasm 기반 서버리스. 콜드 스타트가 마이크로초 단위.
+WasmCloud: 마이크로서비스를 Wasm 컴포넌트로 구성. 언어 무관.
+Docker + Wasm: Docker가 Wasm 컨테이너를 공식 지원하기 시작.
+
+## JavaScript와의 관계
+
+Wasm은 JavaScript를 대체하려는 게 아니다.
+UI 렌더링, DOM 조작, 이벤트 처리는 여전히 JavaScript가 담당한다.
+Wasm은 연산 집약적인 작업(이미지 처리, 암호화, 물리 엔진, AI 추론)을 맡는다.
+
+즉, JavaScript가 지휘자라면 Wasm은 오케스트라의 연주자다.
+둘이 협력해서 웹의 한계를 넓히는 구조다.
+
+## 시작하기
+
+Rust + Wasm이 현재 가장 생태계가 잘 갖춰져 있다.
+
+cargo install wasm-pack
+wasm-pack new my-project
+wasm-pack build --target web
+
+이 세 줄이면 Wasm 프로젝트가 만들어지고 빌드된다.
+
+Rust가 부담스러우면 AssemblyScript도 좋은 선택이다.
+TypeScript와 거의 같은 문법으로 Wasm을 만들 수 있다.
+
+## 앞으로의 전망
+
+Wasm Component Model이 안정화되면,
+서로 다른 언어로 작성된 Wasm 모듈들이 레고 블록처럼 조합될 수 있다.
+Rust로 만든 이미지 처리 모듈 + Python으로 만든 ML 모듈을 하나로 엮는 게 가능해진다.
+
+웹의 다음 10년을 이끌 기술 중 하나로 Wasm은 반드시 주목해야 한다.</div>
+		</div>
+	</article>
+	<script src="./article-template.js"></script>
+</body>
+</html>

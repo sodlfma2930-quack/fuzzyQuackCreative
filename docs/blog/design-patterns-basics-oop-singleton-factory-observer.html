@@ -6,29 +6,43 @@
 	<title>디자인 패턴 기초 — OOP 원칙부터 Singleton, Factory, Observer까지 — Tech Blog</title>
 	<link rel="preconnect" href="https://fonts.googleapis.com">
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-	<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;600&family=Noto+Sans+KR:wght@300;400;500&display=swap" rel="stylesheet">
-	<style>
-		*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-		body { font-family: 'Noto Sans KR', -apple-system, sans-serif; background: #fafafa; color: #1d1d1f; }
-		.header { background: #fff; border-bottom: 1px solid #e5e5ea; padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; }
-		.header__title { font-family: 'Outfit', sans-serif; font-size: 18px; font-weight: 600; }
-		.header__back { font-size: 14px; color: #0071e3; text-decoration: none; }
-		.article { max-width: 680px; margin: 0 auto; padding: 40px 20px; }
-		.article__date { font-size: 13px; color: #86868b; margin-bottom: 8px; }
-		.article__title { font-size: 26px; font-weight: 600; line-height: 1.4; margin-bottom: 24px; }
-		.article__content { font-size: 15px; line-height: 1.8; color: #333; white-space: pre-wrap; word-break: keep-all; }
-	</style>
+	<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;600;700&family=Noto+Sans+KR:wght@300;400;500;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+	<style>*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif; background: #f5f5f7; color: #1d1d1f; -webkit-font-smoothing: antialiased; }
+.header { background: rgba(255,255,255,.72); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-bottom: 1px solid rgba(0,0,0,.08); padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+.header__title { font-family: 'Outfit', sans-serif; font-size: 17px; font-weight: 600; color: #1d1d1f; }
+.header__back { font-size: 13px; color: #0071e3; text-decoration: none; display: flex; align-items: center; gap: 4px; transition: opacity .15s; }
+.header__back:hover { opacity: .7; }
+.hero { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 60px 20px 50px; text-align: center; color: #fff; }
+.hero__date { font-size: 13px; opacity: .75; margin-bottom: 12px; letter-spacing: .5px; }
+.hero__title { font-size: 30px; font-weight: 700; line-height: 1.35; max-width: 680px; margin: 0 auto; }
+.article { max-width: 720px; margin: -24px auto 60px; padding: 0 20px; }
+.article__body { background: #fff; border-radius: 16px; box-shadow: 0 1px 3px rgba(0,0,0,.06), 0 8px 24px rgba(0,0,0,.04); padding: 40px 36px; }
+.article__content { font-size: 16px; line-height: 2; color: #333; word-break: keep-all; }
+.article__content p { margin-bottom: 18px; } .article__content p:last-child { margin-bottom: 0; }
+.article__content h2 { font-size: 21px; font-weight: 700; color: #1d1d1f; margin: 44px 0 18px; padding-bottom: 10px; border-bottom: 2px solid #667eea; display: inline-block; }
+.article__content h2::before { content: ''; display: inline-block; width: 4px; height: 21px; background: #667eea; border-radius: 2px; margin-right: 10px; vertical-align: text-bottom; }
+.article__content pre { background: #1e1e2e; color: #cdd6f4; border-radius: 12px; padding: 20px 24px; margin: 20px 0; overflow-x: auto; font-family: 'Fira Code', monospace; font-size: 13.5px; line-height: 1.7; border: 1px solid rgba(255,255,255,.06); }
+.article__content code { font-family: 'Fira Code', monospace; font-size: 14px; background: #f0f0f5; color: #e74c8b; padding: 2px 7px; border-radius: 5px; }
+.article__content pre code { background: none; color: inherit; padding: 0; border-radius: 0; font-size: 13.5px; }
+.article__content strong { color: #1d1d1f; font-weight: 600; }
+.progress-bar { position: fixed; top: 0; left: 0; height: 3px; background: linear-gradient(90deg, #667eea, #764ba2); z-index: 200; width: 0; transition: width .1s linear; }
+@media (max-width: 600px) { .hero { padding: 40px 16px 36px; } .hero__title { font-size: 23px; } .article__body { padding: 28px 20px; border-radius: 12px; } .article__content { font-size: 15px; } .article__content h2 { font-size: 19px; } .article__content pre { padding: 16px; font-size: 12.5px; } }</style>
 </head>
 <body>
+	<div class="progress-bar" id="progressBar"></div>
 	<header class="header">
 		<div class="header__title">Tech Blog</div>
 		<a class="header__back" href="./index.html">← 목록으로</a>
 	</header>
+	<div class="hero">
+		<p class="hero__date">2026.05.21 14:10</p>
+		<h1 class="hero__title">디자인 패턴 기초 — OOP 원칙부터 Singleton, Factory, Observer까지</h1>
+	</div>
 	<article class="article">
-		<p class="article__date">2026-05-21</p>
-		<h1 class="article__title">디자인 패턴 기초 — OOP 원칙부터 Singleton, Factory, Observer까지</h1>
-		<div class="article__content">코드를 짜다 보면 비슷한 구조의 문제를 반복해서 만난다.
-"이 객체는 하나만 있어야 하는데", "타입에 따라 다른 객체를 만들어야 하는데", "상태가 바뀌면 여러 곳에 알려야 하는데".
+		<div class="article__body">
+			<div class="article__content" id="articleContent">코드를 짜다 보면 비슷한 구조의 문제를 반복해서 만난다.
+&quot;이 객체는 하나만 있어야 하는데&quot;, &quot;타입에 따라 다른 객체를 만들어야 하는데&quot;, &quot;상태가 바뀌면 여러 곳에 알려야 하는데&quot;.
 이런 문제들에 대한 검증된 해결 템플릿이 바로 디자인 패턴이다.
 
 ## OOP 4대 원칙 — 패턴의 기반
@@ -37,14 +51,14 @@
 
 캡슐화: 내부 구현을 숨기고 필요한 것만 공개한다. 세탁기의 버튼만 누르면 되지, 내부 모터 구조를 알 필요 없는 것과 같다.
 상속: 부모 클래스의 기능을 자식이 물려받는다. 스마트폰은 전화기의 기능을 가지면서 추가 기능이 있는 것과 같다.
-다형성: 같은 이름의 메서드가 상황에 따라 다르게 동작한다. "재생" 버튼을 눌렀을 때 음악앱이면 노래가, 영상앱이면 동영상이 나오는 것.
+다형성: 같은 이름의 메서드가 상황에 따라 다르게 동작한다. &quot;재생&quot; 버튼을 눌렀을 때 음악앱이면 노래가, 영상앱이면 동영상이 나오는 것.
 추상화: 복잡한 것에서 핵심만 뽑아낸다. 지하철 노선도가 실제 지리를 무시하고 역과 연결만 표현하는 것과 같다.
 
 ## 패턴의 3가지 분류
 
-생성 패턴: 객체를 "어떻게 만들지" — Singleton, Factory, Builder
-구조 패턴: 객체를 "어떻게 조합할지" — Proxy, Decorator, Adapter
-행위 패턴: 객체가 "어떻게 협력할지" — Observer, Strategy, Command
+생성 패턴: 객체를 &quot;어떻게 만들지&quot; — Singleton, Factory, Builder
+구조 패턴: 객체를 &quot;어떻게 조합할지&quot; — Proxy, Decorator, Adapter
+행위 패턴: 객체가 &quot;어떻게 협력할지&quot; — Observer, Strategy, Command
 
 ## Singleton — 인스턴스가 딱 하나만 존재
 
@@ -76,7 +90,7 @@ DB 연결, 설정 관리, 로거 등 하나만 있어야 하는 자원에 쓴다
 
 ## Factory — 객체 생성을 대신 해주는 공장
 
-카페에서 "아메리카노" 주문하면 바리스타가 알아서 만들어주는 것과 같다.
+카페에서 &quot;아메리카노&quot; 주문하면 바리스타가 알아서 만들어주는 것과 같다.
 타입만 던지면 알맞은 객체를 돌려준다.
 
 interface Payment {
@@ -85,28 +99,28 @@ interface Payment {
 
 class CardPayment implements Payment {
     public function pay($amount) {
-        echo "카드로 {$amount}원 결제";
+        echo &quot;카드로 {$amount}원 결제&quot;;
     }
 }
 
 class PhonePayment implements Payment {
     public function pay($amount) {
-        echo "휴대폰으로 {$amount}원 결제";
+        echo &quot;휴대폰으로 {$amount}원 결제&quot;;
     }
 }
 
 class PaymentFactory {
     public static function create($type) {
         return match($type) {
-            'card'  =&gt; new CardPayment(),
-            'phone' =&gt; new PhonePayment(),
-            default =&gt; throw new Exception("지원하지 않는 결제 타입"),
+            &#x27;card&#x27;  =&gt; new CardPayment(),
+            &#x27;phone&#x27; =&gt; new PhonePayment(),
+            default =&gt; throw new Exception(&quot;지원하지 않는 결제 타입&quot;),
         };
     }
 }
 
-$payment = PaymentFactory::create('card');
-$payment-&gt;pay(10000); // "카드로 10000원 결제"
+$payment = PaymentFactory::create(&#x27;card&#x27;);
+$payment-&gt;pay(10000); // &quot;카드로 10000원 결제&quot;
 
 new를 직접 쓰는 대신 Factory에 위임하면,
 나중에 결제 수단이 추가되어도 Factory만 수정하면 된다.
@@ -122,13 +136,13 @@ interface Observer {
 
 class SmsNotifier implements Observer {
     public function update($event) {
-        echo "SMS 발송: {$event}";
+        echo &quot;SMS 발송: {$event}&quot;;
     }
 }
 
 class PointAccumulator implements Observer {
     public function update($event) {
-        echo "포인트 적립: {$event}";
+        echo &quot;포인트 적립: {$event}&quot;;
     }
 }
 
@@ -142,7 +156,7 @@ class Order {
     public function complete() {
         // 주문 완료 처리...
         foreach ($this-&gt;observers as $observer) {
-            $observer-&gt;update('주문 완료');
+            $observer-&gt;update(&#x27;주문 완료&#x27;);
         }
     }
 }
@@ -151,14 +165,14 @@ $order = new Order();
 $order-&gt;subscribe(new SmsNotifier());
 $order-&gt;subscribe(new PointAccumulator());
 $order-&gt;complete();
-// "SMS 발송: 주문 완료"
-// "포인트 적립: 주문 완료"
+// &quot;SMS 발송: 주문 완료&quot;
+// &quot;포인트 적립: 주문 완료&quot;
 
 Order 클래스는 SmsNotifier나 PointAccumulator의 존재를 몰라도 된다.
 Observer 인터페이스만 구현하면 누구든 구독할 수 있다.
 이메일 알림을 추가하고 싶으면? EmailNotifier를 만들어서 subscribe하면 끝이다.
 
-## SOLID — 패턴이 "왜" 그렇게 생겼는지 이해하는 열쇠
+## SOLID — 패턴이 &quot;왜&quot; 그렇게 생겼는지 이해하는 열쇠
 
 S (Single Responsibility): 클래스는 하나의 책임만 가진다.
 O (Open-Closed): 확장에는 열려있고, 수정에는 닫혀있다.
@@ -189,8 +203,10 @@ Template Method: 알고리즘 뼈대는 부모가, 세부는 자식이 구현
 이후: 나머지 패턴은 필요할 때 하나씩
 
 핵심은 패턴 이름을 외우는 게 아니라,
-"왜 이렇게 하면 좋은가"를 이해하는 것이다.
-실제 코드에서 "이 부분, 패턴 쓰면 깔끔하겠다"라는 감이 오면 그때 적용하면 된다.</div>
+&quot;왜 이렇게 하면 좋은가&quot;를 이해하는 것이다.
+실제 코드에서 &quot;이 부분, 패턴 쓰면 깔끔하겠다&quot;라는 감이 오면 그때 적용하면 된다.</div>
+		</div>
 	</article>
+	<script src="./article-template.js"></script>
 </body>
 </html>

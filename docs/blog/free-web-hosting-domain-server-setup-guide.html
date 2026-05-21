@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>무료로 웹사이트 호스팅하기 — 도메인, 서버, 배포까지 0원 세팅 가이드 — Tech Blog</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;600;700&family=Noto+Sans+KR:wght@300;400;500;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+	<style>*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif; background: #f5f5f7; color: #1d1d1f; -webkit-font-smoothing: antialiased; }
+.header { background: rgba(255,255,255,.72); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-bottom: 1px solid rgba(0,0,0,.08); padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+.header__title { font-family: 'Outfit', sans-serif; font-size: 17px; font-weight: 600; color: #1d1d1f; }
+.header__back { font-size: 13px; color: #0071e3; text-decoration: none; display: flex; align-items: center; gap: 4px; transition: opacity .15s; }
+.header__back:hover { opacity: .7; }
+.hero { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 60px 20px 50px; text-align: center; color: #fff; }
+.hero__date { font-size: 13px; opacity: .75; margin-bottom: 12px; letter-spacing: .5px; }
+.hero__title { font-size: 30px; font-weight: 700; line-height: 1.35; max-width: 680px; margin: 0 auto; }
+.article { max-width: 720px; margin: -24px auto 60px; padding: 0 20px; }
+.article__body { background: #fff; border-radius: 16px; box-shadow: 0 1px 3px rgba(0,0,0,.06), 0 8px 24px rgba(0,0,0,.04); padding: 40px 36px; }
+.article__content { font-size: 16px; line-height: 2; color: #333; word-break: keep-all; }
+.article__content p { margin-bottom: 18px; } .article__content p:last-child { margin-bottom: 0; }
+.article__content h2 { font-size: 21px; font-weight: 700; color: #1d1d1f; margin: 44px 0 18px; padding-bottom: 10px; border-bottom: 2px solid #667eea; display: inline-block; }
+.article__content h2::before { content: ''; display: inline-block; width: 4px; height: 21px; background: #667eea; border-radius: 2px; margin-right: 10px; vertical-align: text-bottom; }
+.article__content pre { background: #1e1e2e; color: #cdd6f4; border-radius: 12px; padding: 20px 24px; margin: 20px 0; overflow-x: auto; font-family: 'Fira Code', monospace; font-size: 13.5px; line-height: 1.7; border: 1px solid rgba(255,255,255,.06); }
+.article__content code { font-family: 'Fira Code', monospace; font-size: 14px; background: #f0f0f5; color: #e74c8b; padding: 2px 7px; border-radius: 5px; }
+.article__content pre code { background: none; color: inherit; padding: 0; border-radius: 0; font-size: 13.5px; }
+.article__content strong { color: #1d1d1f; font-weight: 600; }
+.progress-bar { position: fixed; top: 0; left: 0; height: 3px; background: linear-gradient(90deg, #667eea, #764ba2); z-index: 200; width: 0; transition: width .1s linear; }
+@media (max-width: 600px) { .hero { padding: 40px 16px 36px; } .hero__title { font-size: 23px; } .article__body { padding: 28px 20px; border-radius: 12px; } .article__content { font-size: 15px; } .article__content h2 { font-size: 19px; } .article__content pre { padding: 16px; font-size: 12.5px; } }</style>
+</head>
+<body>
+	<div class="progress-bar" id="progressBar"></div>
+	<header class="header">
+		<div class="header__title">Tech Blog</div>
+		<a class="header__back" href="./index.html">← 목록으로</a>
+	</header>
+	<div class="hero">
+		<p class="hero__date">2026.05.21 14:40</p>
+		<h1 class="hero__title">무료로 웹사이트 호스팅하기 — 도메인, 서버, 배포까지 0원 세팅 가이드</h1>
+	</div>
+	<article class="article">
+		<div class="article__body">
+			<div class="article__content" id="articleContent">사이드 프로젝트나 포트폴리오를 만들었는데, 서버비와 도메인비가 부담될 때가 있다.
+사실 2026년 기준으로 무료 호스팅 옵션이 꽤 많고, 잘 조합하면 진짜 0원으로 운영할 수 있다.
+
+## 무료 도메인 — 내 주소 만들기
+
+Freenom은 서비스가 불안정해졌지만 대안이 있다.
+
+1. GitHub Pages 기본 도메인: username.github.io — 별도 신청 없이 바로 사용 가능
+2. Vercel 기본 도메인: project-name.vercel.app — 배포하면 자동 생성
+3. Netlify 기본 도메인: project-name.netlify.app — 역시 자동 생성
+4. is-a.dev: 개발자용 무료 서브도메인 (yourname.is-a.dev). GitHub PR로 신청
+5. js.org: JavaScript 프로젝트용 무료 서브도메인 (yourproject.js.org)
+
+커스텀 도메인(.com, .dev 등)은 연 1~2만원이지만, 위 옵션으로도 충분히 시작할 수 있다.
+
+## 무료 정적 호스팅 — HTML/CSS/JS 사이트
+
+정적 사이트(프론트엔드만 있는 사이트)는 무료 호스팅이 가장 쉽다.
+
+GitHub Pages: GitHub 레포에 push하면 자동 배포. Jekyll, Hugo 등 정적 사이트 생성기와 궁합이 좋다. 이 블로그도 GitHub Pages로 운영 중이다.
+
+Vercel: Next.js 만든 회사. Git push만 하면 자동 빌드/배포. React, Vue, Svelte 등 프론트엔드 프레임워크에 최적화. 무료 플랜으로 개인 프로젝트 충분.
+
+Netlify: Vercel과 비슷한 포지션. 폼 처리, 서버리스 함수 등 부가 기능이 무료로 제공. 빌드 시간 월 300분 무료.
+
+Cloudflare Pages: 빌드 무제한, 요청 무제한. 속도도 빠르다. 숨은 강자.
+
+## 무료 백엔드 서버 — API와 DB가 필요할 때
+
+백엔드가 필요하면 선택지가 조금 달라진다.
+
+Railway: 월 $5 크레딧 무료 제공. Node.js, Python, PHP 등 대부분 언어 지원. PostgreSQL, MySQL, Redis도 한 클릭으로 추가.
+
+Render: 무료 플랜에서 웹 서비스 + PostgreSQL 제공. 다만 무료 서비스는 15분 비활성 시 슬립 모드 진입.
+
+Fly.io: 무료 티어에서 VM 3개까지 제공. Docker 이미지를 직접 배포할 수 있어 자유도가 높다.
+
+Supabase: Firebase 대안. PostgreSQL + 인증 + 스토리지 + 실시간 기능을 무료로. 프로젝트 2개까지 무료.
+
+PlanetScale (Vitess 기반 MySQL): 무료 플랜으로 1개 DB, 읽기 10억 row/월. 다만 2024년부터 무료 플랜 정책 변경이 있으니 확인 필요.
+
+## 추천 조합 — 실제로 이렇게 세팅하면 된다
+
+정적 사이트(블로그, 포트폴리오):
+GitHub Pages + GitHub Actions 자동 배포 → 완전 무료, 관리 쉬움
+
+프론트엔드 + API:
+Vercel (프론트) + Supabase (백엔드/DB) → 풀스택 무료 조합의 정석
+
+PHP 프로젝트(CodeIgniter, Laravel):
+Railway + MySQL → PHP도 무료로 배포 가능. Composer 지원.
+
+풀스택 자유도 최대:
+Fly.io (Docker) + PlanetScale (DB) → 뭐든 올릴 수 있음
+
+## 무료 SSL 인증서
+
+위에 언급한 서비스들은 대부분 SSL(HTTPS)을 자동으로 제공한다.
+혹시 직접 서버를 운영한다면 Let&#x27;s Encrypt로 무료 SSL을 발급받을 수 있다.
+certbot 한 줄이면 끝.
+
+## 주의할 점
+
+무료 플랜은 대부분 개인/비상업 프로젝트 기준이다.
+트래픽이 폭증하면 과금이 발생할 수 있으니, 각 서비스의 무료 한도를 미리 확인해두자.
+슬립 모드가 있는 서비스(Render 등)는 첫 요청 시 응답이 느릴 수 있다.
+
+결론: 돈 없어도 웹사이트는 만들 수 있다.
+무료 도구를 잘 조합하면 도메인부터 서버, DB, 배포, SSL까지 전부 0원으로 세팅 가능하다.
+일단 만들어서 올리는 게 중요하다. 최적화와 과금은 트래픽이 생긴 다음에 고민해도 늦지 않다.</div>
+		</div>
+	</article>
+	<script src="./article-template.js"></script>
+</body>
+</html>

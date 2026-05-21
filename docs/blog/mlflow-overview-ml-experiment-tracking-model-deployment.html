@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<title>CodeIgniter 4에서 JSON 파일로 데이터 관리하기 — Tech Blog</title>
+	<title>MLflow 정리 — ML 실험 관리부터 모델 배포까지 한 플랫폼에서 — Tech Blog</title>
 	<link rel="preconnect" href="https://fonts.googleapis.com">
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 	<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;600;700&family=Noto+Sans+KR:wght@300;400;500;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
@@ -36,21 +36,80 @@ body { font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-seri
 		<a class="header__back" href="./index.html">← 목록으로</a>
 	</header>
 	<div class="hero">
-		<p class="hero__date">2026.05.19 09:00</p>
-		<h1 class="hero__title">CodeIgniter 4에서 JSON 파일로 데이터 관리하기</h1>
+		<p class="hero__date">2026.05.21 15:00</p>
+		<h1 class="hero__title">MLflow 정리 — ML 실험 관리부터 모델 배포까지 한 플랫폼에서</h1>
 	</div>
 	<article class="article">
 		<div class="article__body">
-			<div class="article__content" id="articleContent">DB 없이도 간단한 프로젝트에서 데이터를 관리할 수 있다.
-CodeIgniter 4의 writable 디렉토리를 활용해 JSON 파일 기반 CRUD를 구현하는 방법을 정리한다.
+			<div class="article__content" id="articleContent">머신러닝 프로젝트를 하다 보면 이런 문제를 겪는다.
+&quot;이 모델 학습할 때 하이퍼파라미터 뭐였지?&quot;, &quot;지난주 결과가 더 좋았는데 그때 코드 어디 갔지?&quot;, &quot;모델을 어떻게 배포하지?&quot;
+MLflow는 이런 ML 라이프사이클 전체를 관리해주는 오픈소스 플랫폼이다.
 
-핵심은 JsonStore 같은 라이브러리 클래스를 하나 만들어서 read/write를 추상화하는 것이다.
-file_get_contents + json_decode로 읽고, json_encode + file_put_contents로 쓴다.
+## MLflow란?
 
-장점은 DB 설정이 필요 없고 배포가 간단하다는 것.
-단점은 동시 쓰기에 취약하고 대용량 데이터에 부적합하다는 것.
+MLflow(https://mlflow.org)는 머신러닝 실험 추적, 모델 관리, 배포를 한 곳에서 할 수 있게 해주는 플랫폼이다.
+Apache 2.0 오픈소스 라이선스로 무료이며, 월간 다운로드 3천만 건 이상으로 ML 업계에서 사실상 표준 도구다.
+Databricks, Microsoft, Meta, Toyota 등 포춘 500대 기업에서도 사용한다.
 
-소규모 프로젝트나 프로토타입에 적합한 패턴이다.</div>
+## 핵심 기능 5가지
+
+1. Tracking (실험 추적)
+모든 ML 실험의 파라미터, 메트릭, 아티팩트를 자동으로 기록한다.
+&quot;학습률 0.001, 에포크 50, 정확도 92.3%&quot; 같은 정보가 자동 저장되어서
+나중에 어떤 설정이 최고 성능이었는지 바로 비교할 수 있다.
+
+2. 관찰성 (Observability)
+LLM 앱과 AI 에이전트의 동작을 추적한다.
+OpenTelemetry 기반으로 구축되어 모든 LLM 제공자(OpenAI, Anthropic 등)와 에이전트 프레임워크를 지원.
+프로덕션에서 품질, 비용, 안전성을 실시간 모니터링할 수 있다.
+
+3. 평가 (Evaluation)
+50개 이상의 내장 메트릭과 LLM 심판(Judge)을 활용한 자동 평가.
+정확성, 지연시간, 안전성, 관련성 등을 체계적으로 분석한다.
+AI가 자동으로 이슈를 탐지해주기도 한다.
+
+4. 프롬프트 관리
+프롬프트를 버전 관리하고 배포할 수 있다.
+Git처럼 프롬프트 변경 이력을 추적하고, 자동 최적화 기능도 제공한다.
+
+5. AI 게이트웨이 &amp; 모델 서빙
+모든 LLM 제공자를 위한 통합 API를 제공한다.
+요청 라우팅, 레이트 제한, 비용 관리를 중앙에서 처리.
+한 줄의 명령으로 모델을 프로덕션에 배포할 수 있다.
+
+## 왜 쓰는가?
+
+ML 프로젝트의 가장 큰 문제는 재현성이다.
+&quot;지난번에 됐는데 지금은 안 돼&quot;가 일상인 게 ML 개발이다.
+MLflow를 쓰면 모든 실험이 기록되니까 이 문제가 해결된다.
+
+또 하나는 협업이다.
+팀원이 어떤 실험을 했고, 어떤 결과가 나왔는지 대시보드에서 바로 확인할 수 있다.
+
+## 누가 쓰는가?
+
+데이터 사이언티스트: 실험 추적과 모델 비교
+ML 엔지니어: 모델 패키징과 배포
+AI 앱 개발자: LLM 앱의 관찰성과 평가
+MLOps 팀: 모델 레지스트리와 프로덕션 관리
+
+## 지원 환경
+
+Python, TypeScript, Java, R을 지원한다.
+100개 이상의 AI 프레임워크와 통합되어 있어서
+TensorFlow, PyTorch, scikit-learn, Hugging Face, LangChain 등
+이미 쓰고 있는 도구와 바로 연결할 수 있다.
+
+## 시작하기
+
+pip install mlflow
+mlflow ui
+
+이 두 줄이면 로컬에서 MLflow UI가 뜬다.
+실험 추적부터 시작해서, 필요에 따라 모델 레지스트리, 배포까지 확장하면 된다.
+
+ML 프로젝트를 체계적으로 관리하고 싶다면 MLflow는 첫 번째로 도입할 도구다.
+오픈소스이고 무료이니 부담 없이 시작할 수 있다.</div>
 		</div>
 	</article>
 	<script src="./article-template.js"></script>

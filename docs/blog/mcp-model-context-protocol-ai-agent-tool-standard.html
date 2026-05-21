@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>MCP(Model Context Protocol) — AI 에이전트가 외부 도구를 쓰는 표준이 생겼다 — Tech Blog</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;600;700&family=Noto+Sans+KR:wght@300;400;500;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+	<style>*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif; background: #f5f5f7; color: #1d1d1f; -webkit-font-smoothing: antialiased; }
+.header { background: rgba(255,255,255,.72); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-bottom: 1px solid rgba(0,0,0,.08); padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+.header__title { font-family: 'Outfit', sans-serif; font-size: 17px; font-weight: 600; color: #1d1d1f; }
+.header__back { font-size: 13px; color: #0071e3; text-decoration: none; display: flex; align-items: center; gap: 4px; transition: opacity .15s; }
+.header__back:hover { opacity: .7; }
+.hero { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 60px 20px 50px; text-align: center; color: #fff; }
+.hero__date { font-size: 13px; opacity: .75; margin-bottom: 12px; letter-spacing: .5px; }
+.hero__title { font-size: 30px; font-weight: 700; line-height: 1.35; max-width: 680px; margin: 0 auto; }
+.article { max-width: 720px; margin: -24px auto 60px; padding: 0 20px; }
+.article__body { background: #fff; border-radius: 16px; box-shadow: 0 1px 3px rgba(0,0,0,.06), 0 8px 24px rgba(0,0,0,.04); padding: 40px 36px; }
+.article__content { font-size: 16px; line-height: 2; color: #333; word-break: keep-all; }
+.article__content p { margin-bottom: 18px; } .article__content p:last-child { margin-bottom: 0; }
+.article__content h2 { font-size: 21px; font-weight: 700; color: #1d1d1f; margin: 44px 0 18px; padding-bottom: 10px; border-bottom: 2px solid #667eea; display: inline-block; }
+.article__content h2::before { content: ''; display: inline-block; width: 4px; height: 21px; background: #667eea; border-radius: 2px; margin-right: 10px; vertical-align: text-bottom; }
+.article__content pre { background: #1e1e2e; color: #cdd6f4; border-radius: 12px; padding: 20px 24px; margin: 20px 0; overflow-x: auto; font-family: 'Fira Code', monospace; font-size: 13.5px; line-height: 1.7; border: 1px solid rgba(255,255,255,.06); }
+.article__content code { font-family: 'Fira Code', monospace; font-size: 14px; background: #f0f0f5; color: #e74c8b; padding: 2px 7px; border-radius: 5px; }
+.article__content pre code { background: none; color: inherit; padding: 0; border-radius: 0; font-size: 13.5px; }
+.article__content strong { color: #1d1d1f; font-weight: 600; }
+.progress-bar { position: fixed; top: 0; left: 0; height: 3px; background: linear-gradient(90deg, #667eea, #764ba2); z-index: 200; width: 0; transition: width .1s linear; }
+@media (max-width: 600px) { .hero { padding: 40px 16px 36px; } .hero__title { font-size: 23px; } .article__body { padding: 28px 20px; border-radius: 12px; } .article__content { font-size: 15px; } .article__content h2 { font-size: 19px; } .article__content pre { padding: 16px; font-size: 12.5px; } }</style>
+</head>
+<body>
+	<div class="progress-bar" id="progressBar"></div>
+	<header class="header">
+		<div class="header__title">Tech Blog</div>
+		<a class="header__back" href="./index.html">← 목록으로</a>
+	</header>
+	<div class="hero">
+		<p class="hero__date">2026.05.21 15:20</p>
+		<h1 class="hero__title">MCP(Model Context Protocol) — AI 에이전트가 외부 도구를 쓰는 표준이 생겼다</h1>
+	</div>
+	<article class="article">
+		<div class="article__body">
+			<div class="article__content" id="articleContent">2025년 말부터 AI 개발 생태계에서 가장 주목받는 키워드 중 하나가 MCP다.
+Model Context Protocol, 줄여서 MCP는 AI 모델이 외부 도구와 데이터를 연결하는 개방형 표준 프로토콜이다.
+
+## 왜 MCP가 필요한가?
+
+ChatGPT나 Claude 같은 AI 모델은 똑똑하지만, 혼자서는 할 수 없는 게 많다.
+파일을 읽거나, DB를 조회하거나, Slack에 메시지를 보내거나, GitHub에 PR을 만드는 건 AI 모델 단독으로는 불가능하다.
+
+그래서 각 서비스마다 플러그인, 함수 호출(Function Calling), 도구 사용(Tool Use) 같은 방식을 만들었는데,
+문제는 이게 전부 제각각이라는 것이다.
+OpenAI 방식으로 만든 도구가 Claude에서는 안 돌아가고, 그 반대도 마찬가지였다.
+
+MCP는 이 문제를 해결한다. USB-C처럼 하나의 표준 규격을 만들어서,
+어떤 AI 모델이든 같은 방식으로 외부 도구에 접근할 수 있게 한 것이다.
+
+## MCP의 구조
+
+MCP는 클라이언트-서버 구조다.
+
+MCP 호스트: AI 앱 (Claude Desktop, IDE 확장, 커스텀 에이전트 등)
+MCP 클라이언트: 호스트 안에서 서버와 1:1 연결을 관리
+MCP 서버: 외부 도구/데이터를 AI에게 노출하는 경량 프로그램
+
+예를 들어 Claude Code가 GitHub에 접근하려면:
+Claude Code(호스트) → MCP 클라이언트 → GitHub MCP 서버 → GitHub API
+이런 흐름이다.
+
+## MCP 서버가 제공하는 3가지
+
+Tools (도구): AI가 실행할 수 있는 함수. 예: 파일 검색, DB 쿼리, API 호출
+Resources (리소스): AI가 읽을 수 있는 데이터. 예: 파일 내용, DB 스키마, 설정값
+Prompts (프롬프트): 미리 정의된 프롬프트 템플릿. 예: 코드 리뷰 요청, 번역 요청
+
+이 3가지를 표준화된 JSON-RPC 프로토콜로 주고받는다.
+
+## 실제 사용 사례
+
+이미 수백 개의 MCP 서버가 만들어져 있다.
+
+GitHub MCP 서버: PR 생성, 이슈 관리, 코드 검색
+Slack MCP 서버: 채널 메시지 전송, 검색
+PostgreSQL MCP 서버: DB 스키마 조회, 쿼리 실행
+Filesystem MCP 서버: 로컬 파일 읽기/쓰기
+Google Drive MCP 서버: 문서 검색, 읽기
+Jira, Notion, Linear 등: 프로젝트 관리 도구 연동
+
+이런 서버들을 조합하면 AI 에이전트가 &quot;Slack에서 받은 버그 리포트를 읽고, GitHub에 이슈 만들고, 관련 코드를 찾아서 PR까지 생성&quot;하는 게 가능해진다.
+
+## 직접 MCP 서버 만들기
+
+Python이나 TypeScript로 간단하게 만들 수 있다.
+
+from mcp.server import Server
+from mcp.types import Tool
+
+server = Server(&quot;my-tool&quot;)
+
+@server.tool()
+async def get_weather(city: str) -&gt; str:
+    &quot;&quot;&quot;도시의 날씨를 조회합니다&quot;&quot;&quot;
+    return f&quot;{city}의 현재 날씨: 맑음, 24도&quot;
+
+이렇게 데코레이터 하나로 도구를 등록하면 끝이다.
+AI가 &quot;서울 날씨 알려줘&quot;라고 하면 이 함수가 자동으로 호출된다.
+
+## MCP vs Function Calling
+
+Function Calling은 API 호출 시 함수 스키마를 매번 전달하는 방식이다.
+MCP는 서버가 독립적으로 실행되면서 도구를 제공하는 방식이다.
+
+차이점:
+Function Calling: 앱 코드 안에 도구 로직이 포함됨. 앱마다 다시 구현해야 함.
+MCP: 도구 로직이 별도 서버로 분리됨. 한 번 만들면 어떤 AI 앱에서든 재사용 가능.
+
+MCP는 &quot;도구의 npm&quot;이라고 생각하면 된다.
+누군가 만든 MCP 서버를 설치만 하면 내 AI 앱에서 바로 쓸 수 있다.
+
+## 왜 지금 주목해야 하는가
+
+Anthropic이 2024년 말에 공개한 이후, 2025~2026년에 폭발적으로 성장하고 있다.
+Claude, Cursor, Windsurf, VS Code 등 주요 AI 도구들이 MCP를 지원하기 시작했다.
+
+앞으로 AI 에이전트 개발은 MCP 서버를 조합하는 방식이 표준이 될 가능성이 높다.
+지금 배워두면 AI 에이전트 시대에 큰 무기가 된다.
+
+시작하기: https://modelcontextprotocol.io 에서 공식 문서와 예제를 확인할 수 있다.</div>
+		</div>
+	</article>
+	<script src="./article-template.js"></script>
+</body>
+</html>

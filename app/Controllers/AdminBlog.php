@@ -60,7 +60,7 @@ class AdminBlog extends BaseController
             'slug'       => $slug,
             'content'    => trim((string) $this->request->getPost('content')),
             'thumbnail'  => $thumbnail,
-            'created_at' => date('Y-m-d'),
+            'created_at' => date('Y-m-d H:i:s'),
         ];
 
         $this->store->write('posts.json', $posts);
