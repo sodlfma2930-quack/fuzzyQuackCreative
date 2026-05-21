@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>디자인 패턴 기초 — OOP 원칙부터 Singleton, Factory, Observer까지 — Tech Blog</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;600&family=Noto+Sans+KR:wght@300;400;500&display=swap" rel="stylesheet">
+	<style>
+		*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+		body { font-family: 'Noto Sans KR', -apple-system, sans-serif; background: #fafafa; color: #1d1d1f; }
+		.header { background: #fff; border-bottom: 1px solid #e5e5ea; padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; }
+		.header__title { font-family: 'Outfit', sans-serif; font-size: 18px; font-weight: 600; }
+		.header__back { font-size: 14px; color: #0071e3; text-decoration: none; }
+		.article { max-width: 680px; margin: 0 auto; padding: 40px 20px; }
+		.article__date { font-size: 13px; color: #86868b; margin-bottom: 8px; }
+		.article__title { font-size: 26px; font-weight: 600; line-height: 1.4; margin-bottom: 24px; }
+		.article__content { font-size: 15px; line-height: 1.8; color: #333; white-space: pre-wrap; word-break: keep-all; }
+	</style>
+</head>
+<body>
+	<header class="header">
+		<div class="header__title">Tech Blog</div>
+		<a class="header__back" href="./index.html">← 목록으로</a>
+	</header>
+	<article class="article">
+		<p class="article__date">2026-05-21</p>
+		<h1 class="article__title">디자인 패턴 기초 — OOP 원칙부터 Singleton, Factory, Observer까지</h1>
+		<div class="article__content">코드를 짜다 보면 비슷한 구조의 문제를 반복해서 만난다.
+"이 객체는 하나만 있어야 하는데", "타입에 따라 다른 객체를 만들어야 하는데", "상태가 바뀌면 여러 곳에 알려야 하는데".
+이런 문제들에 대한 검증된 해결 템플릿이 바로 디자인 패턴이다.
+
+## OOP 4대 원칙 — 패턴의 기반
+
+디자인 패턴은 객체지향(OOP) 위에서 동작한다. 4가지 원칙을 먼저 잡아야 한다.
+
+캡슐화: 내부 구현을 숨기고 필요한 것만 공개한다. 세탁기의 버튼만 누르면 되지, 내부 모터 구조를 알 필요 없는 것과 같다.
+상속: 부모 클래스의 기능을 자식이 물려받는다. 스마트폰은 전화기의 기능을 가지면서 추가 기능이 있는 것과 같다.
+다형성: 같은 이름의 메서드가 상황에 따라 다르게 동작한다. "재생" 버튼을 눌렀을 때 음악앱이면 노래가, 영상앱이면 동영상이 나오는 것.
+추상화: 복잡한 것에서 핵심만 뽑아낸다. 지하철 노선도가 실제 지리를 무시하고 역과 연결만 표현하는 것과 같다.
+
+## 패턴의 3가지 분류
+
+생성 패턴: 객체를 "어떻게 만들지" — Singleton, Factory, Builder
+구조 패턴: 객체를 "어떻게 조합할지" — Proxy, Decorator, Adapter
+행위 패턴: 객체가 "어떻게 협력할지" — Observer, Strategy, Command
+
+## Singleton — 인스턴스가 딱 하나만 존재
+
+회사에 프린터가 1대뿐이라고 생각하면 된다. 모든 직원이 같은 프린터를 쓴다.
+
+class Database {
+    private static $instance = null;
+
+    private function __construct() {
+        // 외부에서 new 못하게 막음
+    }
+
+    public static function getInstance() {
+        if (self::$instance === null) {
+            self::$instance = new self();
+        }
+        return self::$instance;
+    }
+}
+
+$db1 = Database::getInstance();
+$db2 = Database::getInstance();
+// $db1 === $db2 → 같은 객체
+
+생성자를 private으로 잠가서 외부에서 new를 못 하게 만들고,
+getInstance()를 통해서만 접근하게 한다. 이미 만들어져 있으면 기존 것을 반환한다.
+
+DB 연결, 설정 관리, 로거 등 하나만 있어야 하는 자원에 쓴다.
+
+## Factory — 객체 생성을 대신 해주는 공장
+
+카페에서 "아메리카노" 주문하면 바리스타가 알아서 만들어주는 것과 같다.
+타입만 던지면 알맞은 객체를 돌려준다.
+
+interface Payment {
+    public function pay($amount);
+}
+
+class CardPayment implements Payment {
+    public function pay($amount) {
+        echo "카드로 {$amount}원 결제";
+    }
+}
+
+class PhonePayment implements Payment {
+    public function pay($amount) {
+        echo "휴대폰으로 {$amount}원 결제";
+    }
+}
+
+class PaymentFactory {
+    public static function create($type) {
+        return match($type) {
+            'card'  =&gt; new CardPayment(),
+            'phone' =&gt; new PhonePayment(),
+            default =&gt; throw new Exception("지원하지 않는 결제 타입"),
+        };
+    }
+}
+
+$payment = PaymentFactory::create('card');
+$payment-&gt;pay(10000); // "카드로 10000원 결제"
+
+new를 직접 쓰는 대신 Factory에 위임하면,
+나중에 결제 수단이 추가되어도 Factory만 수정하면 된다.
+호출하는 쪽 코드는 건드릴 필요가 없다.
+
+## Observer — 상태가 바뀌면 관련된 곳에 자동 알림
+
+유튜브 구독과 같다. 새 영상이 올라오면 구독자 전원에게 알림이 간다.
+
+interface Observer {
+    public function update($event);
+}
+
+class SmsNotifier implements Observer {
+    public function update($event) {
+        echo "SMS 발송: {$event}";
+    }
+}
+
+class PointAccumulator implements Observer {
+    public function update($event) {
+        echo "포인트 적립: {$event}";
+    }
+}
+
+class Order {
+    private $observers = [];
+
+    public function subscribe(Observer $observer) {
+        $this-&gt;observers[] = $observer;
+    }
+
+    public function complete() {
+        // 주문 완료 처리...
+        foreach ($this-&gt;observers as $observer) {
+            $observer-&gt;update('주문 완료');
+        }
+    }
+}
+
+$order = new Order();
+$order-&gt;subscribe(new SmsNotifier());
+$order-&gt;subscribe(new PointAccumulator());
+$order-&gt;complete();
+// "SMS 발송: 주문 완료"
+// "포인트 적립: 주문 완료"
+
+Order 클래스는 SmsNotifier나 PointAccumulator의 존재를 몰라도 된다.
+Observer 인터페이스만 구현하면 누구든 구독할 수 있다.
+이메일 알림을 추가하고 싶으면? EmailNotifier를 만들어서 subscribe하면 끝이다.
+
+## SOLID — 패턴이 "왜" 그렇게 생겼는지 이해하는 열쇠
+
+S (Single Responsibility): 클래스는 하나의 책임만 가진다.
+O (Open-Closed): 확장에는 열려있고, 수정에는 닫혀있다.
+L (Liskov Substitution): 자식 클래스는 부모 대신 쓸 수 있어야 한다.
+I (Interface Segregation): 인터페이스는 작게 쪼갠다.
+D (Dependency Inversion): 구체 클래스가 아닌 추상(인터페이스)에 의존한다.
+
+Factory 패턴이 Open-Closed를 실현하고,
+Observer 패턴이 Dependency Inversion을 실현하는 식이다.
+SOLID를 알면 패턴이 왜 그렇게 설계되었는지 자연스럽게 보인다.
+
+## 다음 단계로 갈 패턴들
+
+Strategy: 알고리즘을 교체 가능하게 캡슐화 (if/else 체인 제거)
+Proxy: 객체 접근을 대리인이 제어 (lazy-loading, 캐싱)
+Decorator: 기존 객체에 기능을 동적으로 추가 (미들웨어 개념)
+Builder: 복잡한 객체를 단계별로 조립
+Adapter: 호환 안 되는 인터페이스를 연결 (변환기)
+Command: 요청을 객체로 캡슐화 (배치/큐 처리)
+Template Method: 알고리즘 뼈대는 부모가, 세부는 자식이 구현
+
+## 학습 순서 추천
+
+1단계 (1~2일): OOP 4대 원칙 확실히 이해
+2단계 (2~3일): Singleton, Factory, Observer 직접 코드로 작성
+3단계 (3~5일): SOLID 원칙 학습
+4단계 (1주): Strategy, Proxy, Decorator 학습
+이후: 나머지 패턴은 필요할 때 하나씩
+
+핵심은 패턴 이름을 외우는 게 아니라,
+"왜 이렇게 하면 좋은가"를 이해하는 것이다.
+실제 코드에서 "이 부분, 패턴 쓰면 깔끔하겠다"라는 감이 오면 그때 적용하면 된다.</div>
+	</article>
+</body>
+</html>
