@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>GitHub Pages 배포 원리 — PHP 앱을 정적 사이트로 무료 배포하는 구조 — Tech Blog</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;600;700&family=Noto+Sans+KR:wght@300;400;500;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+	<style>*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif; background: #f5f5f7; color: #1d1d1f; -webkit-font-smoothing: antialiased; }
+.header { background: rgba(255,255,255,.72); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-bottom: 1px solid rgba(0,0,0,.08); padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+.header__title { font-family: 'Outfit', sans-serif; font-size: 17px; font-weight: 600; color: #1d1d1f; }
+.header__back { font-size: 13px; color: #0071e3; text-decoration: none; display: flex; align-items: center; gap: 4px; transition: opacity .15s; }
+.header__back:hover { opacity: .7; }
+.hero { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 60px 20px 50px; text-align: center; color: #fff; }
+.hero__date { font-size: 13px; opacity: .75; margin-bottom: 12px; letter-spacing: .5px; }
+.hero__title { font-size: 30px; font-weight: 700; line-height: 1.35; max-width: 680px; margin: 0 auto; }
+.article { max-width: 720px; margin: -24px auto 60px; padding: 0 20px; }
+.article__body { background: #fff; border-radius: 16px; box-shadow: 0 1px 3px rgba(0,0,0,.06), 0 8px 24px rgba(0,0,0,.04); padding: 40px 36px; }
+.article__content { font-size: 16px; line-height: 2; color: #333; word-break: keep-all; }
+.article__content p { margin-bottom: 18px; } .article__content p:last-child { margin-bottom: 0; }
+.article__content h2 { font-size: 21px; font-weight: 700; color: #1d1d1f; margin: 44px 0 18px; padding-bottom: 10px; border-bottom: 2px solid #667eea; display: inline-block; }
+.article__content h2::before { content: ''; display: inline-block; width: 4px; height: 21px; background: #667eea; border-radius: 2px; margin-right: 10px; vertical-align: text-bottom; }
+.article__content pre { background: #1e1e2e; color: #cdd6f4; border-radius: 12px; padding: 20px 24px; margin: 20px 0; overflow-x: auto; font-family: 'Fira Code', monospace; font-size: 13.5px; line-height: 1.7; border: 1px solid rgba(255,255,255,.06); }
+.article__content code { font-family: 'Fira Code', monospace; font-size: 14px; background: #f0f0f5; color: #e74c8b; padding: 2px 7px; border-radius: 5px; }
+.article__content pre code { background: none; color: inherit; padding: 0; border-radius: 0; font-size: 13.5px; }
+.article__content strong { color: #1d1d1f; font-weight: 600; }
+.progress-bar { position: fixed; top: 0; left: 0; height: 3px; background: linear-gradient(90deg, #667eea, #764ba2); z-index: 200; width: 0; transition: width .1s linear; }
+@media (max-width: 600px) { .hero { padding: 40px 16px 36px; } .hero__title { font-size: 23px; } .article__body { padding: 28px 20px; border-radius: 12px; } .article__content { font-size: 15px; } .article__content h2 { font-size: 19px; } .article__content pre { padding: 16px; font-size: 12.5px; } }</style>
+</head>
+<body>
+	<div class="progress-bar" id="progressBar"></div>
+	<header class="header">
+		<div class="header__title">Tech Blog</div>
+		<a class="header__back" href="./index.html">← 목록으로</a>
+	</header>
+	<div class="hero">
+		<p class="hero__date">2026.05.21 16:00</p>
+		<h1 class="hero__title">GitHub Pages 배포 원리 — PHP 앱을 정적 사이트로 무료 배포하는 구조</h1>
+	</div>
+	<article class="article">
+		<div class="article__body">
+			<div class="article__content" id="articleContent">이 블로그는 CodeIgniter 4(PHP)로 만들어졌지만, GitHub Pages에서 무료로 돌아간다.
+GitHub Pages는 PHP를 실행할 수 없는데 어떻게 가능한 걸까?
+핵심은 &quot;이중 렌더링&quot; 구조다. 그 원리를 처음부터 끝까지 정리한다.
+
+## GitHub Pages란?
+
+GitHub Pages는 GitHub 저장소의 파일을 그대로 웹사이트로 서빙해주는 무료 호스팅 서비스다.
+정적 파일(HTML, CSS, JS, 이미지)만 서빙할 수 있다.
+PHP, Python, Node.js 같은 서버 사이드 언어는 실행할 수 없다.
+
+즉, GitHub Pages는 &quot;파일 서버&quot;일 뿐이다.
+브라우저가 index.html을 요청하면 그 파일을 그대로 돌려주는 게 전부다.
+
+## 그런데 이 블로그는 PHP(CodeIgniter 4)로 만들었다
+
+맞다. 이 프로젝트는 CodeIgniter 4 프레임워크를 사용한다.
+로컬에서는 PHP 개발 서버(php spark serve)로 동적으로 동작한다.
+컨트롤러가 JSON 파일에서 데이터를 읽고, 뷰 템플릿에 주입해서 HTML을 생성한다.
+
+예를 들어 블로그 목록 페이지의 흐름:
+1. 브라우저가 /blog 요청
+2. Blog 컨트롤러가 posts.json에서 글 목록을 읽음
+3. created_at 기준으로 역순 정렬
+4. blog/index.php 뷰에 데이터를 넘겨서 HTML 생성
+5. 브라우저에 HTML 응답
+
+이건 PHP가 실행되어야만 가능하다.
+GitHub Pages에서는 이 과정이 불가능하다.
+
+## 해결책: 이중 렌더링 구조
+
+이 프로젝트는 같은 콘텐츠를 두 가지 방식으로 렌더링한다.
+
+1. 동적 렌더링 (로컬/서버): CodeIgniter 4가 PHP로 실시간 생성
+2. 정적 렌더링 (GitHub Pages): 미리 생성한 HTML 파일을 docs/ 폴더에 저장
+
+프로젝트 구조를 보면 이렇다:
+
+project/
+├── app/                    ← CodeIgniter 4 (동적)
+│   ├── Controllers/
+│   │   ├── Blog.php        ← JSON 읽어서 뷰에 전달
+│   │   └── TravelGuide.php
+│   └── Views/
+│       ├── blog/index.php  ← PHP 템플릿
+│       └── travel/guide.php
+├── writable/data/
+│   └── posts.json          ← 블로그 데이터 (단일 소스)
+└── docs/                   ← GitHub Pages (정적)
+    ├── blog/
+    │   ├── index.html      ← 미리 생성된 HTML
+    │   └── *.html
+    ├── travel-guide.html
+    └── css/
+
+핵심: writable/data/posts.json이 단일 데이터 소스(Single Source of Truth)이고,
+여기서 동적 뷰와 정적 HTML 둘 다 생성된다.
+
+## 정적 HTML은 어떻게 만드나?
+
+방법 1 — 스크립트로 생성:
+Python 스크립트가 posts.json을 읽고, 각 글마다 HTML 파일을 생성한다.
+인덱스 페이지도 글 목록을 역순 정렬해서 생성한다.
+
+방법 2 — 수동 변환:
+PHP 뷰의 동적 부분(PHP 태그)을 실제 데이터로 치환해서 순수 HTML로 만든다.
+site_url() 같은 헬퍼 함수는 상대 경로(./index.html)로 바꾼다.
+
+방법 3 — GitHub Actions 자동화:
+GitHub Actions 워크플로우에서 posts.json을 읽고 정적 HTML을 자동 생성한다.
+push할 때마다 자동으로 docs/ 폴더가 업데이트된다.
+
+## GitHub Pages 설정
+
+GitHub 레포 Settings &gt; Pages에서:
+Source: Deploy from a branch
+Branch: main
+Folder: /docs
+
+이렇게 설정하면 docs/ 폴더의 내용이 웹사이트로 서빙된다.
+URL은 https://username.github.io/repo-name/ 형태가 된다.
+
+## 데이터 흐름 정리
+
+글 작성 시:
+1. posts.json에 새 글 추가 (id, title, slug, content, created_at)
+2. docs/blog/slug.html 정적 파일 생성
+3. docs/blog/index.html 인덱스 업데이트
+4. git push → GitHub Pages 자동 배포 (1~2분)
+
+로컬 개발 시:
+- php spark serve → localhost:8080에서 동적으로 확인
+- posts.json 수정하면 즉시 반영 (새로고침만 하면 됨)
+
+GitHub Pages 배포 시:
+- docs/ 폴더의 정적 HTML이 그대로 서빙
+- PHP 없이도 동작 (순수 HTML + CSS + JS)
+
+## 왜 이 구조를 쓰나?
+
+비용: GitHub Pages는 완전 무료. 서버비 0원.
+속도: 정적 파일이라 CDN에서 바로 서빙. PHP 실행 오버헤드 없음.
+개발 편의: 로컬에서는 PHP의 편의 기능(라우팅, 템플릿, 헬퍼)을 그대로 사용.
+안정성: 정적 파일이라 서버 다운 걱정 없음. GitHub의 인프라를 그대로 활용.
+
+단점도 있다:
+- 글을 추가할 때마다 정적 HTML을 재생성해야 함
+- 동적 기능(검색, 댓글, 관리자 패널)은 GitHub Pages에서 사용 불가
+- 두 벌의 코드(PHP 뷰 + 정적 HTML)를 관리해야 함
+
+## 자동화로 단점 해결하기
+
+GitHub Actions + Python 스크립트로 자동화하면 단점이 크게 줄어든다.
+posts.json만 수정하고 push하면:
+1. Actions가 자동으로 정적 HTML 생성
+2. docs/ 폴더에 커밋
+3. GitHub Pages에 자동 배포
+
+수동으로 HTML을 만들 필요가 없어진다.
+
+## 다른 선택지와 비교
+
+Vercel/Netlify: PHP는 지원하지 않지만, Next.js/Nuxt 등은 빌드 시 정적 생성(SSG) 가능.
+Railway/Render: PHP를 직접 실행 가능하지만 무료 플랜에 제약이 있음.
+Jekyll/Hugo: 정적 사이트 생성기. GitHub Pages와 궁합이 좋지만 PHP 생태계를 못 씀.
+
+이 프로젝트의 방식은 &quot;PHP 개발의 편의성 + 정적 호스팅의 무료/속도&quot;를 둘 다 가져가는 하이브리드 전략이다.
+
+결론: GitHub Pages에서 PHP가 안 돌아가는 건 맞다.
+하지만 PHP로 개발하고, 결과물을 정적 HTML로 내보내면
+무료로, 빠르게, 안정적으로 배포할 수 있다.
+&quot;개발은 동적으로, 배포는 정적으로&quot; — 이게 이 블로그의 원리다.</div>
+		</div>
+	</article>
+	<script src="./article-template.js"></script>
+</body>
+</html>

@@ -105,6 +105,8 @@
 		'ci4'       => ['🗄️', '#e0f2f1', '#00695c'],
 		'wasm'      => ['⚡', '#fff8e1', '#f9a825'],
 		'webassembly' => ['⚡', '#fff8e1', '#f9a825'],
+		'github-pages' => ['🚀', '#e8eaf6', '#3949ab'],
+		'deployment' => ['🚀', '#e8eaf6', '#3949ab'],
 	];
 
 	function getPostIcon(string $slug, array $map): array {
