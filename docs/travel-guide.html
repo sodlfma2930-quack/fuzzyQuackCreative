@@ -3,93 +3,355 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-	<title>대구 여행 가이드</title>
+	<title>대구 맛집 · 카페 가이드</title>
 	<link rel="preconnect" href="https://fonts.googleapis.com">
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-	<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&family=Noto+Sans+KR:wght@300;400;500&family=Noto+Serif+KR:wght@400;500&display=swap" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
 	<link rel="stylesheet" href="./css/travel.css">
 </head>
 <body>
-	<header class="guide-hero">
-		<div class="guide-hero__overlay"></div>
-		<div class="guide-hero__content">
-			<p class="guide-hero__label">Travel Picks</p>
-			<h1 class="guide-hero__title">대구 여행 가이드</h1>
-			<p class="guide-hero__intro">
-				예식 전후로 즐길 수 있는 대구의 감성 스팟을 엄선했어요.<br>
-				럭셔리한 분위기부터 힙한 맛집까지, 특별한 하루를 만들어보세요.
-			</p>
-			<a class="guide-hero__link" href="./home.html">홈으로 돌아가기</a>
+	<header class="hero">
+		<div class="hero__bg"></div>
+		<div class="hero__content">
+			<div class="hero__badge">📍 DAEGU LOCAL PICKS</div>
+			<h1 class="hero__title">대구 맛집 · 카페 가이드</h1>
+			<p class="hero__sub">대구 로컬이 추천하는 진짜 맛집과 감성 카페 🍽️</p>
 		</div>
 	</header>
 
-	<main class="guide">
-		<section class="guide-section">
-			<h2 class="section-title">Spot Light</h2>
-			<ul class="spot-list">
-				<li class="spot-card">
-					<div class="spot-card__badge">이색카페</div>
-					<h3 class="spot-card__name">밀림 MILLIM</h3>
-					<p class="spot-card__desc">4층 규모의 정글 테마 대형 카페. 브런치와 파충류 체험까지 한 번에 즐기는 대구 대표 이색 핫플.</p>
-					<p class="spot-card__address">대구광역시 남구 용두길 16</p>
-					<div class="spot-card__map">
-						<iframe src="https://maps.google.com/maps?q=35.8430,128.5910&hl=ko&z=17&output=embed" loading="lazy" allowfullscreen referrerpolicy="no-referrer-when-downgrade"></iframe>
-					</div>
-					<a class="spot-card__naver" href="https://map.naver.com/v5/search/%EB%B0%80%EB%A6%BC%20%EB%8C%80%EA%B5%AC" target="_blank" rel="noopener noreferrer">네이버 지도에서 보기</a>
-				</li>
-				<li class="spot-card">
-					<div class="spot-card__badge">양식</div>
-					<h3 class="spot-card__name">컨트리맨즈 동성로</h3>
-					<p class="spot-card__desc">6년째 동성로를 지켜온 감성 양식 맛집. 비주얼 폭발 시카고 딥디쉬 피자로 줄 서서 먹는 곳.</p>
-					<p class="spot-card__address">대구광역시 중구 동성로2길 21-5</p>
-					<div class="spot-card__map">
-						<iframe src="https://maps.google.com/maps?q=35.8696,128.5966&hl=ko&z=17&output=embed" loading="lazy" allowfullscreen referrerpolicy="no-referrer-when-downgrade"></iframe>
-					</div>
-					<a class="spot-card__naver" href="https://map.naver.com/v5/search/%EC%BB%A8%ED%8A%B8%EB%A6%AC%EB%A7%A8%EC%A6%88%20%EB%8F%99%EC%84%B1%EB%A1%9C" target="_blank" rel="noopener noreferrer">네이버 지도에서 보기</a>
-				</li>
-				<li class="spot-card">
-					<div class="spot-card__badge">베이커리카페</div>
-					<h3 class="spot-card__name">롤링핀 대구수목원점</h3>
-					<p class="spot-card__desc">산토리니 감성의 탁 트인 정원에서 갓 구운 빵 향기와 함께하는 대구 최고 뷰 맛집 카페.</p>
-					<p class="spot-card__address">대구광역시 달서구 한실로6길 158</p>
-					<div class="spot-card__map">
-						<iframe src="https://maps.google.com/maps?q=35.8530,128.5520&hl=ko&z=17&output=embed" loading="lazy" allowfullscreen referrerpolicy="no-referrer-when-downgrade"></iframe>
-					</div>
-					<a class="spot-card__naver" href="https://map.naver.com/v5/search/%EB%A1%A4%EB%A7%81%ED%95%80%20%EB%8C%80%EA%B5%AC%EC%88%98%EB%AA%A9%EC%9B%90%EC%A0%90" target="_blank" rel="noopener noreferrer">네이버 지도에서 보기</a>
-				</li>
-			</ul>
-		</section>
+	<nav class="category-bar">
+		<button class="category-btn active" data-filter="all">전체</button>
+		<button class="category-btn" data-filter="이색카페">이색카페</button>
+		<button class="category-btn" data-filter="양식">양식</button>
+		<button class="category-btn" data-filter="베이커리카페">베이커리카페</button>
+		<button class="category-btn" data-filter="한식">한식</button>
+		<button class="category-btn" data-filter="전통시장">전통시장</button>
+		<button class="category-btn" data-filter="루프탑카페">루프탑카페</button>
+	</nav>
 
-		<section class="guide-section guide-section--accent">
-			<h2 class="section-title">Eat &amp; Chill</h2>
-			<div class="eat-grid">
-				<article class="eat-card">
-					<h3 class="eat-card__name">밀림 MILLIM</h3>
-					<p class="eat-card__signature">클럽 샌드위치 · 쉬림프 샐러드</p>
-					<p class="eat-card__desc">정글 속에서 즐기는 밀림 클럽 샌드위치와 시그니처 드링크.</p>
-				</article>
-				<article class="eat-card">
-					<h3 class="eat-card__name">컨트리맨즈</h3>
-					<p class="eat-card__signature">시카고 딥디쉬 피자 · 고르곤졸라 파스타</p>
-					<p class="eat-card__desc">치즈가 쭉 늘어나는 시카고 딥디쉬 피자의 성지.</p>
-				</article>
-				<article class="eat-card">
-					<h3 class="eat-card__name">롤링핀</h3>
-					<p class="eat-card__signature">뇨끼 파스타 · 로제 베이컨 쉬림프 리조또</p>
-					<p class="eat-card__desc">정원 뷰와 함께하는 갓 구운 베이커리와 브런치 코스.</p>
-				</article>
+	<main class="feed">
+		<article class="card" data-category="이색카페">
+			<div class="card__img">
+				<img src="https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=600&amp;h=400&amp;fit=crop" alt="밀림 MILLIM" loading="lazy">
+				<div class="card__overlay">
+					<span class="card__badge">이색카페</span>
+				</div>
 			</div>
-		</section>
-
-		<section class="guide-section guide-section--cta">
-			<h2 class="section-title">Tip</h2>
-			<ul class="tip-list">
-				<li>밀림은 주말 웨이팅이 길어요 — 평일 오후가 여유로워요.</li>
-				<li>컨트리맨즈 시카고피자는 조리 시간 30분, 미리 주문하세요.</li>
-				<li>롤링핀은 정원 자리가 인기 — 오픈런 추천!</li>
-			</ul>
-			<a class="guide-cta" href="./home.html">홈으로 돌아가기</a>
-		</section>
+			<div class="card__body">
+				<div class="card__header">
+					<h2 class="card__name">밀림 MILLIM</h2>
+					<span class="card__vibe">🌿 정글 감성</span>
+				</div>
+				<p class="card__desc">4층 규모의 정글 테마 대형 카페. 브런치와 파충류 체험까지 한 번에 즐기는 대구 대표 이색 핫플.</p>
+				<div class="card__meta">
+					<div class="card__meta-item">
+						<span class="card__meta-label">시그니처</span>
+						<span class="card__meta-value">클럽 샌드위치 · 쉬림프 샐러드</span>
+					</div>
+					<div class="card__meta-row">
+						<div class="card__meta-item">
+							<span class="card__meta-label">가격대</span>
+							<span class="card__meta-value">₩15,000~</span>
+						</div>
+						<div class="card__meta-item">
+							<span class="card__meta-label">영업시간</span>
+							<span class="card__meta-value">11:00 - 22:00</span>
+						</div>
+					</div>
+				</div>
+				<div class="card__address">
+					<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+					대구광역시 남구 용두길 16
+				</div>
+				<div class="card__map">
+					<iframe src="https://maps.google.com/maps?q=35.8430,128.5910&amp;hl=ko&amp;z=17&amp;output=embed" loading="lazy" allowfullscreen referrerpolicy="no-referrer-when-downgrade"></iframe>
+				</div>
+				<div class="card__actions">
+					<a class="card__btn card__btn--primary" href="https://map.naver.com/v5/search/%EB%B0%80%EB%A6%BC%20%EB%8C%80%EA%B5%AC" target="_blank" rel="noopener">
+						<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+						네이버 지도
+					</a>
+					<button class="card__btn card__btn--save" onclick="this.classList.toggle('saved')">
+						<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+						저장
+					</button>
+				</div>
+			</div>
+		</article>
+		<article class="card" data-category="양식">
+			<div class="card__img">
+				<img src="https://images.unsplash.com/photo-1513104890138-7c749659a591?w=600&amp;h=400&amp;fit=crop" alt="컨트리맨즈 동성로" loading="lazy">
+				<div class="card__overlay">
+					<span class="card__badge">양식</span>
+				</div>
+			</div>
+			<div class="card__body">
+				<div class="card__header">
+					<h2 class="card__name">컨트리맨즈 동성로</h2>
+					<span class="card__vibe">🍕 치즈 폭탄</span>
+				</div>
+				<p class="card__desc">6년째 동성로를 지켜온 감성 양식 맛집. 비주얼 폭발 시카고 딥디쉬 피자로 줄 서서 먹는 곳.</p>
+				<div class="card__meta">
+					<div class="card__meta-item">
+						<span class="card__meta-label">시그니처</span>
+						<span class="card__meta-value">시카고 딥디쉬 피자 · 고르곤졸라 파스타</span>
+					</div>
+					<div class="card__meta-row">
+						<div class="card__meta-item">
+							<span class="card__meta-label">가격대</span>
+							<span class="card__meta-value">₩18,000~</span>
+						</div>
+						<div class="card__meta-item">
+							<span class="card__meta-label">영업시간</span>
+							<span class="card__meta-value">11:30 - 21:30</span>
+						</div>
+					</div>
+				</div>
+				<div class="card__address">
+					<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+					대구광역시 중구 동성로2길 21-5
+				</div>
+				<div class="card__map">
+					<iframe src="https://maps.google.com/maps?q=35.8696,128.5966&amp;hl=ko&amp;z=17&amp;output=embed" loading="lazy" allowfullscreen referrerpolicy="no-referrer-when-downgrade"></iframe>
+				</div>
+				<div class="card__actions">
+					<a class="card__btn card__btn--primary" href="https://map.naver.com/v5/search/%EC%BB%A8%ED%8A%B8%EB%A6%AC%EB%A7%A8%EC%A6%88%20%EB%8F%99%EC%84%B1%EB%A1%9C" target="_blank" rel="noopener">
+						<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+						네이버 지도
+					</a>
+					<button class="card__btn card__btn--save" onclick="this.classList.toggle('saved')">
+						<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+						저장
+					</button>
+				</div>
+			</div>
+		</article>
+		<article class="card" data-category="베이커리카페">
+			<div class="card__img">
+				<img src="https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=600&amp;h=400&amp;fit=crop" alt="롤링핀 대구수목원점" loading="lazy">
+				<div class="card__overlay">
+					<span class="card__badge">베이커리카페</span>
+				</div>
+			</div>
+			<div class="card__body">
+				<div class="card__header">
+					<h2 class="card__name">롤링핀 대구수목원점</h2>
+					<span class="card__vibe">🏖️ 산토리니 무드</span>
+				</div>
+				<p class="card__desc">산토리니 감성의 탁 트인 정원에서 갓 구운 빵 향기와 함께하는 대구 최고 뷰 맛집 카페.</p>
+				<div class="card__meta">
+					<div class="card__meta-item">
+						<span class="card__meta-label">시그니처</span>
+						<span class="card__meta-value">뇨끼 파스타 · 로제 베이컨 쉬림프 리조또</span>
+					</div>
+					<div class="card__meta-row">
+						<div class="card__meta-item">
+							<span class="card__meta-label">가격대</span>
+							<span class="card__meta-value">₩14,000~</span>
+						</div>
+						<div class="card__meta-item">
+							<span class="card__meta-label">영업시간</span>
+							<span class="card__meta-value">10:00 - 22:00</span>
+						</div>
+					</div>
+				</div>
+				<div class="card__address">
+					<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+					대구광역시 달서구 한실로6길 158
+				</div>
+				<div class="card__map">
+					<iframe src="https://maps.google.com/maps?q=35.8530,128.5520&amp;hl=ko&amp;z=17&amp;output=embed" loading="lazy" allowfullscreen referrerpolicy="no-referrer-when-downgrade"></iframe>
+				</div>
+				<div class="card__actions">
+					<a class="card__btn card__btn--primary" href="https://map.naver.com/v5/search/%EB%A1%A4%EB%A7%81%ED%95%80%20%EB%8C%80%EA%B5%AC%EC%88%98%EB%AA%A9%EC%9B%90%EC%A0%90" target="_blank" rel="noopener">
+						<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+						네이버 지도
+					</a>
+					<button class="card__btn card__btn--save" onclick="this.classList.toggle('saved')">
+						<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+						저장
+					</button>
+				</div>
+			</div>
+		</article>
+		<article class="card" data-category="한식">
+			<div class="card__img">
+				<img src="https://images.unsplash.com/photo-1590301157890-4810ed352733?w=600&amp;h=400&amp;fit=crop" alt="동인동 찜갈비골목" loading="lazy">
+				<div class="card__overlay">
+					<span class="card__badge">한식</span>
+				</div>
+			</div>
+			<div class="card__body">
+				<div class="card__header">
+					<h2 class="card__name">동인동 찜갈비골목</h2>
+					<span class="card__vibe">🔥 매콤 로컬</span>
+				</div>
+				<p class="card__desc">대구 3대 음식 중 하나. 50년 전통의 매콤 달콤한 찜갈비를 골목 전체에서 즐길 수 있는 로컬 성지.</p>
+				<div class="card__meta">
+					<div class="card__meta-item">
+						<span class="card__meta-label">시그니처</span>
+						<span class="card__meta-value">찜갈비 · 납작만두</span>
+					</div>
+					<div class="card__meta-row">
+						<div class="card__meta-item">
+							<span class="card__meta-label">가격대</span>
+							<span class="card__meta-value">₩13,000~</span>
+						</div>
+						<div class="card__meta-item">
+							<span class="card__meta-label">영업시간</span>
+							<span class="card__meta-value">10:00 - 21:00</span>
+						</div>
+					</div>
+				</div>
+				<div class="card__address">
+					<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+					대구광역시 중구 동인동 1가
+				</div>
+				<div class="card__map">
+					<iframe src="https://maps.google.com/maps?q=35.8710,128.6040&amp;hl=ko&amp;z=17&amp;output=embed" loading="lazy" allowfullscreen referrerpolicy="no-referrer-when-downgrade"></iframe>
+				</div>
+				<div class="card__actions">
+					<a class="card__btn card__btn--primary" href="https://map.naver.com/v5/search/%EB%8F%99%EC%9D%B8%EB%8F%99%20%EC%B0%9C%EA%B0%88%EB%B9%84" target="_blank" rel="noopener">
+						<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+						네이버 지도
+					</a>
+					<button class="card__btn card__btn--save" onclick="this.classList.toggle('saved')">
+						<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+						저장
+					</button>
+				</div>
+			</div>
+		</article>
+		<article class="card" data-category="전통시장">
+			<div class="card__img">
+				<img src="https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=600&amp;h=400&amp;fit=crop" alt="서문시장 야시장" loading="lazy">
+				<div class="card__overlay">
+					<span class="card__badge">전통시장</span>
+				</div>
+			</div>
+			<div class="card__body">
+				<div class="card__header">
+					<h2 class="card__name">서문시장 야시장</h2>
+					<span class="card__vibe">🏮 야시장 감성</span>
+				</div>
+				<p class="card__desc">대구 최대 전통시장의 야시장. 칼국수, 납작만두, 떡볶이 등 길거리 음식의 천국.</p>
+				<div class="card__meta">
+					<div class="card__meta-item">
+						<span class="card__meta-label">시그니처</span>
+						<span class="card__meta-value">칼국수 · 납작만두 · 수제 떡볶이</span>
+					</div>
+					<div class="card__meta-row">
+						<div class="card__meta-item">
+							<span class="card__meta-label">가격대</span>
+							<span class="card__meta-value">₩5,000~</span>
+						</div>
+						<div class="card__meta-item">
+							<span class="card__meta-label">영업시간</span>
+							<span class="card__meta-value">19:00 - 23:30 (금·토)</span>
+						</div>
+					</div>
+				</div>
+				<div class="card__address">
+					<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+					대구광역시 중구 큰장로26길 45
+				</div>
+				<div class="card__map">
+					<iframe src="https://maps.google.com/maps?q=35.8680,128.5820&amp;hl=ko&amp;z=17&amp;output=embed" loading="lazy" allowfullscreen referrerpolicy="no-referrer-when-downgrade"></iframe>
+				</div>
+				<div class="card__actions">
+					<a class="card__btn card__btn--primary" href="https://map.naver.com/v5/search/%EC%84%9C%EB%AC%B8%EC%8B%9C%EC%9E%A5%20%EC%95%BC%EC%8B%9C%EC%9E%A5" target="_blank" rel="noopener">
+						<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+						네이버 지도
+					</a>
+					<button class="card__btn card__btn--save" onclick="this.classList.toggle('saved')">
+						<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+						저장
+					</button>
+				</div>
+			</div>
+		</article>
+		<article class="card" data-category="루프탑카페">
+			<div class="card__img">
+				<img src="https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=600&amp;h=400&amp;fit=crop" alt="카페 아리따" loading="lazy">
+				<div class="card__overlay">
+					<span class="card__badge">루프탑카페</span>
+				</div>
+			</div>
+			<div class="card__body">
+				<div class="card__header">
+					<h2 class="card__name">카페 아리따</h2>
+					<span class="card__vibe">🌇 시티뷰</span>
+				</div>
+				<p class="card__desc">앞산 카페거리의 시그니처. 통유리 너머 대구 시내 전경을 한눈에 담는 루프탑 뷰 맛집.</p>
+				<div class="card__meta">
+					<div class="card__meta-item">
+						<span class="card__meta-label">시그니처</span>
+						<span class="card__meta-value">아인슈페너 · 티라미수</span>
+					</div>
+					<div class="card__meta-row">
+						<div class="card__meta-item">
+							<span class="card__meta-label">가격대</span>
+							<span class="card__meta-value">₩7,000~</span>
+						</div>
+						<div class="card__meta-item">
+							<span class="card__meta-label">영업시간</span>
+							<span class="card__meta-value">11:00 - 23:00</span>
+						</div>
+					</div>
+				</div>
+				<div class="card__address">
+					<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+					대구광역시 남구 앞산순환로 574
+				</div>
+				<div class="card__map">
+					<iframe src="https://maps.google.com/maps?q=35.8260,128.5830&amp;hl=ko&amp;z=17&amp;output=embed" loading="lazy" allowfullscreen referrerpolicy="no-referrer-when-downgrade"></iframe>
+				</div>
+				<div class="card__actions">
+					<a class="card__btn card__btn--primary" href="https://map.naver.com/v5/search/%EC%95%9E%EC%82%B0%20%EC%B9%B4%ED%8E%98%EA%B1%B0%EB%A6%AC" target="_blank" rel="noopener">
+						<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+						네이버 지도
+					</a>
+					<button class="card__btn card__btn--save" onclick="this.classList.toggle('saved')">
+						<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+						저장
+					</button>
+				</div>
+			</div>
+		</article>
 	</main>
+
+	<section class="tips">
+		<h2 class="tips__title">💡 로컬 꿀팁</h2>
+		<div class="tips__grid">
+			<div class="tips__item">밀림은 주말 웨이팅 1시간 — <strong>평일 오후</strong>가 여유로워요</div>
+			<div class="tips__item">컨트리맨즈 피자는 <strong>조리 30분</strong> — 도착하자마자 주문!</div>
+			<div class="tips__item">롤링핀 정원석은 <strong>오픈런</strong> 추천, 10시 전 도착</div>
+			<div class="tips__item">동인동 찜갈비는 <strong>2인분 이상</strong> 주문 필수</div>
+			<div class="tips__item">서문 야시장은 <strong>금·토만</strong> 운영 — 평일 방문 시 주의</div>
+			<div class="tips__item">앞산 카페거리는 <strong>일몰 시간</strong>에 가면 뷰 최고</div>
+		</div>
+	</section>
+
+	<footer class="footer">
+		<a class="footer__btn" href="./home.html">← 홈으로 돌아가기</a>
+	</footer>
+
+	<script>
+	document.querySelectorAll('.category-btn').forEach(function(btn) {
+		btn.addEventListener('click', function() {
+			document.querySelectorAll('.category-btn').forEach(function(b) { b.classList.remove('active'); });
+			this.classList.add('active');
+			var filter = this.dataset.filter;
+			document.querySelectorAll('.card').forEach(function(card) {
+				if (filter === 'all' || card.dataset.category === filter) {
+					card.style.display = '';
+					card.style.animation = 'fadeUp .4s ease forwards';
+				} else {
+					card.style.display = 'none';
+				}
+			});
+		});
+	});
+	</script>
 </body>
 </html>
