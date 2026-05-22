@@ -104,7 +104,7 @@
 			return d.innerHTML;
 		}
 
-		input.addEventListener('keydown', e => { if (e.key === 'Enter') addItem(); });
+		input.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); addItem(); } });
 		document.getElementById('addBtn').addEventListener('click', addItem);
 
 		function addItem() {
