@@ -179,12 +179,10 @@
 		document.getElementById('groomName').textContent = couple.groom_name || '';
 		document.getElementById('groomParents').textContent = couple.groom_parents || '';
 		document.getElementById('groomContact').href = 'tel:' + (couple.groom_contact || '');
-		document.getElementById('groomContact').textContent = couple.groom_contact || '연락하기';
 
 		document.getElementById('brideName').textContent = couple.bride_name || '';
 		document.getElementById('brideParents').textContent = couple.bride_parents || '';
 		document.getElementById('brideContact').href = 'tel:' + (couple.bride_contact || '');
-		document.getElementById('brideContact').textContent = couple.bride_contact || '연락하기';
 
 		document.title = (couple.groom_name || '신랑') + ' & ' + (couple.bride_name || '신부') + '의 초대장';
 	});
