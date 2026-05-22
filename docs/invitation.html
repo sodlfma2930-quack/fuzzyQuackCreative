@@ -191,6 +191,7 @@
 	fetch(DATA_BASE + '/gallery.json').then(r => r.json()).then(items => {
 		const grid = document.getElementById('galleryGrid');
 		items.forEach(item => {
+			if (item.src && item.src.startsWith('/')) item.src = '.' + item.src;
 			const fig = document.createElement('figure');
 			fig.className = 'gallery__thumb reveal';
 			fig.dataset.lightbox = item.src;
