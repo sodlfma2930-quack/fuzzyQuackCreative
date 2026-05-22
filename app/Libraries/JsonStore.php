@@ -10,7 +10,6 @@ class JsonStore
     private const SYNC_FILES = [
         'contents.json',
         'accounts.json',
-        'gallery.json',
         'greetings.json',
     ];
 
