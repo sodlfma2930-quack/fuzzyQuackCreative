@@ -32,7 +32,9 @@ $routes->post('admin/blog/delete/(:num)', 'AdminBlog::delete/$1');
 
 $routes->get('greeting/search', 'Greeting::search');
 $routes->get('admin/greetings', 'Greeting::admin');
-$routes->post('admin/greetings/save', 'Greeting::save');
+$routes->post('admin/greetings/add', 'Greeting::add');
+$routes->post('admin/greetings/update/(:num)', 'Greeting::update/$1');
+$routes->post('admin/greetings/delete/(:num)', 'Greeting::delete/$1');
 
 $routes->get('blog', 'Blog::index');
 $routes->get('blog/(:segment)', 'Blog::show/$1');
