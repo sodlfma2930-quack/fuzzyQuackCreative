@@ -114,6 +114,8 @@
 		'autogen'   => ['🤖', '#fff3e0', '#e65100'],
 		'langchain' => ['🤖', '#fff3e0', '#e65100'],
 		'prompt'    => ['💬', '#fce4ec', '#ad1457'],
+		'git'       => ['🏷️', '#e8eaf6', '#3949ab'],
+		'tagging'   => ['🏷️', '#e8eaf6', '#3949ab'],
 	];
 
 	function getPostIcon(string $slug, array $map): array {
