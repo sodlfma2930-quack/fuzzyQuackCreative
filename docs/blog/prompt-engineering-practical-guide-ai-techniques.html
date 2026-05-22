@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>프롬프트 엔지니어링 실전 가이드 — AI를 제대로 부려먹는 기술 — Tech Blog</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;600;700&family=Noto+Sans+KR:wght@300;400;500;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+	<style>*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif; background: #f5f5f7; color: #1d1d1f; -webkit-font-smoothing: antialiased; }
+.header { background: rgba(255,255,255,.72); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-bottom: 1px solid rgba(0,0,0,.08); padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+.header__title { font-family: 'Outfit', sans-serif; font-size: 17px; font-weight: 600; color: #1d1d1f; }
+.header__back { font-size: 13px; color: #0071e3; text-decoration: none; display: flex; align-items: center; gap: 4px; transition: opacity .15s; }
+.header__back:hover { opacity: .7; }
+.hero { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 60px 20px 50px; text-align: center; color: #fff; }
+.hero__date { font-size: 13px; opacity: .75; margin-bottom: 12px; letter-spacing: .5px; }
+.hero__title { font-size: 30px; font-weight: 700; line-height: 1.35; max-width: 680px; margin: 0 auto; }
+.article { max-width: 720px; margin: -24px auto 60px; padding: 0 20px; }
+.article__body { background: #fff; border-radius: 16px; box-shadow: 0 1px 3px rgba(0,0,0,.06), 0 8px 24px rgba(0,0,0,.04); padding: 40px 36px; }
+.article__content { font-size: 16px; line-height: 2; color: #333; word-break: keep-all; }
+.article__content p { margin-bottom: 18px; } .article__content p:last-child { margin-bottom: 0; }
+.article__content h2 { font-size: 21px; font-weight: 700; color: #1d1d1f; margin: 44px 0 18px; padding-bottom: 10px; border-bottom: 2px solid #667eea; display: inline-block; }
+.article__content h2::before { content: ''; display: inline-block; width: 4px; height: 21px; background: #667eea; border-radius: 2px; margin-right: 10px; vertical-align: text-bottom; }
+.article__content pre { background: #1e1e2e; color: #cdd6f4; border-radius: 12px; padding: 20px 24px; margin: 20px 0; overflow-x: auto; font-family: 'Fira Code', monospace; font-size: 13.5px; line-height: 1.7; border: 1px solid rgba(255,255,255,.06); }
+.article__content code { font-family: 'Fira Code', monospace; font-size: 14px; background: #f0f0f5; color: #e74c8b; padding: 2px 7px; border-radius: 5px; }
+.article__content pre code { background: none; color: inherit; padding: 0; border-radius: 0; font-size: 13.5px; }
+.article__content strong { color: #1d1d1f; font-weight: 600; }
+.progress-bar { position: fixed; top: 0; left: 0; height: 3px; background: linear-gradient(90deg, #667eea, #764ba2); z-index: 200; width: 0; transition: width .1s linear; }
+@media (max-width: 600px) { .hero { padding: 40px 16px 36px; } .hero__title { font-size: 23px; } .article__body { padding: 28px 20px; border-radius: 12px; } .article__content { font-size: 15px; } .article__content h2 { font-size: 19px; } .article__content pre { padding: 16px; font-size: 12.5px; } }</style>
+</head>
+<body>
+	<div class="progress-bar" id="progressBar"></div>
+	<header class="header">
+		<div class="header__title">Tech Blog</div>
+		<a class="header__back" href="./index.html">← 목록으로</a>
+	</header>
+	<div class="hero">
+		<p class="hero__date">2026.05.22 10:00</p>
+		<h1 class="hero__title">프롬프트 엔지니어링 실전 가이드 — AI를 제대로 부려먹는 기술</h1>
+	</div>
+	<article class="article">
+		<div class="article__body">
+			<div class="article__content" id="articleContent">같은 AI 모델을 써도 결과물의 차이가 크다.
+그 차이를 만드는 게 프롬프트 엔지니어링이다.
+단순히 &quot;잘 물어보기&quot;가 아니라, AI의 동작 원리를 이해하고 체계적으로 지시하는 기술이다.
+
+## 프롬프트 엔지니어링이란?
+
+AI 모델에게 원하는 결과를 이끌어내기 위해 입력(프롬프트)을 설계하는 기술이다.
+코딩이 컴퓨터에게 명령하는 거라면, 프롬프트 엔지니어링은 AI에게 명령하는 것이다.
+
+핵심은 세 가지다.
+1. AI가 어떤 역할인지 정해준다 (Role)
+2. 무엇을 해야 하는지 명확하게 말한다 (Task)
+3. 어떤 형식으로 답해야 하는지 보여준다 (Format)
+
+## 기본 테크닉 5가지
+
+**1. Zero-shot vs Few-shot**
+
+Zero-shot: 예시 없이 바로 지시한다.
+Few-shot: 예시를 몇 개 보여주고 패턴을 학습시킨다.
+
+    # Zero-shot
+    &quot;이 리뷰의 감성을 분석해줘: &#x27;배송은 빨랐는데 포장이 엉망이네요&#x27;&quot;
+
+    # Few-shot (훨씬 정확한 결과)
+    &quot;리뷰 감성 분석:
+    리뷰: &#x27;너무 맛있어요! 재주문합니다&#x27; → 긍정
+    리뷰: &#x27;배송이 3일이나 걸렸어요&#x27; → 부정
+    리뷰: &#x27;그냥 보통이에요&#x27; → 중립
+    리뷰: &#x27;배송은 빨랐는데 포장이 엉망이네요&#x27; → ?&quot;
+
+Few-shot만으로도 정확도가 20~30% 올라가는 경우가 많다.
+
+**2. Chain-of-Thought (CoT)**
+
+&quot;단계별로 생각해봐&quot;를 추가하면 추론 능력이 크게 향상된다.
+
+    # 나쁜 프롬프트
+    &quot;이 수학 문제를 풀어줘: 가게에 사과 23개가 있고...&quot;
+
+    # 좋은 프롬프트
+    &quot;이 수학 문제를 단계별로 풀어줘. 각 단계에서 어떤 계산을 하는지 보여줘.&quot;
+
+복잡한 로직, 수학, 코드 디버깅에서 특히 효과적이다.
+
+**3. 역할 부여 (Role Prompting)**
+
+AI에게 전문가 역할을 부여하면 답변의 깊이가 달라진다.
+
+    # 일반
+    &quot;React 코드 리뷰해줘&quot;
+
+    # 역할 부여
+    &quot;당신은 10년 경력의 시니어 프론트엔드 개발자입니다.
+    성능 최적화와 접근성 관점에서 이 React 코드를 리뷰해주세요.
+    문제점마다 심각도(상/중/하)를 표시하고, 수정 코드도 제안해주세요.&quot;
+
+역할이 구체적일수록 결과가 좋다.
+
+**4. 구조화된 출력 요청**
+
+자유 형식 답변 대신 구조를 지정하면 훨씬 쓸모 있는 결과를 얻는다.
+
+    &quot;다음 형식으로 답변해줘:
+    ## 요약 (3줄 이내)
+    ## 장점 (불릿 포인트)
+    ## 단점 (불릿 포인트)
+    ## 추천 여부 (예/아니오 + 이유 1줄)&quot;
+
+JSON 출력도 가능하다.
+
+    &quot;결과를 JSON으로 답해줘:
+    {&quot;sentiment&quot;: &quot;긍정/부정/중립&quot;, &quot;confidence&quot;: 0.0~1.0, &quot;keywords&quot;: [...]}&quot;
+
+**5. 제약 조건 추가**
+
+AI는 제약이 없으면 장황해진다. 명확한 제약을 건다.
+
+    &quot;한국어로 답해줘&quot;
+    &quot;200자 이내로 요약해줘&quot;
+    &quot;코드 예시를 반드시 포함해줘&quot;
+    &quot;확실하지 않은 내용은 &#x27;확인 필요&#x27;라고 표시해줘&quot;
+
+## 고급 테크닉
+
+**Self-Consistency**: 같은 질문을 여러 번 하고 다수결로 답을 정한다. 추론 정확도가 올라간다.
+
+**Tree of Thoughts**: 여러 사고 경로를 탐색하고 가장 좋은 것을 선택한다. 복잡한 문제 해결에 효과적.
+
+**Prompt Chaining**: 큰 작업을 여러 프롬프트로 쪼개서 순차적으로 처리한다. 각 단계의 출력이 다음 단계의 입력이 된다.
+
+    1단계: &quot;이 논문의 핵심 주장 3가지를 추출해줘&quot;
+    2단계: &quot;이 3가지 주장에 대한 반론을 각각 만들어줘&quot;
+    3단계: &quot;주장과 반론을 종합해서 균형 잡힌 분석 글을 써줘&quot;
+
+한 번에 시키면 얕은 답이 나오지만, 체이닝하면 깊이 있는 결과를 얻는다.
+
+## 실수하기 쉬운 패턴
+
+**모호한 지시**: &quot;좋은 코드 짜줘&quot; → &quot;TypeScript로, 에러 핸들링 포함, 함수당 20줄 이하로 짜줘&quot;
+**과도한 지시**: 한 프롬프트에 10가지를 요구하면 다 어중간해진다. 3가지 이하로 집중.
+**부정형 지시**: &quot;~하지 마&quot; 보다 &quot;~해줘&quot;가 효과적이다. AI는 긍정 지시를 더 잘 따른다.
+**맥락 부족**: &quot;이거 고쳐줘&quot; → &quot;Python 3.11, Django 5.0 환경에서 이 에러가 발생한다. 에러 메시지는 다음과 같다...&quot;
+
+## 프롬프트 엔지니어링의 미래
+
+2026년 현재, AI 모델이 점점 똑똑해지면서 프롬프트가 간단해지는 추세다.
+하지만 &quot;정확하게 원하는 것을 표현하는 능력&quot;은 모델이 아무리 좋아져도 중요하다.
+프롬프트 엔지니어링은 AI 시대의 기본 리터러시다. 개발자뿐 아니라 모든 직군에 필요한 스킬이 됐다.
+
+결국 핵심은 이것이다: AI에게 잘 물어보는 건, 사람에게 잘 설명하는 것과 같다.
+명확하고, 구체적이고, 예시가 있으면 된다.</div>
+		</div>
+	</article>
+	<script src="./article-template.js"></script>
+</body>
+</html>

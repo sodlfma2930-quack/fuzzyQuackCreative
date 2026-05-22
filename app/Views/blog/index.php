@@ -107,6 +107,13 @@
 		'webassembly' => ['⚡', '#fff8e1', '#f9a825'],
 		'github-pages' => ['🚀', '#e8eaf6', '#3949ab'],
 		'deployment' => ['🚀', '#e8eaf6', '#3949ab'],
+		'rag'       => ['🔍', '#e8f5e9', '#2e7d32'],
+		'retrieval' => ['🔍', '#e8f5e9', '#2e7d32'],
+		'agent'     => ['🤖', '#fff3e0', '#e65100'],
+		'crewai'    => ['🤖', '#fff3e0', '#e65100'],
+		'autogen'   => ['🤖', '#fff3e0', '#e65100'],
+		'langchain' => ['🤖', '#fff3e0', '#e65100'],
+		'prompt'    => ['💬', '#fce4ec', '#ad1457'],
 	];
 
 	function getPostIcon(string $slug, array $map): array {

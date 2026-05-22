@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>RAG 완전 정리 — AI가 최신 정보를 아는 비결, 검색 증강 생성 — Tech Blog</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;600;700&family=Noto+Sans+KR:wght@300;400;500;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+	<style>*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif; background: #f5f5f7; color: #1d1d1f; -webkit-font-smoothing: antialiased; }
+.header { background: rgba(255,255,255,.72); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-bottom: 1px solid rgba(0,0,0,.08); padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+.header__title { font-family: 'Outfit', sans-serif; font-size: 17px; font-weight: 600; color: #1d1d1f; }
+.header__back { font-size: 13px; color: #0071e3; text-decoration: none; display: flex; align-items: center; gap: 4px; transition: opacity .15s; }
+.header__back:hover { opacity: .7; }
+.hero { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 60px 20px 50px; text-align: center; color: #fff; }
+.hero__date { font-size: 13px; opacity: .75; margin-bottom: 12px; letter-spacing: .5px; }
+.hero__title { font-size: 30px; font-weight: 700; line-height: 1.35; max-width: 680px; margin: 0 auto; }
+.article { max-width: 720px; margin: -24px auto 60px; padding: 0 20px; }
+.article__body { background: #fff; border-radius: 16px; box-shadow: 0 1px 3px rgba(0,0,0,.06), 0 8px 24px rgba(0,0,0,.04); padding: 40px 36px; }
+.article__content { font-size: 16px; line-height: 2; color: #333; word-break: keep-all; }
+.article__content p { margin-bottom: 18px; } .article__content p:last-child { margin-bottom: 0; }
+.article__content h2 { font-size: 21px; font-weight: 700; color: #1d1d1f; margin: 44px 0 18px; padding-bottom: 10px; border-bottom: 2px solid #667eea; display: inline-block; }
+.article__content h2::before { content: ''; display: inline-block; width: 4px; height: 21px; background: #667eea; border-radius: 2px; margin-right: 10px; vertical-align: text-bottom; }
+.article__content pre { background: #1e1e2e; color: #cdd6f4; border-radius: 12px; padding: 20px 24px; margin: 20px 0; overflow-x: auto; font-family: 'Fira Code', monospace; font-size: 13.5px; line-height: 1.7; border: 1px solid rgba(255,255,255,.06); }
+.article__content code { font-family: 'Fira Code', monospace; font-size: 14px; background: #f0f0f5; color: #e74c8b; padding: 2px 7px; border-radius: 5px; }
+.article__content pre code { background: none; color: inherit; padding: 0; border-radius: 0; font-size: 13.5px; }
+.article__content strong { color: #1d1d1f; font-weight: 600; }
+.progress-bar { position: fixed; top: 0; left: 0; height: 3px; background: linear-gradient(90deg, #667eea, #764ba2); z-index: 200; width: 0; transition: width .1s linear; }
+@media (max-width: 600px) { .hero { padding: 40px 16px 36px; } .hero__title { font-size: 23px; } .article__body { padding: 28px 20px; border-radius: 12px; } .article__content { font-size: 15px; } .article__content h2 { font-size: 19px; } .article__content pre { padding: 16px; font-size: 12.5px; } }</style>
+</head>
+<body>
+	<div class="progress-bar" id="progressBar"></div>
+	<header class="header">
+		<div class="header__title">Tech Blog</div>
+		<a class="header__back" href="./index.html">← 목록으로</a>
+	</header>
+	<div class="hero">
+		<p class="hero__date">2026.05.22 09:00</p>
+		<h1 class="hero__title">RAG 완전 정리 — AI가 최신 정보를 아는 비결, 검색 증강 생성</h1>
+	</div>
+	<article class="article">
+		<div class="article__body">
+			<div class="article__content" id="articleContent">LLM은 학습 데이터 이후의 정보를 모른다. &quot;오늘 날씨 어때?&quot;라고 물어도 대답할 수 없다.
+이 한계를 깨는 기술이 RAG(Retrieval-Augmented Generation), 검색 증강 생성이다.
+2026년 현재 AI 서비스의 핵심 아키텍처로 자리잡았다.
+
+## RAG란?
+
+RAG는 LLM이 답변을 생성하기 전에, 외부 데이터를 먼저 검색해서 참고하는 구조다.
+쉽게 말하면 &quot;오픈북 시험&quot;이다. AI가 모든 걸 외우는 대신, 필요한 자료를 찾아보고 답한다.
+
+기존 LLM: 질문 → (학습된 지식만으로) 답변 생성
+RAG: 질문 → 관련 문서 검색 → 검색 결과 + 질문을 합쳐서 답변 생성
+
+## 왜 필요한가?
+
+**할루시네이션 감소**: LLM이 없는 사실을 지어내는 문제를 크게 줄인다. 검색된 문서를 근거로 답하니까.
+**최신 정보 반영**: 학습 데이터가 2024년까지여도, 검색 DB에 2026년 문서가 있으면 최신 정보를 답할 수 있다.
+**도메인 특화**: 회사 내부 문서, 법률, 의료 데이터 등 특수한 지식을 LLM에 주입하지 않아도 된다.
+**비용 절감**: 모델을 파인튜닝하려면 수천만 원이 드는데, RAG는 문서만 색인하면 된다.
+
+## RAG의 동작 구조
+
+전체 파이프라인은 크게 3단계다.
+
+1단계 — 문서 색인 (Indexing)
+원본 문서를 작은 청크(chunk)로 나눈다 (보통 500~1000 토큰).
+각 청크를 임베딩 모델로 벡터로 변환한다.
+벡터 DB(Pinecone, Weaviate, ChromaDB 등)에 저장한다.
+
+2단계 — 검색 (Retrieval)
+사용자 질문도 같은 임베딩 모델로 벡터로 변환한다.
+벡터 DB에서 코사인 유사도가 높은 상위 K개 청크를 가져온다.
+
+3단계 — 생성 (Generation)
+검색된 청크들을 프롬프트에 컨텍스트로 넣는다.
+LLM이 이 컨텍스트를 참고해서 답변을 생성한다.
+
+## 핵심 코드 예시
+
+Python + LangChain으로 간단한 RAG를 구현하면 이렇다.
+
+    from langchain.document_loaders import TextLoader
+    from langchain.text_splitter import RecursiveCharacterTextSplitter
+    from langchain.embeddings import OpenAIEmbeddings
+    from langchain.vectorstores import Chroma
+    from langchain.chat_models import ChatOpenAI
+    from langchain.chains import RetrievalQA
+
+    # 1. 문서 로드 및 청크 분할
+    loader = TextLoader(&quot;company_docs.txt&quot;)
+    docs = loader.load()
+    splitter = RecursiveCharacterTextSplitter(chunk_size=800, chunk_overlap=100)
+    chunks = splitter.split_documents(docs)
+
+    # 2. 벡터 DB에 저장
+    embeddings = OpenAIEmbeddings()
+    vectordb = Chroma.from_documents(chunks, embeddings)
+
+    # 3. RAG 체인 생성
+    llm = ChatOpenAI(model=&quot;gpt-4o&quot;)
+    qa = RetrievalQA.from_chain_type(llm=llm, retriever=vectordb.as_retriever())
+
+    # 4. 질문
+    result = qa.run(&quot;우리 회사 휴가 정책이 어떻게 되나요?&quot;)
+
+이 코드만으로 회사 문서 기반 Q&amp;A 챗봇이 만들어진다.
+
+## RAG 성능을 높이는 기법들
+
+**Hybrid Search**: 벡터 검색(의미 기반) + BM25(키워드 기반)를 결합한다. 둘 다 쓰면 검색 정확도가 크게 올라간다.
+**Reranking**: 1차 검색 후 Cross-Encoder로 관련도를 다시 평가해서 순위를 재조정한다. Cohere Rerank, BGE Reranker가 대표적.
+**Chunk 전략**: 문서 종류에 따라 최적의 청크 크기가 다르다. 기술 문서는 작게, 서사 문서는 크게 나누는 게 좋다.
+**Query Transformation**: 사용자 질문을 여러 관점으로 재작성해서 검색 범위를 넓힌다. Multi-Query, HyDE 등의 기법이 있다.
+
+## RAG vs 파인튜닝
+
+파인튜닝: 모델 자체를 바꾼다. 비싸고 시간이 오래 걸린다. 모델의 &quot;성격&quot;이나 출력 형식을 바꿀 때 적합.
+RAG: 모델은 그대로 두고 외부 지식을 연결한다. 저렴하고 실시간 업데이트 가능. 지식 확장에 적합.
+
+대부분의 실무에서는 RAG가 먼저다. 파인튜닝은 RAG로 해결이 안 될 때 고려한다.
+
+## 실무에서 RAG를 쓰는 곳
+
+Notion AI: 워크스페이스 문서를 RAG로 검색해서 답변
+GitHub Copilot: 현재 프로젝트의 코드를 RAG로 참조
+Perplexity: 웹 전체를 실시간 검색 + LLM 생성
+기업 내부 챗봇: 사내 문서 기반 Q&amp;A 시스템
+
+2026년 기준, AI 서비스를 만든다면 RAG는 선택이 아니라 기본이다.</div>
+		</div>
+	</article>
+	<script src="./article-template.js"></script>
+</body>
+</html>
