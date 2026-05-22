@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+	<title>모바일 청첩장</title>
+	<meta property="og:type" content="website">
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&family=Noto+Sans+KR:wght@300;400;500&family=Noto+Serif+KR:wght@400;500&display=swap" rel="stylesheet">
+	<link rel="stylesheet" href="./css/invitation.css">
+</head>
+<body>
+	<main class="invite">
+		<section class="hero">
+			<div class="hero__overlay"></div>
+			<div class="hero__content">
+				<p class="hero__label">Save the Date</p>
+				<h1 class="hero__title" id="heroHeadline"></h1>
+				<p class="hero__subtitle" id="heroSubtitle"></p>
+				<div class="hero__date">
+					<strong id="heroDate"></strong>
+					<span id="heroTime"></span>
+					<p id="heroVenueName"></p>
+					<p id="heroVenueAddress"></p>
+				</div>
+			</div>
+		</section>
+
+		<section class="story reveal">
+			<div class="story__card">
+				<h2 class="section-title">우리의 이야기</h2>
+				<p class="story__text" id="storyIntro"></p>
+			</div>
+		</section>
+
+		<section class="couple reveal">
+			<div class="couple__profiles">
+				<article class="profile">
+					<p class="profile__role">Groom</p>
+					<h3 class="profile__name" id="groomName"></h3>
+					<p class="profile__parents" id="groomParents"></p>
+					<a class="profile__contact" id="groomContact" href="#">연락하기</a>
+				</article>
+				<article class="profile">
+					<p class="profile__role">Bride</p>
+					<h3 class="profile__name" id="brideName"></h3>
+					<p class="profile__parents" id="brideParents"></p>
+					<a class="profile__contact" id="brideContact" href="#">연락하기</a>
+				</article>
+			</div>
+		</section>
+
+		<section class="schedule reveal">
+			<h2 class="section-title">예식 순서</h2>
+			<ol class="timeline">
+				<li class="timeline__item reveal">
+					<span class="timeline__time">14:40</span>
+					<div class="timeline__body">
+						<h3 class="timeline__title">하객 맞이</h3>
+						<p class="timeline__desc">로비에서 웰컴 드링크와 포토존 함께 즐겨요</p>
+					</div>
+				</li>
+				<li class="timeline__item reveal">
+					<span class="timeline__time">15:10</span>
+					<div class="timeline__body">
+						<h3 class="timeline__title">프리 스토리 필름</h3>
+						<p class="timeline__desc">10년의 순간을 담은 영상으로 인사드려요</p>
+					</div>
+				</li>
+				<li class="timeline__item reveal">
+					<span class="timeline__time">15:30</span>
+					<div class="timeline__body">
+						<h3 class="timeline__title">본식</h3>
+						<p class="timeline__desc">서로에게 약속했던 사랑을 축복 속에 전해요</p>
+					</div>
+				</li>
+				<li class="timeline__item reveal">
+					<span class="timeline__time">16:30</span>
+					<div class="timeline__body">
+						<h3 class="timeline__title">애프터 파티</h3>
+						<p class="timeline__desc">연회장에서 달콤한 디저트와 음악을 함께해요</p>
+					</div>
+				</li>
+			</ol>
+		</section>
+
+		<section class="gallery reveal">
+			<h2 class="section-title">우리의 추억</h2>
+			<div class="gallery__grid" id="galleryGrid"></div>
+		</section>
+		<div class="lightbox" id="lightbox">
+			<button type="button" class="lightbox__close" aria-label="닫기">&times;</button>
+			<button type="button" class="lightbox__nav lightbox__nav--prev" aria-label="이전">‹</button>
+			<img class="lightbox__img" src="" alt="">
+			<button type="button" class="lightbox__nav lightbox__nav--next" aria-label="다음">›</button>
+		</div>
+
+		<section class="account reveal">
+			<h2 class="section-title">마음 전하실 곳</h2>
+			<p class="account__intro">축하의 마음을 전해주시면 감사히 잘 쓰겠습니다.</p>
+			<div id="accountList"></div>
+		</section>
+
+		<section class="map reveal">
+			<h2 class="section-title">오시는 길</h2>
+			<div class="map__embed">
+				<iframe src="https://maps.google.com/maps?q=35.823339,128.740033&hl=ko&z=17&output=embed" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+			</div>
+			<ul class="map__info">
+				<li>
+					<strong>지하철</strong>
+					<p>대구 2호선 영남대역 1번 출구</p>
+					<p>역 앞 정류장에서 818, 840번 버스 환승 후 펜타힐즈로 하차 (약 10분)</p>
+				</li>
+				<li>
+					<strong>버스</strong>
+					<p>818, 840, 급행 3</p>
+					<p>펜타힐즈로 정류장 하차 후 도보 2분</p>
+				</li>
+				<li>
+					<strong>주차</strong>
+					<p>로터스 101 전용 지하 주차장 (4시간 무료, 발렛 가능)</p>
+				</li>
+			</ul>
+			<a class="map__link" href="https://map.naver.com/v5/search/%EB%A1%9C%ED%84%B0%EC%8A%A4%20101" target="_blank" rel="noopener noreferrer">네이버 지도에서 길찾기</a>
+		</section>
+
+		<section class="share reveal">
+			<h2 class="section-title">청첩장 공유하기</h2>
+			<div class="share__buttons">
+				<button class="button button--ghost" type="button" id="shareKakao">카카오톡</button>
+				<button class="button button--ghost" type="button" id="shareFacebook">페이스북</button>
+				<button class="button button--ghost" type="button" id="shareCopy">링크 복사</button>
+			</div>
+		</section>
+
+		<section class="greeting reveal">
+			<h2 class="section-title">From. 신랑 & 신부</h2>
+			<p class="greeting__intro">이름과 전화번호 뒷자리를 입력하시면<br>저희가 준비한 감사 메시지를 확인하실 수 있어요.</p>
+			<div class="greeting__form">
+				<input type="text" id="greetName" class="greeting__input" placeholder="이름" autocomplete="off">
+				<input type="tel" id="greetPhone" class="greeting__input" placeholder="전화번호 뒷 4자리" maxlength="4" autocomplete="off">
+				<button type="button" class="greeting__btn" id="greetBtn">확인</button>
+			</div>
+			<div class="greeting__result" id="greetResult" hidden>
+				<div class="greeting__message" id="greetMessage"></div>
+			</div>
+			<div class="greeting__not-found" id="greetNotFound" hidden>
+				<p>등록된 메시지를 찾지 못했어요.<br>이름과 번호를 다시 확인해 주세요.</p>
+			</div>
+		</section>
+	</main>
+
+	<script>
+	const DATA_BASE = './data';
+
+	function esc(s) {
+		const d = document.createElement('div');
+		d.textContent = s || '';
+		return d.innerHTML;
+	}
+
+	// ── Load contents.json ──
+	fetch(DATA_BASE + '/contents.json').then(r => r.json()).then(data => {
+		const hero = data.hero || {};
+		const couple = data.couple || {};
+		const story = data.story || {};
+
+		document.getElementById('heroHeadline').textContent = hero.headline || '';
+		document.getElementById('heroSubtitle').textContent = hero.subtitle || '';
+		document.getElementById('heroDate').textContent = hero.date || '';
+		document.getElementById('heroTime').textContent = hero.time || '';
+		document.getElementById('heroVenueName').textContent = hero.venue_name || '';
+		document.getElementById('heroVenueAddress').textContent = hero.venue_address || '';
+
+		document.getElementById('storyIntro').innerHTML = esc(story.intro || '').replace(/\r?\n/g, '<br>');
+
+		document.getElementById('groomName').textContent = couple.groom_name || '';
+		document.getElementById('groomParents').textContent = couple.groom_parents || '';
+		document.getElementById('groomContact').href = 'tel:' + (couple.groom_contact || '');
+		document.getElementById('groomContact').textContent = couple.groom_contact || '연락하기';
+
+		document.getElementById('brideName').textContent = couple.bride_name || '';
+		document.getElementById('brideParents').textContent = couple.bride_parents || '';
+		document.getElementById('brideContact').href = 'tel:' + (couple.bride_contact || '');
+		document.getElementById('brideContact').textContent = couple.bride_contact || '연락하기';
+
+		document.title = (couple.groom_name || '신랑') + ' & ' + (couple.bride_name || '신부') + '의 초대장';
+	});
+
+	// ── Load gallery.json ──
+	fetch(DATA_BASE + '/gallery.json').then(r => r.json()).then(items => {
+		const grid = document.getElementById('galleryGrid');
+		items.forEach(item => {
+			const fig = document.createElement('figure');
+			fig.className = 'gallery__thumb reveal';
+			fig.dataset.lightbox = item.src;
+			fig.innerHTML = '<img src="' + esc(item.src) + '" alt="' + esc(item.alt) + '" loading="lazy">';
+			grid.appendChild(fig);
+		});
+		initLightbox();
+		document.querySelectorAll('.gallery__thumb.reveal').forEach(el => observer.observe(el));
+	});
+
+	// ── Load accounts.json ──
+	fetch(DATA_BASE + '/accounts.json').then(r => r.json()).then(groups => {
+		const el = document.getElementById('accountList');
+		groups.forEach(group => {
+			const div = document.createElement('div');
+			div.className = 'account__group';
+			div.innerHTML = '<button type="button" class="account__toggle"><span class="account__toggle-label">' + esc(group.label) + '</span><span class="account__toggle-icon">+</span></button>'
+				+ '<div class="account__list" hidden>'
+				+ (group.items || []).map(item =>
+					'<div class="account__item"><div class="account__info">'
+					+ '<span class="account__bank">' + esc(item.bank) + '</span>'
+					+ '<span class="account__number">' + esc(item.number) + '</span>'
+					+ '<span class="account__holder">' + esc(item.holder) + '</span>'
+					+ '</div><button type="button" class="account__copy" data-copy-account="' + esc(item.number) + '">복사</button></div>'
+				).join('')
+				+ '</div>';
+			el.appendChild(div);
+		});
+
+		el.querySelectorAll('.account__toggle').forEach(btn => {
+			btn.addEventListener('click', () => {
+				const list = btn.parentElement.querySelector('.account__list');
+				const isOpen = !list.hidden;
+				list.hidden = isOpen;
+				btn.classList.toggle('open', !isOpen);
+			});
+		});
+		el.querySelectorAll('[data-copy-account]').forEach(btn => {
+			btn.addEventListener('click', () => {
+				const num = btn.dataset.copyAccount.replace(/-/g, '');
+				navigator.clipboard.writeText(num).then(() => {
+					btn.textContent = '복사됨';
+					btn.classList.add('copied');
+					setTimeout(() => { btn.textContent = '복사'; btn.classList.remove('copied'); }, 2000);
+				});
+			});
+		});
+	});
+
+	// ── Load greetings.json (for search) ──
+	let greetings = [];
+	fetch(DATA_BASE + '/greetings.json').then(r => r.json()).then(data => { greetings = data; });
+
+	document.getElementById('greetBtn').addEventListener('click', searchGreeting);
+	document.getElementById('greetPhone').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); searchGreeting(); } });
+
+	function searchGreeting() {
+		const name = document.getElementById('greetName').value.trim();
+		const phone = document.getElementById('greetPhone').value.trim();
+		if (!name) { document.getElementById('greetName').focus(); return; }
+		if (!phone) { document.getElementById('greetPhone').focus(); return; }
+
+		document.getElementById('greetResult').hidden = true;
+		document.getElementById('greetNotFound').hidden = true;
+
+		const found = greetings.find(g => {
+			const gPhone = (g.phone || '').replace(/\D/g, '');
+			return g.name === name && gPhone.slice(-4) === phone.slice(-4);
+		});
+
+		if (found) {
+			document.getElementById('greetMessage').textContent = found.message;
+			document.getElementById('greetResult').hidden = false;
+		} else {
+			document.getElementById('greetNotFound').hidden = false;
+		}
+	}
+
+	// ── Share ──
+	const pageUrl = window.location.href;
+	document.getElementById('shareKakao').addEventListener('click', () => {
+		window.open('https://sharer.kakao.com/talk?url=' + encodeURIComponent(pageUrl), '_blank');
+	});
+	document.getElementById('shareFacebook').addEventListener('click', () => {
+		window.open('https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(pageUrl), '_blank');
+	});
+	document.getElementById('shareCopy').addEventListener('click', async () => {
+		try {
+			await navigator.clipboard.writeText(pageUrl);
+			document.getElementById('shareCopy').textContent = '복사 완료!';
+			setTimeout(() => document.getElementById('shareCopy').textContent = '링크 복사', 1800);
+		} catch(e) {}
+	});
+
+	// ── Lightbox ──
+	function initLightbox() {
+		const lb = document.getElementById('lightbox');
+		const lbImg = lb.querySelector('.lightbox__img');
+		const thumbs = Array.from(document.querySelectorAll('[data-lightbox]'));
+		let lbIndex = 0;
+		let scrollY = 0;
+
+		function lbOpen(i) {
+			lbIndex = i;
+			lbImg.src = thumbs[i].dataset.lightbox;
+			lbImg.alt = thumbs[i].querySelector('img').alt;
+			scrollY = window.scrollY;
+			document.body.style.top = -scrollY + 'px';
+			document.body.classList.add('lightbox-open');
+			lb.classList.add('active');
+		}
+		function lbClose() {
+			lb.classList.remove('active');
+			document.body.classList.remove('lightbox-open');
+			document.body.style.top = '';
+			window.scrollTo(0, scrollY);
+		}
+		function lbNav(dir) {
+			lbIndex = (lbIndex + dir + thumbs.length) % thumbs.length;
+			lbImg.style.opacity = 0;
+			setTimeout(() => {
+				lbImg.src = thumbs[lbIndex].dataset.lightbox;
+				lbImg.alt = thumbs[lbIndex].querySelector('img').alt;
+				lbImg.style.opacity = 1;
+			}, 150);
+		}
+
+		thumbs.forEach((el, i) => el.addEventListener('click', () => lbOpen(i)));
+		lb.querySelector('.lightbox__nav--prev').addEventListener('click', () => lbNav(-1));
+		lb.querySelector('.lightbox__nav--next').addEventListener('click', () => lbNav(1));
+		lb.addEventListener('click', e => {
+			if (e.target === lb || e.target.classList.contains('lightbox__close')) lbClose();
+		});
+
+		let touchStartX = 0;
+		lb.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; }, { passive: true });
+		lb.addEventListener('touchend', e => {
+			const dx = e.changedTouches[0].clientX - touchStartX;
+			if (Math.abs(dx) > 50) lbNav(dx < 0 ? 1 : -1);
+		});
+	}
+
+	// ── Reveal animation ──
+	const observer = new IntersectionObserver((entries) => {
+		entries.forEach((entry) => {
+			if (entry.isIntersecting) {
+				const el = entry.target;
+				const siblings = el.parentElement.querySelectorAll('.reveal');
+				const idx = Array.from(siblings).indexOf(el);
+				if (idx > 0 && el.classList.contains('gallery__thumb')) {
+					el.style.animationDelay = (idx * 0.06) + 's';
+				} else if (el.classList.contains('timeline__item')) {
+					el.style.animationDelay = (idx * 0.12) + 's';
+				}
+				el.classList.add('visible');
+				observer.unobserve(el);
+			}
+		});
+	}, { threshold: 0.15 });
+	document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+	</script>
+</body>
+</html>

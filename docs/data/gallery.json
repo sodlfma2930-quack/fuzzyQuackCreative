@@ -1,0 +1,11 @@
+[
+    { "id": 1, "src": "/uploads/gallery/edit-1.jpg", "alt": "숲속에서 함께" },
+    { "id": 2, "src": "/uploads/gallery/edit-2.jpg", "alt": "벤치에 앉아 마주보며" },
+    { "id": 3, "src": "/uploads/gallery/edit-3.jpg", "alt": "한옥 담장 앞에서" },
+    { "id": 4, "src": "/uploads/gallery/holding-hands.jpg", "alt": "나무 아래 손잡고" },
+    { "id": 5, "src": "/uploads/gallery/photo-1.jpg", "alt": "숲길 산책" },
+    { "id": 6, "src": "/uploads/gallery/photo-2.jpg", "alt": "초록 배경 속 둘" },
+    { "id": 7, "src": "/uploads/gallery/photo-3.jpg", "alt": "한옥 마당에서" },
+    { "id": 8, "src": "/uploads/gallery/photo-4.jpg", "alt": "고목 아래 함께" },
+    { "id": 9, "src": "/uploads/gallery/photo-5.jpg", "alt": "한옥 마루에 앉아" }
+]
