@@ -30,5 +30,9 @@ $routes->get('admin/blog/edit/(:num)', 'AdminBlog::edit/$1');
 $routes->post('admin/blog/update/(:num)', 'AdminBlog::update/$1');
 $routes->post('admin/blog/delete/(:num)', 'AdminBlog::delete/$1');
 
+$routes->get('greeting/search', 'Greeting::search');
+$routes->get('admin/greetings', 'Greeting::admin');
+$routes->post('admin/greetings/save', 'Greeting::save');
+
 $routes->get('blog', 'Blog::index');
 $routes->get('blog/(:segment)', 'Blog::show/$1');

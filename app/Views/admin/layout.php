@@ -78,6 +78,7 @@
 				<li><a href="<?= site_url('admin/texts') ?>" class="<?= uri_string() === 'admin/texts' ? 'active' : '' ?>">텍스트 관리</a></li>
 				<li><a href="<?= site_url('admin/gallery') ?>" class="<?= uri_string() === 'admin/gallery' ? 'active' : '' ?>">갤러리 관리</a></li>
 				<li><a href="<?= site_url('admin/blog') ?>" class="<?= str_starts_with(uri_string(), 'admin/blog') ? 'active' : '' ?>">블로그 관리</a></li>
+				<li><a href="<?= site_url('admin/greetings') ?>" class="<?= str_starts_with(uri_string(), 'admin/greetings') ? 'active' : '' ?>">감사 메시지</a></li>
 			</ul>
 			<div class="sidebar__back">
 				<a href="<?= site_url('/') ?>">← 청첩장 보기</a>

@@ -148,6 +148,22 @@
 				<button class="button button--ghost" type="button" data-copy>링크 복사</button>
 			</div>
 		</section>
+
+		<section class="greeting reveal">
+			<h2 class="section-title">From. 신랑 & 신부</h2>
+			<p class="greeting__intro">이름과 전화번호 뒷자리를 입력하시면<br>저희가 준비한 감사 메시지를 확인하실 수 있어요.</p>
+			<div class="greeting__form">
+				<input type="text" id="greetName" class="greeting__input" placeholder="이름" autocomplete="off">
+				<input type="tel" id="greetPhone" class="greeting__input" placeholder="전화번호 뒷 4자리" maxlength="4" autocomplete="off">
+				<button type="button" class="greeting__btn" id="greetBtn">확인</button>
+			</div>
+			<div class="greeting__result" id="greetResult" hidden>
+				<div class="greeting__message" id="greetMessage"></div>
+			</div>
+			<div class="greeting__not-found" id="greetNotFound" hidden>
+				<p>등록된 메시지를 찾지 못했어요.<br>이름과 번호를 다시 확인해 주세요.</p>
+			</div>
+		</section>
 	</main>
 	<script>
 		window.APP_CONFIG = {
@@ -237,6 +253,27 @@
 			});
 		}, { threshold: 0.15 });
 		document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+		document.getElementById('greetBtn').addEventListener('click', searchGreeting);
+		document.getElementById('greetPhone').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); searchGreeting(); } });
+		function searchGreeting() {
+			const name = document.getElementById('greetName').value.trim();
+			const phone = document.getElementById('greetPhone').value.trim();
+			if (!name) { document.getElementById('greetName').focus(); return; }
+			if (!phone) { document.getElementById('greetPhone').focus(); return; }
+			document.getElementById('greetResult').hidden = true;
+			document.getElementById('greetNotFound').hidden = true;
+			fetch('<?= site_url("greeting/search") ?>?name=' + encodeURIComponent(name) + '&phone=' + encodeURIComponent(phone))
+				.then(r => r.json())
+				.then(data => {
+					if (data.found) {
+						document.getElementById('greetMessage').textContent = data.message;
+						document.getElementById('greetResult').hidden = false;
+					} else {
+						document.getElementById('greetNotFound').hidden = false;
+					}
+				});
+		}
 	</script>
 </body>
 </html>
