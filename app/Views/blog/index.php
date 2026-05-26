@@ -116,6 +116,15 @@
 		'prompt'    => ['💬', '#fce4ec', '#ad1457'],
 		'git'       => ['🏷️', '#e8eaf6', '#3949ab'],
 		'tagging'   => ['🏷️', '#e8eaf6', '#3949ab'],
+		'vector'    => ['🧮', '#e3f2fd', '#1565c0'],
+		'pinecone'  => ['🧮', '#e3f2fd', '#1565c0'],
+		'chromadb'  => ['🧮', '#e3f2fd', '#1565c0'],
+		'edge'      => ['📱', '#e0f2f1', '#00695c'],
+		'tinyml'    => ['📱', '#e0f2f1', '#00695c'],
+		'on-device' => ['📱', '#e0f2f1', '#00695c'],
+		'opentelemetry' => ['📡', '#ede7f6', '#4527a0'],
+		'observability' => ['📡', '#ede7f6', '#4527a0'],
+		'tracing'   => ['📡', '#ede7f6', '#4527a0'],
 	];
 
 	function getPostIcon(string $slug, array $map): array {

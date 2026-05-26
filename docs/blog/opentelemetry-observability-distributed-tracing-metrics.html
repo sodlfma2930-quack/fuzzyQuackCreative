@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>OpenTelemetry 정리 — 분산 시스템 관찰성의 사실상 표준 — Tech Blog</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;600;700&family=Noto+Sans+KR:wght@300;400;500;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+	<style>*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif; background: #f5f5f7; color: #1d1d1f; -webkit-font-smoothing: antialiased; }
+.header { background: rgba(255,255,255,.72); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-bottom: 1px solid rgba(0,0,0,.08); padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+.header__title { font-family: 'Outfit', sans-serif; font-size: 17px; font-weight: 600; color: #1d1d1f; }
+.header__back { font-size: 13px; color: #0071e3; text-decoration: none; display: flex; align-items: center; gap: 4px; transition: opacity .15s; }
+.header__back:hover { opacity: .7; }
+.hero { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 60px 20px 50px; text-align: center; color: #fff; }
+.hero__date { font-size: 13px; opacity: .75; margin-bottom: 12px; letter-spacing: .5px; }
+.hero__title { font-size: 30px; font-weight: 700; line-height: 1.35; max-width: 680px; margin: 0 auto; }
+.article { max-width: 720px; margin: -24px auto 60px; padding: 0 20px; }
+.article__body { background: #fff; border-radius: 16px; box-shadow: 0 1px 3px rgba(0,0,0,.06), 0 8px 24px rgba(0,0,0,.04); padding: 40px 36px; }
+.article__content { font-size: 16px; line-height: 2; color: #333; word-break: keep-all; }
+.article__content p { margin-bottom: 18px; } .article__content p:last-child { margin-bottom: 0; }
+.article__content h2 { font-size: 21px; font-weight: 700; color: #1d1d1f; margin: 44px 0 18px; padding-bottom: 10px; border-bottom: 2px solid #667eea; display: inline-block; }
+.article__content h2::before { content: ''; display: inline-block; width: 4px; height: 21px; background: #667eea; border-radius: 2px; margin-right: 10px; vertical-align: text-bottom; }
+.article__content pre { background: #1e1e2e; color: #cdd6f4; border-radius: 12px; padding: 20px 24px; margin: 20px 0; overflow-x: auto; font-family: 'Fira Code', monospace; font-size: 13.5px; line-height: 1.7; border: 1px solid rgba(255,255,255,.06); }
+.article__content code { font-family: 'Fira Code', monospace; font-size: 14px; background: #f0f0f5; color: #e74c8b; padding: 2px 7px; border-radius: 5px; }
+.article__content pre code { background: none; color: inherit; padding: 0; border-radius: 0; font-size: 13.5px; }
+.article__content strong { color: #1d1d1f; font-weight: 600; }
+.progress-bar { position: fixed; top: 0; left: 0; height: 3px; background: linear-gradient(90deg, #667eea, #764ba2); z-index: 200; width: 0; transition: width .1s linear; }
+@media (max-width: 600px) { .hero { padding: 40px 16px 36px; } .hero__title { font-size: 23px; } .article__body { padding: 28px 20px; border-radius: 12px; } .article__content { font-size: 15px; } .article__content h2 { font-size: 19px; } .article__content pre { padding: 16px; font-size: 12.5px; } }</style>
+</head>
+<body>
+	<div class="progress-bar" id="progressBar"></div>
+	<header class="header">
+		<div class="header__title">Tech Blog</div>
+		<a class="header__back" href="./index.html">&larr; 목록으로</a>
+	</header>
+	<div class="hero">
+		<p class="hero__date">2026.05.26 15:37</p>
+		<h1 class="hero__title">OpenTelemetry 정리 — 분산 시스템 관찰성의 사실상 표준</h1>
+	</div>
+	<article class="article">
+		<div class="article__body">
+			<div class="article__content" id="articleContent">마이크로서비스가 늘어나면 문제도 복잡해진다.
+&quot;API가 느린데 어디서 병목인지 모르겠다&quot;, &quot;에러가 나는데 어떤 서비스에서 시작된 건지 추적이 안 된다&quot;.
+OpenTelemetry(OTel)는 이런 관찰성(Observability) 문제를 해결하는 오픈소스 표준이다.
+2026년 현재 CNCF 프로젝트 중 Kubernetes 다음으로 활발한 프로젝트이며, 사실상 업계 표준이다.
+
+## 관찰성(Observability)이란?
+
+모니터링과 관찰성은 다르다.
+모니터링: &quot;CPU 사용률이 80%입니다&quot; — 미리 정한 지표를 감시.
+관찰성: &quot;왜 이 요청이 3초나 걸렸을까?&quot; — 예상하지 못한 문제를 추적.
+
+관찰성의 3가지 축(Three Pillars):
+
+**Traces (추적)**: 요청이 시스템을 통과하는 전체 경로를 추적한다.
+사용자 요청 → API 게이트웨이 → 인증 서비스 → 주문 서비스 → DB 쿼리
+이 흐름 전체를 하나의 트레이스로 볼 수 있다.
+
+**Metrics (메트릭)**: 시간에 따른 수치 데이터.
+요청 수/초, 응답 시간 p99, 에러율, 메모리 사용량 등.
+
+**Logs (로그)**: 개별 이벤트의 상세 기록.
+&quot;2026-05-26 15:30:00 ERROR: 결제 서비스 타임아웃&quot; 같은 기록.
+
+OpenTelemetry는 이 세 가지를 하나의 표준으로 통합한다.
+
+## OpenTelemetry란?
+
+OTel은 텔레메트리 데이터(추적, 메트릭, 로그)를 수집하고 내보내는 오픈소스 프레임워크다.
+CNCF(Cloud Native Computing Foundation)에서 관리하며, Google, Microsoft, AWS, Datadog 등이 기여한다.
+
+핵심 특징:
+**벤더 중립**: Datadog, Grafana, Jaeger, New Relic 등 어떤 백엔드에도 데이터를 보낼 수 있다.
+**언어 지원**: Java, Python, Go, Node.js, .NET, PHP, Rust, C++ 등 주요 언어 모두 지원.
+**자동 계측**: 코드 한 줄 안 바꾸고도 HTTP 요청, DB 쿼리, 외부 API 호출을 자동으로 추적.
+
+## 왜 OpenTelemetry인가?
+
+이전에는 벤더마다 자체 에이전트를 설치해야 했다.
+Datadog 쓰다가 Grafana로 바꾸면 코드 전체를 수정해야 했다.
+
+OTel은 수집 부분을 표준화해서, 백엔드를 바꿔도 애플리케이션 코드는 그대로다.
+USB-C처럼 &quot;한 번 연결하면 아무 기기에나 꽂을 수 있는&quot; 구조다.
+
+## OTel의 구조
+
+1. **API**: 텔레메트리 데이터를 생성하는 인터페이스.
+2. **SDK**: API의 구현체. 데이터를 처리하고 내보낸다.
+3. **Collector**: 중앙 수집기. 데이터를 받아서 가공하고 백엔드에 전달한다.
+
+흐름: 앱(SDK) → Collector → 백엔드(Grafana, Jaeger, Datadog 등)
+
+Collector는 선택사항이다. SDK에서 백엔드로 직접 보내도 되지만,
+Collector를 두면 데이터 가공, 필터링, 라우팅을 중앙에서 할 수 있다.
+
+## 실전 코드 — Node.js 자동 계측
+
+Express 앱에 OTel을 적용하는 예시다.
+
+    // tracing.js — 앱 시작 전에 로드
+    const { NodeSDK } = require('@opentelemetry/sdk-node');
+    const { getNodeAutoInstrumentations } = require('@opentelemetry/auto-instrumentations-node');
+    const { OTLPTraceExporter } = require('@opentelemetry/exporter-trace-otlp-http');
+
+    const sdk = new NodeSDK({
+        traceExporter: new OTLPTraceExporter({ url: 'http://localhost:4318/v1/traces' }),
+        instrumentations: [getNodeAutoInstrumentations()],
+        serviceName: 'order-service',
+    });
+
+    sdk.start();
+
+    // 실행: node --require ./tracing.js app.js
+
+이것만으로 Express의 모든 HTTP 요청, 응답 시간, DB 쿼리가 자동으로 추적된다.
+코드를 한 줄도 바꾸지 않았다.
+
+## 실전 코드 — Python 자동 계측
+
+    pip install opentelemetry-distro opentelemetry-exporter-otlp
+    opentelemetry-bootstrap -a install
+
+    # 실행
+    opentelemetry-instrument --service_name order-service --traces_exporter otlp python app.py
+
+Django, Flask, FastAPI 모두 자동 계측이 가능하다.
+DB 쿼리(SQLAlchemy, psycopg2), HTTP 클라이언트(requests, httpx),
+메시지 큐(Celery, Kafka) 호출도 자동으로 추적된다.
+
+## 분산 추적 — 요청의 전체 경로 파악
+
+마이크로서비스 환경에서 가장 강력한 기능이 분산 추적이다.
+
+사용자가 주문 버튼을 클릭하면:
+1. API 게이트웨이 (50ms)
+2. → 인증 서비스 (20ms)
+3. → 주문 서비스 (200ms)
+4.   → 재고 확인 (80ms)
+5.   → 결제 서비스 (500ms) ← 병목!
+6. → 알림 서비스 (30ms)
+
+이 전체 흐름이 하나의 트레이스로 연결된다.
+Trace ID가 서비스 간에 전파되면서, 하나의 요청이 어떤 서비스를 거쳤고
+각 단계에서 얼마나 걸렸는지 워터폴 차트로 볼 수 있다.
+
+&quot;결제 서비스에서 500ms 걸리네&quot; — 이걸 바로 알 수 있다.
+
+## OTel Collector 구성 예시
+
+    receivers:
+      otlp:
+        protocols:
+          grpc:
+            endpoint: 0.0.0.0:4317
+          http:
+            endpoint: 0.0.0.0:4318
+
+    processors:
+      batch:
+        timeout: 5s
+        send_batch_size: 1000
+
+    exporters:
+      otlp/grafana:
+        endpoint: https://otlp-gateway.grafana.net/otlp
+      logging:
+        loglevel: debug
+
+    service:
+      pipelines:
+        traces:
+          receivers: [otlp]
+          processors: [batch]
+          exporters: [otlp/grafana, logging]
+
+Receiver로 데이터를 받고, Processor로 가공하고, Exporter로 내보내는 파이프라인 구조다.
+
+## 백엔드 선택
+
+**Jaeger** (오픈소스): 분산 추적 전용. 무료. 시작하기 쉬움.
+**Grafana Tempo + Loki + Prometheus** (오픈소스): 트레이스 + 로그 + 메트릭 풀스택.
+**Datadog** (상용): 올인원 관찰성 플랫폼. 편하지만 비쌈.
+**Grafana Cloud** (프리티어): 무료로 시작 가능한 관리형 서비스.
+
+추천: 학습/소규모는 Jaeger로 시작 → 프로덕션은 Grafana 스택 또는 Datadog.
+
+## 언제 도입해야 하나?
+
+서비스가 2개 이상이면 도입을 고려한다.
+서비스가 5개 이상이면 필수다.
+
+&quot;장애가 나면 어떤 서비스 문제인지 10분 안에 파악할 수 있는가?&quot;
+이 질문에 확신이 없다면 OTel 도입 시점이다.
+
+## 정리
+
+OpenTelemetry는 관찰성의 USB-C다.
+한 번 적용하면 어떤 백엔드든 연결할 수 있고,
+자동 계측으로 코드 변경 없이도 시스템의 동작을 투명하게 볼 수 있다.
+
+분산 시스템을 운영한다면, 또는 앞으로 운영할 예정이라면,
+OTel은 가장 먼저 배워야 할 관찰성 도구다.</div>
+		</div>
+	</article>
+	<script src="./article-template.js"></script>
+</body>
+</html>

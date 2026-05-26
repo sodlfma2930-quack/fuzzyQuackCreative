@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>벡터 데이터베이스 완전 정리 — AI 검색과 RAG의 핵심 인프라 — Tech Blog</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;600;700&family=Noto+Sans+KR:wght@300;400;500;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+	<style>*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif; background: #f5f5f7; color: #1d1d1f; -webkit-font-smoothing: antialiased; }
+.header { background: rgba(255,255,255,.72); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-bottom: 1px solid rgba(0,0,0,.08); padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+.header__title { font-family: 'Outfit', sans-serif; font-size: 17px; font-weight: 600; color: #1d1d1f; }
+.header__back { font-size: 13px; color: #0071e3; text-decoration: none; display: flex; align-items: center; gap: 4px; transition: opacity .15s; }
+.header__back:hover { opacity: .7; }
+.hero { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 60px 20px 50px; text-align: center; color: #fff; }
+.hero__date { font-size: 13px; opacity: .75; margin-bottom: 12px; letter-spacing: .5px; }
+.hero__title { font-size: 30px; font-weight: 700; line-height: 1.35; max-width: 680px; margin: 0 auto; }
+.article { max-width: 720px; margin: -24px auto 60px; padding: 0 20px; }
+.article__body { background: #fff; border-radius: 16px; box-shadow: 0 1px 3px rgba(0,0,0,.06), 0 8px 24px rgba(0,0,0,.04); padding: 40px 36px; }
+.article__content { font-size: 16px; line-height: 2; color: #333; word-break: keep-all; }
+.article__content p { margin-bottom: 18px; } .article__content p:last-child { margin-bottom: 0; }
+.article__content h2 { font-size: 21px; font-weight: 700; color: #1d1d1f; margin: 44px 0 18px; padding-bottom: 10px; border-bottom: 2px solid #667eea; display: inline-block; }
+.article__content h2::before { content: ''; display: inline-block; width: 4px; height: 21px; background: #667eea; border-radius: 2px; margin-right: 10px; vertical-align: text-bottom; }
+.article__content pre { background: #1e1e2e; color: #cdd6f4; border-radius: 12px; padding: 20px 24px; margin: 20px 0; overflow-x: auto; font-family: 'Fira Code', monospace; font-size: 13.5px; line-height: 1.7; border: 1px solid rgba(255,255,255,.06); }
+.article__content code { font-family: 'Fira Code', monospace; font-size: 14px; background: #f0f0f5; color: #e74c8b; padding: 2px 7px; border-radius: 5px; }
+.article__content pre code { background: none; color: inherit; padding: 0; border-radius: 0; font-size: 13.5px; }
+.article__content strong { color: #1d1d1f; font-weight: 600; }
+.progress-bar { position: fixed; top: 0; left: 0; height: 3px; background: linear-gradient(90deg, #667eea, #764ba2); z-index: 200; width: 0; transition: width .1s linear; }
+@media (max-width: 600px) { .hero { padding: 40px 16px 36px; } .hero__title { font-size: 23px; } .article__body { padding: 28px 20px; border-radius: 12px; } .article__content { font-size: 15px; } .article__content h2 { font-size: 19px; } .article__content pre { padding: 16px; font-size: 12.5px; } }</style>
+</head>
+<body>
+	<div class="progress-bar" id="progressBar"></div>
+	<header class="header">
+		<div class="header__title">Tech Blog</div>
+		<a class="header__back" href="./index.html">&larr; 목록으로</a>
+	</header>
+	<div class="hero">
+		<p class="hero__date">2026.05.26 15:35</p>
+		<h1 class="hero__title">벡터 데이터베이스 완전 정리 — AI 검색과 RAG의 핵심 인프라</h1>
+	</div>
+	<article class="article">
+		<div class="article__body">
+			<div class="article__content" id="articleContent">AI 시대에 가장 빠르게 성장한 데이터베이스 카테고리가 있다.
+벡터 데이터베이스(Vector Database)다.
+RAG, 시맨틱 검색, 추천 시스템의 핵심 인프라로, 2026년 현재 AI 서비스를 만든다면 반드시 알아야 하는 기술이다.
+
+## 벡터 데이터베이스란?
+
+기존 DB는 숫자, 문자열을 정확히 일치시키는 검색에 최적화되어 있다.
+SELECT * FROM users WHERE name = '홍길동' 같은 쿼리다.
+
+벡터 DB는 다르다. &quot;의미적으로 비슷한 것&quot;을 찾는다.
+예를 들어 &quot;맛있는 한식 레스토랑&quot;을 검색하면 &quot;한국 전통 음식 맛집&quot;도 찾아내는 것이다.
+
+이게 가능한 이유는 데이터를 &quot;벡터(숫자 배열)&quot;로 변환해서 저장하기 때문이다.
+텍스트, 이미지, 오디오 등을 임베딩 모델로 벡터로 바꾸면,
+의미가 비슷한 데이터는 벡터 공간에서 가까운 위치에 놓인다.
+
+## 왜 기존 DB로는 안 되나?
+
+PostgreSQL에 pgvector 확장을 설치하면 벡터 검색이 가능하다.
+하지만 수백만~수억 개의 벡터에서 밀리초 단위로 검색하려면 전용 인프라가 필요하다.
+
+벡터 DB는 이를 위해 설계됐다.
+ANN(Approximate Nearest Neighbor) 알고리즘으로 정확도를 약간 희생하는 대신 속도를 수천 배 높인다.
+대표적인 알고리즘으로 HNSW(Hierarchical Navigable Small World)와 IVF(Inverted File Index)가 있다.
+
+## 주요 벡터 데이터베이스 비교
+
+**Pinecone** — 완전 관리형 클라우드 서비스
+서버 관리 없이 API만 호출하면 된다.
+확장성이 뛰어나고 엔터프라이즈급 안정성.
+무료 플랜: 인덱스 5개, 벡터 10만 개까지.
+
+**ChromaDB** — 오픈소스, 로컬 우선
+Python 패키지 하나로 바로 시작 가능.
+SQLite 기반으로 로컬에서 돌아가서 프로토타입에 최적.
+LangChain, LlamaIndex와 통합이 쉽다.
+
+**Weaviate** — 오픈소스, 하이브리드 검색 강점
+벡터 검색 + 키워드 검색을 동시에 지원.
+GraphQL API를 제공해서 쿼리가 직관적.
+자체 임베딩 모듈 내장 (별도 임베딩 API 호출 불필요).
+
+**Qdrant** — 오픈소스, Rust 기반 고성능
+Rust로 작성되어 메모리 효율과 속도가 뛰어나다.
+필터링 성능이 특히 좋아서 메타데이터 조건부 검색에 강하다.
+
+**Milvus** — 오픈소스, 대규모 특화
+수십억 벡터까지 처리 가능한 분산 아키텍처.
+Kubernetes 위에서 동작하며 기업 환경에 적합.
+
+## 핵심 개념 — 임베딩(Embedding)
+
+벡터 DB를 이해하려면 임베딩을 알아야 한다.
+임베딩은 데이터를 고정 길이의 숫자 배열로 변환하는 것이다.
+
+    &quot;오늘 날씨가 좋다&quot; → [0.12, -0.34, 0.56, ..., 0.78]  (1536차원)
+    &quot;날이 화창하네&quot;     → [0.11, -0.33, 0.55, ..., 0.79]  (거의 비슷!)
+    &quot;주식이 폭락했다&quot;   → [-0.45, 0.22, -0.67, ..., -0.12] (완전 다름)
+
+의미가 비슷하면 벡터도 비슷하고, 의미가 다르면 벡터도 멀어진다.
+이 벡터 간의 거리(코사인 유사도, 유클리드 거리 등)로 유사도를 측정한다.
+
+대표적인 임베딩 모델:
+OpenAI text-embedding-3-large: 3072차원, 범용 성능 최고.
+Cohere embed-v3: 다국어 지원 강점.
+BGE-M3 (오픈소스): 무료이면서 성능이 뛰어남.
+
+## 실전 코드 — ChromaDB로 시맨틱 검색
+
+    import chromadb
+    from chromadb.utils import embedding_functions
+
+    # 1. 클라이언트 생성
+    client = chromadb.Client()
+    ef = embedding_functions.OpenAIEmbeddingFunction(model_name=&quot;text-embedding-3-small&quot;)
+
+    # 2. 컬렉션 생성
+    collection = client.create_collection(&quot;docs&quot;, embedding_function=ef)
+
+    # 3. 문서 추가
+    collection.add(
+        documents=[&quot;Python은 데이터 과학에 많이 쓰인다&quot;, &quot;JavaScript는 웹 개발의 핵심이다&quot;, &quot;Rust는 시스템 프로그래밍에 적합하다&quot;],
+        ids=[&quot;doc1&quot;, &quot;doc2&quot;, &quot;doc3&quot;]
+    )
+
+    # 4. 시맨틱 검색
+    results = collection.query(query_texts=[&quot;데이터 분석에 좋은 언어&quot;], n_results=2)
+
+&quot;데이터 분석에 좋은 언어&quot;라고 검색하면 &quot;Python은 데이터 과학에 많이 쓰인다&quot;가 1위로 나온다.
+키워드가 하나도 겹치지 않는데도 의미를 이해해서 찾아낸다.
+
+## 벡터 DB가 쓰이는 곳
+
+**RAG**: LLM이 답변 전에 관련 문서를 벡터 DB에서 검색한다. 할루시네이션을 줄이는 핵심.
+**시맨틱 검색**: 쇼핑몰에서 &quot;가벼운 여름 신발&quot;을 검색하면 &quot;통기성 좋은 샌들&quot;도 나온다.
+**추천 시스템**: 사용자가 본 콘텐츠와 유사한 콘텐츠를 벡터 유사도로 추천.
+**이미지 검색**: 텍스트로 이미지를 검색하거나, 이미지로 유사 이미지를 찾는다.
+**이상 탐지**: 정상 데이터의 벡터 분포에서 벗어나는 데이터를 탐지.
+
+## 선택 가이드
+
+프로토타입/학습 → ChromaDB — 설치 한 줄, 로컬에서 바로 시작.
+스타트업/중소규모 → Pinecone — 관리 부담 없이 빠르게 프로덕션 투입.
+대규모/온프레미스 → Milvus — 분산 처리와 기업 보안 요구사항 충족.
+하이브리드 검색 필요 → Weaviate — 벡터 + 키워드 동시 검색.
+성능 최적화 중요 → Qdrant — Rust 기반 속도와 필터링 성능.
+
+## 앞으로의 전망
+
+벡터 DB는 AI 인프라의 핵심 레이어로 자리잡았다.
+AI 서비스가 늘어날수록 벡터 DB의 수요도 함께 증가한다.
+기존 DB(PostgreSQL, MongoDB)도 벡터 검색 기능을 추가하고 있어서
+&quot;벡터 검색&quot;은 특수 기능이 아니라 기본 기능이 되어가고 있다.
+
+하지만 대규모 벡터 데이터를 전문적으로 다루려면 여전히 전용 벡터 DB가 필요하다.
+AI 시대의 데이터 인프라를 이해하려면 벡터 DB는 필수 지식이다.</div>
+		</div>
+	</article>
+	<script src="./article-template.js"></script>
+</body>
+</html>

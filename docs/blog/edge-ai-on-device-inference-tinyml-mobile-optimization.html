@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Edge AI 정리 — 서버 없이 디바이스에서 직접 AI를 돌리는 시대 — Tech Blog</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;600;700&family=Noto+Sans+KR:wght@300;400;500;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+	<style>*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif; background: #f5f5f7; color: #1d1d1f; -webkit-font-smoothing: antialiased; }
+.header { background: rgba(255,255,255,.72); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-bottom: 1px solid rgba(0,0,0,.08); padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+.header__title { font-family: 'Outfit', sans-serif; font-size: 17px; font-weight: 600; color: #1d1d1f; }
+.header__back { font-size: 13px; color: #0071e3; text-decoration: none; display: flex; align-items: center; gap: 4px; transition: opacity .15s; }
+.header__back:hover { opacity: .7; }
+.hero { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 60px 20px 50px; text-align: center; color: #fff; }
+.hero__date { font-size: 13px; opacity: .75; margin-bottom: 12px; letter-spacing: .5px; }
+.hero__title { font-size: 30px; font-weight: 700; line-height: 1.35; max-width: 680px; margin: 0 auto; }
+.article { max-width: 720px; margin: -24px auto 60px; padding: 0 20px; }
+.article__body { background: #fff; border-radius: 16px; box-shadow: 0 1px 3px rgba(0,0,0,.06), 0 8px 24px rgba(0,0,0,.04); padding: 40px 36px; }
+.article__content { font-size: 16px; line-height: 2; color: #333; word-break: keep-all; }
+.article__content p { margin-bottom: 18px; } .article__content p:last-child { margin-bottom: 0; }
+.article__content h2 { font-size: 21px; font-weight: 700; color: #1d1d1f; margin: 44px 0 18px; padding-bottom: 10px; border-bottom: 2px solid #667eea; display: inline-block; }
+.article__content h2::before { content: ''; display: inline-block; width: 4px; height: 21px; background: #667eea; border-radius: 2px; margin-right: 10px; vertical-align: text-bottom; }
+.article__content pre { background: #1e1e2e; color: #cdd6f4; border-radius: 12px; padding: 20px 24px; margin: 20px 0; overflow-x: auto; font-family: 'Fira Code', monospace; font-size: 13.5px; line-height: 1.7; border: 1px solid rgba(255,255,255,.06); }
+.article__content code { font-family: 'Fira Code', monospace; font-size: 14px; background: #f0f0f5; color: #e74c8b; padding: 2px 7px; border-radius: 5px; }
+.article__content pre code { background: none; color: inherit; padding: 0; border-radius: 0; font-size: 13.5px; }
+.article__content strong { color: #1d1d1f; font-weight: 600; }
+.progress-bar { position: fixed; top: 0; left: 0; height: 3px; background: linear-gradient(90deg, #667eea, #764ba2); z-index: 200; width: 0; transition: width .1s linear; }
+@media (max-width: 600px) { .hero { padding: 40px 16px 36px; } .hero__title { font-size: 23px; } .article__body { padding: 28px 20px; border-radius: 12px; } .article__content { font-size: 15px; } .article__content h2 { font-size: 19px; } .article__content pre { padding: 16px; font-size: 12.5px; } }</style>
+</head>
+<body>
+	<div class="progress-bar" id="progressBar"></div>
+	<header class="header">
+		<div class="header__title">Tech Blog</div>
+		<a class="header__back" href="./index.html">&larr; 목록으로</a>
+	</header>
+	<div class="hero">
+		<p class="hero__date">2026.05.26 15:36</p>
+		<h1 class="hero__title">Edge AI 정리 — 서버 없이 디바이스에서 직접 AI를 돌리는 시대</h1>
+	</div>
+	<article class="article">
+		<div class="article__body">
+			<div class="article__content" id="articleContent">AI 하면 거대한 GPU 서버를 떠올리지만, 흐름이 바뀌고 있다.
+스마트폰, 노트북, IoT 기기에서 직접 AI를 실행하는 Edge AI가 빠르게 확산 중이다.
+클라우드 없이도 AI가 동작하는 시대가 이미 시작됐다.
+
+## Edge AI란?
+
+Edge AI는 AI 모델을 클라우드 서버가 아닌 사용자 가까운 장치(엣지)에서 실행하는 것이다.
+스마트폰, 노트북, 자동차, CCTV, 산업용 센서 등이 모두 엣지 디바이스다.
+
+기존 방식: 데이터를 서버에 보냄 → 서버에서 AI 처리 → 결과를 돌려받음
+Edge AI: 데이터가 발생한 장치에서 바로 AI 처리 → 결과 즉시 사용
+
+## 왜 Edge AI인가?
+
+**지연시간 제로**: 서버 왕복 시간이 없다. 자율주행차가 0.1초 늦게 판단하면 사고가 난다.
+**프라이버시**: 얼굴 인식 데이터가 서버에 올라가지 않는다. 기기 안에서 처리하고 끝.
+**오프라인 동작**: 인터넷이 없는 공장, 선박, 농장에서도 AI가 동작한다.
+**비용 절감**: 클라우드 API 호출 비용이 0원이다. 기기당 추론 비용이 거의 없다.
+**대역폭 절약**: 카메라 100대가 24시간 영상을 서버에 보내면 네트워크가 터진다. 엣지에서 처리하면 결과만 보내면 된다.
+
+## 어디에 쓰이나?
+
+**스마트폰**: Apple의 Neural Engine, Google의 Tensor 칩. 사진 편집, 음성 인식, 실시간 번역이 기기에서 동작한다. 갤럭시 AI의 통화 실시간 번역도 온디바이스다.
+**자율주행**: Tesla, Waymo의 차량은 차 안의 칩에서 실시간으로 주변 환경을 인식한다. 서버에 물어보고 있을 시간이 없다.
+**산업/제조**: 공장 라인의 불량품 검출. 카메라 + 엣지 AI로 실시간 품질 검사. 사람 눈보다 빠르고 정확하다.
+**의료**: 휴대용 초음파 기기에 AI를 탑재해서 현장에서 바로 진단 보조.
+**스마트홈**: 음성 비서가 기기 안에서 음성을 처리. &quot;안녕 빅스비&quot;나 &quot;Hey Siri&quot;의 웨이크워드 감지는 이미 온디바이스다.
+
+## 핵심 기술 — 모델 경량화
+
+서버용 AI 모델은 수십~수백 GB지만, 스마트폰 메모리는 수 GB다.
+큰 모델을 작은 기기에서 돌리려면 경량화가 필수다.
+
+**양자화(Quantization)**
+모델 가중치를 32비트 → 8비트 또는 4비트로 줄인다.
+정확도 손실은 1~2% 이내인데 모델 크기가 4~8배 줄어든다.
+Llama 3.1 70B 모델도 4비트 양자화하면 노트북에서 돌릴 수 있다.
+
+**프루닝(Pruning)**
+중요하지 않은 뉴런 연결을 잘라낸다.
+가지치기와 같다. 모델 크기가 줄고 속도가 빨라진다.
+
+**지식 증류(Knowledge Distillation)**
+큰 모델(Teacher)의 지식을 작은 모델(Student)에 전달한다.
+선생님이 가르쳐주니까 학생은 적은 파라미터로도 비슷한 성능을 낸다.
+
+**모델 아키텍처 설계**
+MobileNet, EfficientNet처럼 처음부터 모바일 환경에 최적화된 모델 구조를 사용한다.
+Depthwise Separable Convolution 같은 기법으로 연산량을 대폭 줄인다.
+
+## 엣지 AI 프레임워크
+
+**TensorFlow Lite** — Google의 모바일/IoT용 프레임워크
+안드로이드, iOS, 라즈베리파이에서 동작.
+모델 변환 도구가 잘 갖춰져 있어서 TF 모델 → TFLite 변환이 쉽다.
+
+**ONNX Runtime** — Microsoft의 크로스플랫폼 추론 엔진
+어떤 프레임워크(PyTorch, TensorFlow)로 학습한 모델이든 ONNX 포맷으로 변환해서 실행 가능.
+Windows, Linux, Android, iOS 모두 지원.
+
+**Core ML** — Apple 생태계 전용
+iPhone, iPad, Mac에서 최적의 성능. Neural Engine 하드웨어를 직접 활용.
+Swift에서 모델을 불러와 추론하면 된다.
+
+**TinyML** — 마이크로컨트롤러용
+아두이노 같은 초저전력 칩에서 AI를 돌린다.
+센서 데이터 분석, 키워드 감지 등 단순하지만 실용적인 작업.
+
+## 실전 예시 — llama.cpp
+
+2026년 가장 주목받는 온디바이스 AI 프로젝트 중 하나가 llama.cpp다.
+C++로 작성되어 GPU 없이 CPU만으로 LLM을 실행할 수 있다.
+
+    # 모델 다운로드 (4비트 양자화 버전)
+    # llama-3.1-8B-Q4_K_M.gguf (약 4.5GB)
+
+    # 실행
+    ./llama-cli -m llama-3.1-8B-Q4_K_M.gguf -p &quot;Edge AI의 장점은&quot; -n 200
+
+M1 MacBook에서 초당 30~40 토큰의 속도로 생성된다.
+인터넷 없이, 비용 없이, 프라이버시 걱정 없이 LLM을 사용할 수 있다.
+
+비슷한 프로젝트로 ollama가 있다.
+
+    ollama run llama3.1
+
+한 줄이면 로컬에서 LLM이 실행된다.
+
+## Edge AI vs Cloud AI
+
+클라우드 AI: 최고 성능, 최신 모델 사용 가능, 인터넷 필수, API 비용 발생.
+Edge AI: 지연시간 최소, 프라이버시 보장, 오프라인 가능, 모델 크기 제한.
+
+대부분의 실무에서는 둘을 조합한다.
+일반적인 요청은 엣지에서 처리하고, 복잡한 요청만 클라우드에 보내는 하이브리드 구조다.
+예: 스마트폰이 간단한 질문은 온디바이스로 답하고, 복잡한 질문은 서버의 대형 모델에 요청.
+
+## 앞으로의 전망
+
+Apple, Google, Qualcomm, Samsung 모두 AI 전용 칩(NPU)을 강화하고 있다.
+하드웨어가 좋아질수록 엣지에서 돌릴 수 있는 모델이 커진다.
+
+2026년에는 스마트폰에서 70B 파라미터 모델을 실시간으로 돌리는 것도 가능해졌다.
+3년 전에는 서버에서만 가능했던 일이다.
+
+Edge AI는 AI의 민주화를 실현하는 핵심 기술이다.
+클라우드에 의존하지 않고, 누구나 자기 기기에서 AI를 활용할 수 있는 시대가 오고 있다.</div>
+		</div>
+	</article>
+	<script src="./article-template.js"></script>
+</body>
+</html>
