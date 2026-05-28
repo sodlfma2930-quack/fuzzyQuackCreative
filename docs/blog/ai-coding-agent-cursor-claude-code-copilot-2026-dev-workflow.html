@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>AI 코딩 에이전트 시대 — Cursor, Claude Code, Copilot이 바꾸는 2026년 개발 현장 — Tech Blog</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;600;700&family=Noto+Sans+KR:wght@300;400;500;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+	<style>*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif; background: #f5f5f7; color: #1d1d1f; -webkit-font-smoothing: antialiased; }
+.header { background: rgba(255,255,255,.72); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-bottom: 1px solid rgba(0,0,0,.08); padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+.header__title { font-family: 'Outfit', sans-serif; font-size: 17px; font-weight: 600; color: #1d1d1f; }
+.header__back { font-size: 13px; color: #0071e3; text-decoration: none; display: flex; align-items: center; gap: 4px; transition: opacity .15s; }
+.header__back:hover { opacity: .7; }
+.hero { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 60px 20px 50px; text-align: center; color: #fff; }
+.hero__date { font-size: 13px; opacity: .75; margin-bottom: 12px; letter-spacing: .5px; }
+.hero__title { font-size: 30px; font-weight: 700; line-height: 1.35; max-width: 680px; margin: 0 auto; }
+.article { max-width: 720px; margin: -24px auto 60px; padding: 0 20px; }
+.article__body { background: #fff; border-radius: 16px; box-shadow: 0 1px 3px rgba(0,0,0,.06), 0 8px 24px rgba(0,0,0,.04); padding: 40px 36px; }
+.article__content { font-size: 16px; line-height: 2; color: #333; word-break: keep-all; }
+.article__content p { margin-bottom: 18px; } .article__content p:last-child { margin-bottom: 0; }
+.article__content h2 { font-size: 21px; font-weight: 700; color: #1d1d1f; margin: 44px 0 18px; padding-bottom: 10px; border-bottom: 2px solid #667eea; display: inline-block; }
+.article__content h2::before { content: ''; display: inline-block; width: 4px; height: 21px; background: #667eea; border-radius: 2px; margin-right: 10px; vertical-align: text-bottom; }
+.article__content pre { background: #1e1e2e; color: #cdd6f4; border-radius: 12px; padding: 20px 24px; margin: 20px 0; overflow-x: auto; font-family: 'Fira Code', monospace; font-size: 13.5px; line-height: 1.7; border: 1px solid rgba(255,255,255,.06); }
+.article__content code { font-family: 'Fira Code', monospace; font-size: 14px; background: #f0f0f5; color: #e74c8b; padding: 2px 7px; border-radius: 5px; }
+.article__content pre code { background: none; color: inherit; padding: 0; border-radius: 0; font-size: 13.5px; }
+.article__content strong { color: #1d1d1f; font-weight: 600; }
+.progress-bar { position: fixed; top: 0; left: 0; height: 3px; background: linear-gradient(90deg, #667eea, #764ba2); z-index: 200; width: 0; transition: width .1s linear; }
+@media (max-width: 600px) { .hero { padding: 40px 16px 36px; } .hero__title { font-size: 23px; } .article__body { padding: 28px 20px; border-radius: 12px; } .article__content { font-size: 15px; } .article__content h2 { font-size: 19px; } .article__content pre { padding: 16px; font-size: 12.5px; } }</style>
+</head>
+<body>
+	<div class="progress-bar" id="progressBar"></div>
+	<header class="header">
+		<div class="header__title">Tech Blog</div>
+		<a class="header__back" href="./index.html">&larr; 목록으로</a>
+	</header>
+	<div class="hero">
+		<p class="hero__date">2026.05.28 10:48</p>
+		<h1 class="hero__title">AI 코딩 에이전트 시대 — Cursor, Claude Code, Copilot이 바꾸는 2026년 개발 현장</h1>
+	</div>
+	<article class="article">
+		<div class="article__body">
+			<div class="article__content" id="articleContent">2026년, 개발자의 일하는 방식이 근본적으로 달라지고 있다.
+AI가 코드 자동완성을 넘어서 &quot;직접 코드를 짜고, 디버깅하고, PR까지 만드는&quot; 시대가 됐다.
+AI 코딩 에이전트의 현재 상황과 실무에서의 활용법을 정리한다.
+
+## 자동완성에서 에이전트로
+
+2022~2023년의 AI 코딩 도구는 &quot;자동완성&quot;이었다.
+커서 위치에서 다음 줄을 예측해주는 수준. GitHub Copilot의 Tab 키 시대다.
+
+2024년부터 흐름이 바뀌었다.
+AI가 코드베이스 전체를 이해하고, 파일을 읽고, 수정하고, 터미널 명령을 실행하고,
+테스트를 돌리고, 에러를 스스로 고치는 &quot;에이전트&quot;로 진화했다.
+
+자동완성: 개발자가 코드를 짜면 AI가 다음 줄을 제안
+에이전트: 개발자가 의도를 말하면 AI가 전체 구현을 수행
+
+## 2026년 주요 AI 코딩 도구
+
+**Claude Code (Anthropic)**
+CLI 기반의 AI 코딩 에이전트. 터미널에서 자연어로 지시하면 코드를 읽고, 수정하고, 커밋까지 한다.
+파일 시스템 전체에 접근하고, 셸 명령을 실행할 수 있어서 자유도가 높다.
+MCP(Model Context Protocol)로 외부 도구 연동도 가능.
+원격 에이전트로 cron 스케줄링까지 지원해서 자동화 파이프라인 구축이 가능하다.
+이 블로그 자체가 Claude Code로 만들어지고 있다.
+
+**Cursor**
+VS Code를 포크한 AI 네이티브 에디터.
+Cmd+K로 인라인 수정, Composer로 멀티파일 수정이 가능하다.
+코드베이스를 인덱싱해서 프로젝트 전체 컨텍스트를 이해한다.
+직관적인 UI 덕분에 진입 장벽이 낮고, 2025년부터 폭발적으로 성장했다.
+
+**GitHub Copilot Workspace**
+GitHub 이슈에서 바로 코딩 세션을 시작한다.
+이슈를 읽고, 관련 파일을 찾고, 변경 사항을 제안하고, PR까지 만드는 워크플로우.
+GitHub 생태계와 자연스럽게 통합된다는 게 강점.
+
+**Windsurf (Codeium)**
+&quot;Flow&quot; 개념의 AI 에디터. 개발자의 행동을 관찰하면서 선제적으로 제안한다.
+코드 작성 중 다음 파일을 열어야 할 때 자동으로 열어주고,
+관련된 테스트 코드를 함께 수정해준다.
+
+**Amazon Q Developer**
+AWS 환경에 최적화된 AI 코딩 도구.
+AWS 인프라 코드(CloudFormation, CDK, Terraform) 생성에 특히 강하다.
+Java 코드 업그레이드(8→17) 자동 변환 기능이 실무에서 호평.
+
+## 바이브 코딩(Vibe Coding)이란?
+
+2025년부터 등장한 용어다.
+&quot;정확한 코드를 짜는 것&quot;에서 &quot;AI에게 의도를 전달하는 것&quot;으로 개발 방식이 바뀌는 현상.
+
+전통적 코딩:
+1. 문제 분석 → 2. 알고리즘 설계 → 3. 코드 작성 → 4. 디버깅 → 5. 테스트
+
+바이브 코딩:
+1. 자연어로 의도 설명 → 2. AI가 코드 생성 → 3. 결과 확인 → 4. 피드백 → 5. 반복
+
+&quot;로그인 페이지를 만들어줘. 이메일/비밀번호 입력, 유효성 검사, JWT 인증&quot;이라고 말하면
+AI가 프론트엔드 컴포넌트, API 엔드포인트, 인증 미들웨어, 테스트 코드까지 만든다.
+
+## 실무에서 어떻게 쓰나?
+
+**1. 보일러플레이트 생성**
+새 프로젝트 셋업, CRUD API, 폼 컴포넌트 같은 반복 작업은 AI에게 맡긴다.
+5분이면 이전에 30분 걸리던 기본 구조가 완성된다.
+
+**2. 버그 수정**
+에러 메시지를 그대로 AI에게 보여주면 원인을 분석하고 수정 코드를 제안한다.
+스택 트레이스를 읽고, 관련 파일을 찾고, 수정하고, 테스트까지 돌려본다.
+
+**3. 코드 리뷰**
+PR의 diff를 AI에게 보여주고 리뷰를 요청한다.
+보안 취약점, 성능 문제, 코드 스타일 위반을 잡아낸다.
+사람 리뷰 전에 1차 필터링 역할.
+
+**4. 레거시 코드 이해**
+처음 보는 코드베이스를 AI에게 설명해달라고 한다.
+&quot;이 파일이 뭐하는 거야?&quot; &quot;이 함수의 호출 흐름을 알려줘&quot;
+온보딩 시간이 며칠에서 몇 시간으로 줄어든다.
+
+**5. 테스트 코드 작성**
+기존 코드에 대한 유닛 테스트, 통합 테스트를 AI가 생성한다.
+엣지 케이스까지 고려한 테스트를 만들어줘서 커버리지가 올라간다.
+
+## AI 코딩 에이전트의 한계
+
+만능은 아니다. 현재 한계를 알아야 제대로 쓸 수 있다.
+
+**컨텍스트 한계**: 프로젝트 전체를 한 번에 이해하지 못한다. 파일이 수천 개인 대형 프로젝트에서는 관련 파일을 직접 지정해줘야 할 때가 있다.
+**할루시네이션**: 존재하지 않는 API나 라이브러리를 사용하는 코드를 생성할 수 있다. 반드시 검증해야 한다.
+**아키텍처 판단**: &quot;이 기능을 어떤 패턴으로 구현할까&quot; 같은 고수준 설계 판단은 아직 개발자의 영역이다.
+**보안 감수성**: AI가 생성한 코드에 SQL 인젝션이나 XSS 취약점이 포함될 수 있다. 보안 리뷰는 필수다.
+
+## 개발자는 뭘 해야 하나?
+
+&quot;AI가 코드를 짜면 개발자는 필요 없는 거 아니야?&quot; — 아니다.
+
+**역할이 바뀌는 것**이지 사라지는 게 아니다.
+코드를 한 줄씩 타이핑하는 비중은 줄지만,
+아키텍처 설계, 요구사항 분석, 코드 리뷰, 품질 보증의 비중은 오히려 늘어난다.
+
+AI를 잘 쓰는 개발자와 못 쓰는 개발자의 생산성 격차가 벌어지고 있다.
+프롬프트 작성, 코드 검증, AI 출력 디렉션이 새로운 핵심 역량이 되고 있다.
+
+## 도구 선택 가이드
+
+터미널 중심, 최대 자유도 → **Claude Code** — 파일 시스템과 셸 전체에 접근. 자동화에 강점.
+GUI 선호, 빠른 적응 → **Cursor** — VS Code 기반이라 익숙하고 UI가 직관적.
+GitHub 워크플로우 통합 → **Copilot Workspace** — 이슈에서 PR까지 원스톱.
+AWS 환경 → **Amazon Q** — 인프라 코드와 마이그레이션에 특화.
+
+하나만 쓸 필요는 없다. Claude Code로 큰 작업을 하고 Cursor로 미세 조정하는 식으로 조합하는 개발자도 많다.
+
+## 2026년 트렌드 요약
+
+코딩 에이전트가 개발자의 기본 도구가 되고 있다. IDE에 AI가 없으면 허전한 시대다.
+&quot;AI가 코드를 짜고, 개발자가 방향을 잡는다&quot; — 이게 2026년 개발의 새로운 상식이다.
+
+AI 코딩 도구를 아직 안 써봤다면, 오늘 하나를 설치해서 써보는 걸 추천한다.
+30분이면 &quot;왜 이걸 안 썼지&quot;라는 생각이 들 것이다.</div>
+		</div>
+	</article>
+	<script src="./article-template.js"></script>
+</body>
+</html>
