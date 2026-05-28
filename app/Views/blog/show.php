@@ -101,6 +101,28 @@
 			z-index: 200; width: 0; transition: width .1s linear;
 		}
 
+		.search-float { max-width: 720px; margin: 0 auto; padding: 12px 20px 0; }
+		.search-float__box {
+			background: #fff; border-radius: 12px;
+			box-shadow: 0 1px 3px rgba(0,0,0,.06), 0 4px 12px rgba(0,0,0,.04);
+			padding: 12px 16px; display: flex; gap: 8px; align-items: center;
+		}
+		.search-float__input {
+			flex: 1; border: 1px solid #e5e5ea; border-radius: 8px;
+			padding: 9px 12px; font-size: 13px; font-family: inherit;
+			outline: none; transition: border-color .15s;
+		}
+		.search-float__input:focus { border-color: #667eea; }
+		.search-float__input::placeholder { color: #a1a1a6; }
+		.search-float__btn {
+			border: none; border-radius: 8px; padding: 9px 14px;
+			font-size: 12px; font-weight: 500; font-family: inherit;
+			cursor: pointer; transition: opacity .15s; white-space: nowrap;
+		}
+		.search-float__btn:hover { opacity: .8; }
+		.search-float__btn--naver { background: #03c75a; color: #fff; }
+		.search-float__btn--google { background: #4285f4; color: #fff; }
+
 		@media (max-width: 600px) {
 			.hero { padding: 40px 16px 36px; }
 			.hero__title { font-size: 23px; }
@@ -108,6 +130,9 @@
 			.article__content { font-size: 15px; }
 			.article__content h2 { font-size: 19px; }
 			.article__content pre { padding: 16px; font-size: 12.5px; }
+			.search-float__box { flex-wrap: wrap; }
+			.search-float__input { width: 100%; }
+			.search-float__btn { flex: 1; }
 		}
 	</style>
 </head>
@@ -127,6 +152,15 @@
 		<p class="hero__date"><?= $displayDate ?></p>
 		<h1 class="hero__title"><?= esc($post['title'] ?? '') ?></h1>
 	</div>
+
+	<div class="search-float">
+		<div class="search-float__box">
+			<input type="text" class="search-float__input" id="searchInput" placeholder="모르는 용어를 검색해 보세요" autocomplete="off">
+			<button type="button" class="search-float__btn search-float__btn--naver" onclick="(function(){var q=document.getElementById('searchInput').value.trim();if(q)window.open('https://search.naver.com/search.naver?query='+encodeURIComponent(q),'_blank');})()">네이버</button>
+			<button type="button" class="search-float__btn search-float__btn--google" onclick="(function(){var q=document.getElementById('searchInput').value.trim();if(q)window.open('https://www.google.com/search?q='+encodeURIComponent(q),'_blank');})()">구글</button>
+		</div>
+	</div>
+	<script>document.getElementById('searchInput').addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();var q=this.value.trim();if(q)window.open('https://search.naver.com/search.naver?query='+encodeURIComponent(q),'_blank');}});</script>
 
 	<article class="article">
 		<div class="article__body">

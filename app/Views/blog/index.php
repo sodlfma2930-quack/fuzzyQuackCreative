@@ -72,36 +72,11 @@
 
 		.empty { text-align: center; padding: 80px 0; color: #86868b; font-size: 15px; }
 
-		.search-bar {
-			background: #fff; border-radius: 14px;
-			box-shadow: 0 1px 3px rgba(0,0,0,.04), 0 4px 12px rgba(0,0,0,.03);
-			padding: 16px 20px; margin-bottom: 20px;
-			display: flex; gap: 8px; align-items: center;
-		}
-		.search-bar__input {
-			flex: 1; border: 1px solid #e5e5ea; border-radius: 8px;
-			padding: 10px 14px; font-size: 14px; font-family: inherit;
-			outline: none; transition: border-color .15s;
-		}
-		.search-bar__input:focus { border-color: #667eea; }
-		.search-bar__input::placeholder { color: #a1a1a6; }
-		.search-bar__btn {
-			border: none; border-radius: 8px; padding: 10px 16px;
-			font-size: 13px; font-weight: 500; font-family: inherit;
-			cursor: pointer; transition: opacity .15s; white-space: nowrap;
-		}
-		.search-bar__btn:hover { opacity: .8; }
-		.search-bar__btn--naver { background: #03c75a; color: #fff; }
-		.search-bar__btn--google { background: #4285f4; color: #fff; }
-
 		@media (max-width: 600px) {
 			.hero h1 { font-size: 26px; }
 			.post-card { flex-direction: column; }
 			.post-card__thumb { width: 100%; min-height: 120px; }
 			.post-card__arrow { display: none; }
-			.search-bar { flex-wrap: wrap; }
-			.search-bar__input { width: 100%; }
-			.search-bar__btn { flex: 1; }
 		}
 	</style>
 </head>
@@ -172,17 +147,6 @@
 	?>
 
 	<div class="container">
-		<div class="search-bar">
-			<input type="text" class="search-bar__input" id="searchInput" placeholder="모르는 용어를 검색해 보세요" autocomplete="off">
-			<button type="button" class="search-bar__btn search-bar__btn--naver" onclick="searchNaver()">네이버</button>
-			<button type="button" class="search-bar__btn search-bar__btn--google" onclick="searchGoogle()">구글</button>
-		</div>
-		<script>
-		function getQuery(){return document.getElementById('searchInput').value.trim();}
-		function searchNaver(){var q=getQuery();if(q)window.open('https://search.naver.com/search.naver?query='+encodeURIComponent(q),'_blank');}
-		function searchGoogle(){var q=getQuery();if(q)window.open('https://www.google.com/search?q='+encodeURIComponent(q),'_blank');}
-		document.getElementById('searchInput').addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();searchNaver();}});
-		</script>
 		<?php if (empty($posts)) : ?>
 			<div class="empty">아직 작성된 글이 없어요.</div>
 		<?php else : ?>
