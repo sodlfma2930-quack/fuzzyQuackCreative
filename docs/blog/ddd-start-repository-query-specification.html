@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>DDD START! 정리 — 리포지터리 조회 기능과 Specification 패턴 (Chapter 5) — Tech Blog</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;600;700&family=Noto+Sans+KR:wght@300;400;500;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+	<style>*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif; background: #f5f5f7; color: #1d1d1f; -webkit-font-smoothing: antialiased; }
+.header { background: rgba(255,255,255,.72); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-bottom: 1px solid rgba(0,0,0,.08); padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+.header__title { font-family: 'Outfit', sans-serif; font-size: 17px; font-weight: 600; color: #1d1d1f; }
+.header__back { font-size: 13px; color: #0071e3; text-decoration: none; display: flex; align-items: center; gap: 4px; transition: opacity .15s; }
+.header__back:hover { opacity: .7; }
+.hero { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 60px 20px 50px; text-align: center; color: #fff; }
+.hero__date { font-size: 13px; opacity: .75; margin-bottom: 12px; letter-spacing: .5px; }
+.hero__title { font-size: 30px; font-weight: 700; line-height: 1.35; max-width: 680px; margin: 0 auto; }
+.article { max-width: 720px; margin: -24px auto 60px; padding: 0 20px; }
+.article__body { background: #fff; border-radius: 16px; box-shadow: 0 1px 3px rgba(0,0,0,.06), 0 8px 24px rgba(0,0,0,.04); padding: 40px 36px; }
+.article__content { font-size: 16px; line-height: 2; color: #333; word-break: keep-all; }
+.article__content p { margin-bottom: 18px; } .article__content p:last-child { margin-bottom: 0; }
+.article__content h2 { font-size: 21px; font-weight: 700; color: #1d1d1f; margin: 44px 0 18px; padding-bottom: 10px; border-bottom: 2px solid #667eea; display: inline-block; }
+.article__content h2::before { content: ''; display: inline-block; width: 4px; height: 21px; background: #667eea; border-radius: 2px; margin-right: 10px; vertical-align: text-bottom; }
+.article__content pre { background: #1e1e2e; color: #cdd6f4; border-radius: 12px; padding: 20px 24px; margin: 20px 0; overflow-x: auto; font-family: 'Fira Code', monospace; font-size: 13.5px; line-height: 1.7; border: 1px solid rgba(255,255,255,.06); }
+.article__content code { font-family: 'Fira Code', monospace; font-size: 14px; background: #f0f0f5; color: #e74c8b; padding: 2px 7px; border-radius: 5px; }
+.article__content pre code { background: none; color: inherit; padding: 0; border-radius: 0; font-size: 13.5px; }
+.article__content strong { color: #1d1d1f; font-weight: 600; }
+.progress-bar { position: fixed; top: 0; left: 0; height: 3px; background: linear-gradient(90deg, #667eea, #764ba2); z-index: 200; width: 0; transition: width .1s linear; }
+@media (max-width: 600px) { .hero { padding: 40px 16px 36px; } .hero__title { font-size: 23px; } .article__body { padding: 28px 20px; border-radius: 12px; } .article__content { font-size: 15px; } .article__content h2 { font-size: 19px; } .article__content pre { padding: 16px; font-size: 12.5px; } }</style>
+</head>
+<body>
+	<div class="progress-bar" id="progressBar"></div>
+	<header class="header">
+		<div class="header__title">Tech Blog</div>
+		<a class="header__back" href="./index.html">← 목록으로</a>
+	</header>
+	<div class="hero">
+		<p class="hero__date">2026.08.14 10:30</p>
+		<h1 class="hero__title">DDD START! 정리 — 리포지터리 조회 기능과 Specification 패턴 (Chapter 5)</h1>
+	</div>
+	<article class="article">
+		<div class="article__body">
+			<div class="article__content" id="articleContent">4장에서 리포지터리의 저장과 기본 조회를 다뤘다면, 5장은 **검색 조건이 복잡한 조회**를 어떻게 구현하는지 다룬다.
+핵심은 Specification 패턴이다. 검색 조건을 객체로 만들어서 조합하고, JPA의 Criteria API로 변환하는 구조를 살펴본다.
+
+## 검색을 위한 스펙(Specification)
+
+리포지터리에서 애그리거트를 찾을 때 식별자 외에 다양한 조건으로 검색해야 할 때가 있다.
+"주문 상태가 결제 완료이고, 주문일이 지난달인 주문 목록" 같은 조건이다.
+
+이런 다양한 검색 조건을 지원해야 할 때 사용할 수 있는 것이 **스펙(Specification)** 패턴이다.
+스펙은 애그리거트가 특정 조건을 충족하는지 여부를 검사한다.
+
+    public interface Specification<T> {
+        public boolean isSatisfiedBy(T agg);
+    }
+
+`isSatisfiedBy()` 메서드의 agg 파라미터는 검사 대상이 되는 객체다.
+이 메서드가 true를 리턴하면 해당 객체가 조건을 충족한다는 뜻이다.
+
+주문 상태로 필터링하는 스펙 구현 예시:
+
+    public class OrdererSpec implements Specification<Order> {
+        private String ordererId;
+
+        public OrdererSpec(String ordererId) {
+            this.ordererId = ordererId;
+        }
+
+        public boolean isSatisfiedBy(Order agg) {
+            return agg.getOrdererId().getMemberId().getId()
+                       .equals(ordererId);
+        }
+    }
+
+리포지터리는 이 스펙을 전달받아서 필터링한다:
+
+    public List<Order> findAll(Specification<Order> spec) {
+        return findAll().stream()
+                .filter(order -> spec.isSatisfiedBy(order))
+                .collect(toList());
+    }
+
+하지만 이 방식은 모든 데이터를 메모리에 로딩한 뒤 걸러내야 하니까 실제 서비스에선 쓸 수 없다.
+실제로는 사양(스펙)을 DB 쿼리로 변환해서 필요한 데이터만 걸러내야 한다.
+
+## JPA를 위한 스펙 구현
+
+JPA에서는 CriteriaBuilder와 Predicate를 이용해서 스펙을 구현한다.
+JPA 정적 메타 모델을 사용하면 문자열 기반 필드명 대신 타입-안전한 방식으로 쿼리를 작성할 수 있다.
+
+    public interface Specification<T> {
+        Predicate toPredicate(Root<T> root, CriteriaBuilder cb);
+    }
+
+주문자 ID로 검색하는 JPA 스펙:
+
+    public class OrdererIdSpec implements Specification<Order> {
+        private String ordererId;
+
+        public OrdererIdSpec(String ordererId) {
+            this.ordererId = ordererId;
+        }
+
+        @Override
+        public Predicate toPredicate(Root<Order> root, CriteriaBuilder cb) {
+            return cb.equal(root.get(Order_.orderer)
+                                .get(Orderer_.memberId)
+                                .get(MemberId_.id),
+                           ordererId);
+        }
+    }
+
+리포지터리 구현 클래스에서 스펙을 사용하는 방법:
+
+    @Repository
+    public class JpaOrderRepository implements OrderRepository {
+        @PersistenceContext
+        private EntityManager entityManager;
+
+        @Override
+        public List<Order> findAll(Specification<Order> spec) {
+            CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+            CriteriaQuery<Order> criteriaQuery = cb.createQuery(Order.class);
+            Root<Order> root = criteriaQuery.from(Order.class);
+            Predicate predicate = spec.toPredicate(root, cb);
+            criteriaQuery.where(predicate);
+            // ...
+            return entityManager.createQuery(criteriaQuery).getResultList();
+        }
+    }
+
+## AND/OR 스펙 조합
+
+스펙의 진짜 장점은 **조합**에 있다.
+두 개 이상의 스펙을 AND/OR로 엮어서 복합 조건을 만들 수 있다.
+
+AND 조합:
+
+    public class AndSpec<T> implements Specification<T> {
+        private List<Specification<T>> specs;
+
+        public AndSpecification(Specification<T>... specs) {
+            this.specs = Arrays.asList(specs);
+        }
+
+        @Override
+        public Predicate toPredicate(Root<T> root, CriteriaBuilder cb) {
+            Predicate[] predicates = specs.stream()
+                .map(spec -> spec.toPredicate(root, cb))
+                .toArray(Predicate[]::new);
+            return cb.and(predicates);
+        }
+    }
+
+사용할 때는 이렇게 조합한다:
+
+    Specification<Order> ordererSpec = new OrdererIdSpec("user1");
+    Specification<Order> orderDateSpec = new OrderDateSpec(fromDate, toDate);
+    Specification<Order> compositeSpec = new AndSpec<>(ordererSpec, orderDateSpec);
+
+    List<Order> orders = orderRepository.findAll(compositeSpec);
+
+OR 조합도 같은 구조로 `cb.or(predicates)`를 사용하면 된다.
+
+## 정렬과 페이징
+
+### 정렬
+
+JPQL을 사용한다면 `ORDER BY` 절로 정렬하면 된다.
+JPA Criteria를 사용한다면 `CriteriaBuilder`의 `asc()`나 `desc()`를 사용한다.
+
+    CriteriaQuery<Order> criteriaQuery = cb.createQuery(Order.class);
+    Root<Order> root = criteriaQuery.from(Order.class);
+    criteriaQuery.orderBy(cb.desc(root.get("number")));
+
+하지만 정렬 순서를 리포지터리에 하드코딩하면 안 된다.
+정렬 순서가 고정된 게 아니라면 **파라미터로** 전달받아야 한다.
+
+JPA는 `javax.persistence.TypedQuery`의 `setFirstResult()`와 `setMaxResults()`로 페이징을 지원한다.
+
+### 페이징
+
+    @Override
+    public List<Order> findAll(Specification<Order> spec, int offset, int limit) {
+        // ...
+        TypedQuery<Order> query = entityManager.createQuery(criteriaQuery);
+        query.setFirstResult(offset);
+        query.setMaxResults(limit);
+        return query.getResultList();
+    }
+
+## 동적 인스턴스 생성 (select new)
+
+JPA는 쿼리 결과에서 임의의 객체를 동적으로 생성하는 기능을 제공한다.
+JPQL의 `select new` 구문이다.
+
+    @Query("select new com.myshop.order.query.dto.OrderView(" +
+           "o.number, o.state, m.name, m.id, p.name) " +
+           "from Order o join o.orderLines ol, Member m, Product p " +
+           "where o.orderer.memberId.id = :ordererId " +
+           "and ol.productId.id = p.id " +
+           "order by o.number.number desc")
+    List<OrderView> findOrderView(@Param("ordererId") String ordererId);
+
+`select new` 다음에 생성할 클래스의 완전한 이름을 지정하고, 괄호 안에 생성자에 인자로 전달할 값을 지정한다.
+조회 전용 모델을 만들 때 유용하다. 표현 영역에서 필요한 데이터만 딱 맞게 담아서 전달하는 DTO를 만들 수 있다.
+
+## @Subselect로 조회 전용 모델 만들기
+
+하이버네이트는 JPA 확장 기능으로 `@Subselect`를 제공한다.
+이건 쿼리 결과를 `@Entity`로 매핑할 수 있는 기능이다.
+
+    @Entity
+    @Immutable
+    @Subselect("select o.order_number as number, " +
+               "o.orderer_id, o.orderer_name, " +
+               "o.total_amounts, o.receiver_name, " +
+               "o.state, o.order_date " +
+               "from purchase_order o " +
+               "where o.state <> 'CANCELED'")
+    @Synchronize({"purchase_order"})
+    public class OrderSummary {
+        @Id
+        private String number;
+        private String ordererId;
+        private String ordererName;
+        private int totalAmounts;
+        private String receiverName;
+        private String state;
+        @Temporal(TemporalType.TIMESTAMP)
+        @Column(name = "order_date")
+        private Date orderDate;
+    }
+
+`@Subselect`는 조회 쿼리를 값으로 가진다. 하이버네이트는 이 select 쿼리의 결과를 매핑할 테이블처럼 사용한다.
+
+**`@Immutable`** 은 이 엔티티의 매핑 필드/프로퍼티가 변경되어도 DB에 반영하지 않고 무시한다는 뜻이다.
+수정할 수 없는 조회 전용이니까 실수로 `set` 해도 UPDATE 쿼리가 날아가지 않는다.
+
+**`@Synchronize`** 는 해당 엔티티와 관련된 테이블 목록을 명시한다.
+하이버네이트는 이 목록에 있는 테이블에 변경이 발생하면, 관련된 `@Subselect` 엔티티를 조회하기 전에 플러시를 먼저 실행한다.
+이를 통해 아직 커밋되지 않은 변경사항이 조회 결과에 반영된다.
+
+## 스펙 패턴의 실전 가치
+
+스펙 패턴이 복잡해 보일 수 있지만 핵심은 간단하다:
+- 검색 조건을 **객체로 캡슐화**한다
+- 여러 조건을 **AND/OR로 자유롭게 조합**한다
+- 리포지터리 인터페이스를 변경하지 않고 **새로운 검색 조건을 추가**할 수 있다
+
+결국 OCP(Open-Closed Principle)를 만족시키는 설계다.
+새 검색 조건이 생겨도 리포지터리 코드는 변경하지 않고 새로운 Specification 구현체만 추가하면 된다.
+
+Spring Data JPA를 쓰면 `JpaSpecificationExecutor<T>` 인터페이스가 이미 스펙 패턴을 지원하고 있어서, 직접 `findAll(Specification)` 같은 메서드를 만들 필요 없이 바로 사용할 수 있다.</div>
+		</div>
+	</article>
+	<script src="./article-template.js"></script>
+</body>
+</html>
