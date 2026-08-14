@@ -11,12 +11,23 @@
 	<link rel="stylesheet" href="./css/invitation.css">
 </head>
 <body>
+	<div class="petals" aria-hidden="true">
+		<div class="petal"></div>
+		<div class="petal"></div>
+		<div class="petal"></div>
+		<div class="petal"></div>
+		<div class="petal"></div>
+		<div class="petal"></div>
+		<div class="petal"></div>
+		<div class="petal"></div>
+	</div>
+
 	<main class="invite">
 		<section class="hero">
 			<div class="hero__overlay"></div>
 			<div class="hero__content">
-				<p class="hero__label">Save the Date</p>
-				<h1 class="hero__title" id="heroHeadline"></h1>
+				<p class="hero__label">Wedding Invitation</p>
+				<h1 class="hero__names" id="heroNames"></h1>
 				<p class="hero__subtitle" id="heroSubtitle"></p>
 				<div class="hero__date">
 					<strong id="heroDate"></strong>
@@ -27,32 +38,82 @@
 			</div>
 		</section>
 
+		<div class="section-divider section-divider--line" aria-hidden="true">
+			<svg viewBox="0 0 60 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+				<path d="M30 4C26 4 22 8 22 14c0 8 8 16 8 22 0-6 8-14 8-22 0-6-4-10-8-10z" fill="currentColor" stroke="currentColor" stroke-width="0.5" opacity="0.35"/>
+				<path d="M16 12c-4 0-6 3-6 6 0 5 6 10 6 14 0-4 6-9 6-14 0-3-2-6-6-6z" fill="currentColor" opacity="0.2"/>
+				<path d="M44 12c4 0 6 3 6 6 0 5-6 10-6 14 0-4-6-9-6-14 0-3 2-6 6-6z" fill="currentColor" opacity="0.2"/>
+			</svg>
+		</div>
+
 		<section class="story reveal">
 			<div class="story__card">
-				<h2 class="section-title">우리의 이야기</h2>
+				<p class="section-title">Our Story</p>
+				<p class="section-title-kr">초대합니다</p>
 				<p class="story__text" id="storyIntro"></p>
 			</div>
 		</section>
 
+		<div class="section-divider" aria-hidden="true">
+			<svg viewBox="0 0 60 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+				<circle cx="30" cy="10" r="3" stroke="currentColor" stroke-width="0.8" fill="none" opacity="0.3"/>
+				<line x1="8" y1="10" x2="24" y2="10" stroke="currentColor" stroke-width="0.5" opacity="0.2"/>
+				<line x1="36" y1="10" x2="52" y2="10" stroke="currentColor" stroke-width="0.5" opacity="0.2"/>
+			</svg>
+		</div>
+
 		<section class="couple reveal">
+			<p class="section-title">Groom & Bride</p>
+			<p class="section-title-kr">신랑 & 신부</p>
 			<div class="couple__profiles">
 				<article class="profile">
 					<p class="profile__role">Groom</p>
 					<h3 class="profile__name" id="groomName"></h3>
 					<p class="profile__parents" id="groomParents"></p>
-					<a class="profile__contact" id="groomContact" href="#">연락하기</a>
+					<a class="profile__contact" id="groomContact" href="#" aria-label="신랑에게 연락">
+						<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
+					</a>
 				</article>
+				<div class="couple__divider">
+					<div class="couple__heart"></div>
+				</div>
 				<article class="profile">
 					<p class="profile__role">Bride</p>
 					<h3 class="profile__name" id="brideName"></h3>
 					<p class="profile__parents" id="brideParents"></p>
-					<a class="profile__contact" id="brideContact" href="#">연락하기</a>
+					<a class="profile__contact" id="brideContact" href="#" aria-label="신부에게 연락">
+						<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
+					</a>
 				</article>
 			</div>
 		</section>
 
+		<div class="section-divider" aria-hidden="true">
+			<svg viewBox="0 0 60 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+				<circle cx="30" cy="10" r="3" stroke="currentColor" stroke-width="0.8" fill="none" opacity="0.3"/>
+				<line x1="8" y1="10" x2="24" y2="10" stroke="currentColor" stroke-width="0.5" opacity="0.2"/>
+				<line x1="36" y1="10" x2="52" y2="10" stroke="currentColor" stroke-width="0.5" opacity="0.2"/>
+			</svg>
+		</div>
+
+		<section class="calendar reveal">
+			<p class="section-title">Save the Date</p>
+			<p class="section-title-kr">예식 일시</p>
+			<div class="calendar__grid" id="calendarGrid"></div>
+			<div class="calendar__countdown" id="countdown"></div>
+		</section>
+
+		<div class="section-divider" aria-hidden="true">
+			<svg viewBox="0 0 60 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+				<circle cx="30" cy="10" r="3" stroke="currentColor" stroke-width="0.8" fill="none" opacity="0.3"/>
+				<line x1="8" y1="10" x2="24" y2="10" stroke="currentColor" stroke-width="0.5" opacity="0.2"/>
+				<line x1="36" y1="10" x2="52" y2="10" stroke="currentColor" stroke-width="0.5" opacity="0.2"/>
+			</svg>
+		</div>
+
 		<section class="schedule reveal">
-			<h2 class="section-title">예식 순서</h2>
+			<p class="section-title">Ceremony</p>
+			<p class="section-title-kr">예식 순서</p>
 			<ol class="timeline">
 				<li class="timeline__item reveal">
 					<span class="timeline__time">14:40</span>
@@ -85,49 +146,85 @@
 			</ol>
 		</section>
 
+		<div class="section-divider" aria-hidden="true">
+			<svg viewBox="0 0 60 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+				<circle cx="30" cy="10" r="3" stroke="currentColor" stroke-width="0.8" fill="none" opacity="0.3"/>
+				<line x1="8" y1="10" x2="24" y2="10" stroke="currentColor" stroke-width="0.5" opacity="0.2"/>
+				<line x1="36" y1="10" x2="52" y2="10" stroke="currentColor" stroke-width="0.5" opacity="0.2"/>
+			</svg>
+		</div>
+
 		<section class="gallery reveal">
-			<h2 class="section-title">우리의 추억</h2>
+			<p class="section-title">Gallery</p>
+			<p class="section-title-kr">우리의 추억</p>
 			<div class="gallery__grid" id="galleryGrid"></div>
 		</section>
 		<div class="lightbox" id="lightbox">
 			<button type="button" class="lightbox__close" aria-label="닫기">&times;</button>
-			<button type="button" class="lightbox__nav lightbox__nav--prev" aria-label="이전">‹</button>
+			<button type="button" class="lightbox__nav lightbox__nav--prev" aria-label="이전">&#8249;</button>
 			<img class="lightbox__img" src="" alt="">
-			<button type="button" class="lightbox__nav lightbox__nav--next" aria-label="다음">›</button>
+			<button type="button" class="lightbox__nav lightbox__nav--next" aria-label="다음">&#8250;</button>
 		</div>
 
-		<section class="account reveal">
-			<h2 class="section-title">마음 전하실 곳</h2>
-			<p class="account__intro">축하의 마음을 전해주시면 감사히 잘 쓰겠습니다.</p>
-			<div id="accountList"></div>
-		</section>
+		<div class="section-divider" aria-hidden="true">
+			<svg viewBox="0 0 60 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+				<circle cx="30" cy="10" r="3" stroke="currentColor" stroke-width="0.8" fill="none" opacity="0.3"/>
+				<line x1="8" y1="10" x2="24" y2="10" stroke="currentColor" stroke-width="0.5" opacity="0.2"/>
+				<line x1="36" y1="10" x2="52" y2="10" stroke="currentColor" stroke-width="0.5" opacity="0.2"/>
+			</svg>
+		</div>
 
 		<section class="map reveal">
-			<h2 class="section-title">오시는 길</h2>
+			<p class="section-title">Location</p>
+			<p class="section-title-kr">오시는 길</p>
 			<div class="map__embed">
 				<iframe src="https://maps.google.com/maps?q=35.823339,128.740033&hl=ko&z=17&output=embed" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
 			</div>
 			<ul class="map__info">
 				<li>
-					<strong>지하철</strong>
+					<strong>Subway</strong>
 					<p>대구 2호선 영남대역 1번 출구</p>
 					<p>역 앞 정류장에서 818, 840번 버스 환승 후 펜타힐즈로 하차 (약 10분)</p>
 				</li>
 				<li>
-					<strong>버스</strong>
+					<strong>Bus</strong>
 					<p>818, 840, 급행 3</p>
 					<p>펜타힐즈로 정류장 하차 후 도보 2분</p>
 				</li>
 				<li>
-					<strong>주차</strong>
+					<strong>Parking</strong>
 					<p>로터스 101 전용 지하 주차장 (4시간 무료, 발렛 가능)</p>
 				</li>
 			</ul>
 			<a class="map__link" href="https://map.naver.com/v5/search/%EB%A1%9C%ED%84%B0%EC%8A%A4%20101" target="_blank" rel="noopener noreferrer">네이버 지도에서 길찾기</a>
 		</section>
 
+		<div class="section-divider" aria-hidden="true">
+			<svg viewBox="0 0 60 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+				<circle cx="30" cy="10" r="3" stroke="currentColor" stroke-width="0.8" fill="none" opacity="0.3"/>
+				<line x1="8" y1="10" x2="24" y2="10" stroke="currentColor" stroke-width="0.5" opacity="0.2"/>
+				<line x1="36" y1="10" x2="52" y2="10" stroke="currentColor" stroke-width="0.5" opacity="0.2"/>
+			</svg>
+		</div>
+
+		<section class="account reveal">
+			<p class="section-title">Celebration</p>
+			<p class="section-title-kr">마음 전하실 곳</p>
+			<p class="account__intro">축하의 마음을 전해주시면 감사히 잘 쓰겠습니다.</p>
+			<div id="accountList"></div>
+		</section>
+
+		<div class="section-divider" aria-hidden="true">
+			<svg viewBox="0 0 60 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+				<circle cx="30" cy="10" r="3" stroke="currentColor" stroke-width="0.8" fill="none" opacity="0.3"/>
+				<line x1="8" y1="10" x2="24" y2="10" stroke="currentColor" stroke-width="0.5" opacity="0.2"/>
+				<line x1="36" y1="10" x2="52" y2="10" stroke="currentColor" stroke-width="0.5" opacity="0.2"/>
+			</svg>
+		</div>
+
 		<section class="share reveal">
-			<h2 class="section-title">청첩장 공유하기</h2>
+			<p class="section-title">Share</p>
+			<p class="section-title-kr">청첩장 공유하기</p>
 			<div class="share__buttons">
 				<button class="button button--ghost" type="button" id="shareKakao">카카오톡</button>
 				<button class="button button--ghost" type="button" id="shareFacebook">페이스북</button>
@@ -135,8 +232,17 @@
 			</div>
 		</section>
 
+		<div class="section-divider" aria-hidden="true">
+			<svg viewBox="0 0 60 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+				<circle cx="30" cy="10" r="3" stroke="currentColor" stroke-width="0.8" fill="none" opacity="0.3"/>
+				<line x1="8" y1="10" x2="24" y2="10" stroke="currentColor" stroke-width="0.5" opacity="0.2"/>
+				<line x1="36" y1="10" x2="52" y2="10" stroke="currentColor" stroke-width="0.5" opacity="0.2"/>
+			</svg>
+		</div>
+
 		<section class="greeting reveal">
-			<h2 class="section-title">From. 신랑 & 신부</h2>
+			<p class="section-title">Message</p>
+			<p class="section-title-kr">From. 신랑 & 신부</p>
 			<p class="greeting__intro">이름과 전화번호 뒷자리를 입력하시면<br>저희가 준비한 감사 메시지를 확인하실 수 있어요.</p>
 			<div class="greeting__form">
 				<input type="text" id="greetName" class="greeting__input" placeholder="이름" autocomplete="off">
@@ -150,6 +256,11 @@
 				<p>등록된 메시지를 찾지 못했어요.<br>이름과 번호를 다시 확인해 주세요.</p>
 			</div>
 		</section>
+
+		<footer class="footer">
+			<span class="footer__heart">&#10084;</span>
+			<span id="footerNames"></span>
+		</footer>
 	</main>
 
 	<script>
@@ -161,13 +272,20 @@
 		return d.innerHTML;
 	}
 
-	// ── Load contents.json ──
+	let weddingDate = null;
+
 	fetch(DATA_BASE + '/contents.json').then(r => r.json()).then(data => {
 		const hero = data.hero || {};
 		const couple = data.couple || {};
 		const story = data.story || {};
 
-		document.getElementById('heroHeadline').textContent = hero.headline || '';
+		const groomFirst = (couple.groom_name || '').charAt(0);
+		const brideFirst = (couple.bride_name || '').charAt(0);
+		document.getElementById('heroNames').innerHTML =
+			esc(couple.groom_name || '') +
+			' <span class="amp">&</span> ' +
+			esc(couple.bride_name || '');
+
 		document.getElementById('heroSubtitle').textContent = hero.subtitle || '';
 		document.getElementById('heroDate').textContent = hero.date || '';
 		document.getElementById('heroTime').textContent = hero.time || '';
@@ -184,10 +302,73 @@
 		document.getElementById('brideParents').textContent = couple.bride_parents || '';
 		document.getElementById('brideContact').href = 'tel:' + (couple.bride_contact || '');
 
-		document.title = (couple.groom_name || '신랑') + ' & ' + (couple.bride_name || '신부') + '의 초대장';
+		document.getElementById('footerNames').textContent =
+			(couple.groom_name || '') + ' & ' + (couple.bride_name || '');
+
+		document.title = (couple.groom_name || '') + ' & ' + (couple.bride_name || '') + ' Wedding';
+
+		const dateMatch = (hero.date || '').match(/(\d{4}).*?(\d{1,2}).*?(\d{1,2})/);
+		if (dateMatch) {
+			weddingDate = new Date(+dateMatch[1], +dateMatch[2] - 1, +dateMatch[3], 15, 30);
+			buildCalendar(+dateMatch[1], +dateMatch[2] - 1, +dateMatch[3]);
+			updateCountdown();
+			setInterval(updateCountdown, 60000);
+		}
 	});
 
-	// ── Load gallery.json ──
+	function buildCalendar(year, month, day) {
+		const grid = document.getElementById('calendarGrid');
+		const dayNames = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
+		dayNames.forEach((name, i) => {
+			const el = document.createElement('span');
+			el.className = 'calendar__day-header' + (i === 0 ? ' calendar__day-header:first-child' : '');
+			if (i === 0) el.classList.add('calendar__day--sun');
+			el.textContent = name;
+			grid.appendChild(el);
+		});
+
+		const firstDay = new Date(year, month, 1).getDay();
+		const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+		for (let i = 0; i < firstDay; i++) {
+			const el = document.createElement('span');
+			el.className = 'calendar__day calendar__day--empty';
+			el.textContent = ' ';
+			grid.appendChild(el);
+		}
+
+		for (let d = 1; d <= daysInMonth; d++) {
+			const el = document.createElement('span');
+			const dayOfWeek = (firstDay + d - 1) % 7;
+			el.className = 'calendar__day';
+			if (dayOfWeek === 0) el.classList.add('calendar__day--sun');
+			if (d === day) el.classList.add('calendar__day--active');
+			el.textContent = d;
+			grid.appendChild(el);
+		}
+	}
+
+	function updateCountdown() {
+		if (!weddingDate) return;
+		const now = new Date();
+		const diff = weddingDate - now;
+
+		if (diff <= 0) {
+			document.getElementById('countdown').innerHTML =
+				'<p class="calendar__dday">Today</p>';
+			return;
+		}
+
+		const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+		const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+		const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+
+		document.getElementById('countdown').innerHTML =
+			'<div class="calendar__count-item"><span class="calendar__count-num">' + days + '</span><span class="calendar__count-label">Days</span></div>' +
+			'<div class="calendar__count-item"><span class="calendar__count-num">' + hours + '</span><span class="calendar__count-label">Hours</span></div>' +
+			'<div class="calendar__count-item"><span class="calendar__count-num">' + mins + '</span><span class="calendar__count-label">Mins</span></div>';
+	}
+
 	fetch(DATA_BASE + '/gallery.json').then(r => r.json()).then(items => {
 		const grid = document.getElementById('galleryGrid');
 		items.forEach(item => {
@@ -202,7 +383,6 @@
 		document.querySelectorAll('.gallery__thumb.reveal').forEach(el => observer.observe(el));
 	});
 
-	// ── Load accounts.json ──
 	fetch(DATA_BASE + '/accounts.json').then(r => r.json()).then(groups => {
 		const el = document.getElementById('accountList');
 		groups.forEach(group => {
@@ -241,7 +421,6 @@
 		});
 	});
 
-	// ── Load greetings.json (for search) ──
 	let greetings = [];
 	fetch(DATA_BASE + '/greetings.json').then(r => r.json()).then(data => { greetings = data; });
 
@@ -270,7 +449,6 @@
 		}
 	}
 
-	// ── Share ──
 	const pageUrl = window.location.href;
 	document.getElementById('shareKakao').addEventListener('click', () => {
 		window.open('https://sharer.kakao.com/talk?url=' + encodeURIComponent(pageUrl), '_blank');
@@ -286,7 +464,6 @@
 		} catch(e) {}
 	});
 
-	// ── Lightbox ──
 	function initLightbox() {
 		const lb = document.getElementById('lightbox');
 		const lbImg = lb.querySelector('.lightbox__img');
@@ -316,7 +493,7 @@
 				lbImg.src = thumbs[lbIndex].dataset.lightbox;
 				lbImg.alt = thumbs[lbIndex].querySelector('img').alt;
 				lbImg.style.opacity = 1;
-			}, 150);
+			}, 200);
 		}
 
 		thumbs.forEach((el, i) => el.addEventListener('click', () => lbOpen(i)));
@@ -334,23 +511,24 @@
 		});
 	}
 
-	// ── Reveal animation ──
 	const observer = new IntersectionObserver((entries) => {
 		entries.forEach((entry) => {
 			if (entry.isIntersecting) {
 				const el = entry.target;
 				const siblings = el.parentElement.querySelectorAll('.reveal');
 				const idx = Array.from(siblings).indexOf(el);
-				if (idx > 0 && el.classList.contains('gallery__thumb')) {
-					el.style.animationDelay = (idx * 0.06) + 's';
+
+				if (el.classList.contains('gallery__thumb')) {
+					el.style.transitionDelay = (idx * 0.08) + 's';
 				} else if (el.classList.contains('timeline__item')) {
-					el.style.animationDelay = (idx * 0.12) + 's';
+					el.style.transitionDelay = (idx * 0.15) + 's';
 				}
+
 				el.classList.add('visible');
 				observer.unobserve(el);
 			}
 		});
-	}, { threshold: 0.15 });
+	}, { threshold: 0.12 });
 	document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
 	</script>
 </body>

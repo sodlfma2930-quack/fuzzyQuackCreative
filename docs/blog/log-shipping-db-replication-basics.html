@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Log Shipping 기초 — 트랜잭션 로그로 DB를 복제하는 가장 클래식한 방법 — Tech Blog</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;600;700&family=Noto+Sans+KR:wght@300;400;500;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+	<style>*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif; background: #f5f5f7; color: #1d1d1f; -webkit-font-smoothing: antialiased; }
+.header { background: rgba(255,255,255,.72); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-bottom: 1px solid rgba(0,0,0,.08); padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+.header__title { font-family: 'Outfit', sans-serif; font-size: 17px; font-weight: 600; color: #1d1d1f; }
+.header__back { font-size: 13px; color: #0071e3; text-decoration: none; display: flex; align-items: center; gap: 4px; transition: opacity .15s; }
+.header__back:hover { opacity: .7; }
+.hero { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 60px 20px 50px; text-align: center; color: #fff; }
+.hero__date { font-size: 13px; opacity: .75; margin-bottom: 12px; letter-spacing: .5px; }
+.hero__title { font-size: 30px; font-weight: 700; line-height: 1.35; max-width: 680px; margin: 0 auto; }
+.article { max-width: 720px; margin: -24px auto 60px; padding: 0 20px; }
+.article__body { background: #fff; border-radius: 16px; box-shadow: 0 1px 3px rgba(0,0,0,.06), 0 8px 24px rgba(0,0,0,.04); padding: 40px 36px; }
+.article__content { font-size: 16px; line-height: 2; color: #333; word-break: keep-all; }
+.article__content p { margin-bottom: 18px; } .article__content p:last-child { margin-bottom: 0; }
+.article__content h2 { font-size: 21px; font-weight: 700; color: #1d1d1f; margin: 44px 0 18px; padding-bottom: 10px; border-bottom: 2px solid #667eea; display: inline-block; }
+.article__content h2::before { content: ''; display: inline-block; width: 4px; height: 21px; background: #667eea; border-radius: 2px; margin-right: 10px; vertical-align: text-bottom; }
+.article__content pre { background: #1e1e2e; color: #cdd6f4; border-radius: 12px; padding: 20px 24px; margin: 20px 0; overflow-x: auto; font-family: 'Fira Code', monospace; font-size: 13.5px; line-height: 1.7; border: 1px solid rgba(255,255,255,.06); }
+.article__content code { font-family: 'Fira Code', monospace; font-size: 14px; background: #f0f0f5; color: #e74c8b; padding: 2px 7px; border-radius: 5px; }
+.article__content pre code { background: none; color: inherit; padding: 0; border-radius: 0; font-size: 13.5px; }
+.article__content strong { color: #1d1d1f; font-weight: 600; }
+.progress-bar { position: fixed; top: 0; left: 0; height: 3px; background: linear-gradient(90deg, #667eea, #764ba2); z-index: 200; width: 0; transition: width .1s linear; }
+@media (max-width: 600px) { .hero { padding: 40px 16px 36px; } .hero__title { font-size: 23px; } .article__body { padding: 28px 20px; border-radius: 12px; } .article__content { font-size: 15px; } .article__content h2 { font-size: 19px; } .article__content pre { padding: 16px; font-size: 12.5px; } }</style>
+</head>
+<body>
+	<div class="progress-bar" id="progressBar"></div>
+	<header class="header">
+		<div class="header__title">Tech Blog</div>
+		<a class="header__back" href="./index.html">&larr; 목록으로</a>
+	</header>
+	<div class="hero">
+		<p class="hero__date">2026.06.04 10:00</p>
+		<h1 class="hero__title">Log Shipping 기초 &mdash; 트랜잭션 로그로 DB를 복제하는 가장 클래식한 방법</h1>
+	</div>
+	<article class="article">
+		<div class="article__body">
+			<div class="article__content" id="articleContent">운영 DB가 하나뿐이라면, 그 서버가 죽는 순간 서비스도 같이 죽는다.
+DB 복제(Replication)가 필요한 이유다.
+복제 방식은 여러 가지가 있지만, 가장 역사가 오래되고 원리가 직관적인 방식이 **Log Shipping**이다.
+
+## Log Shipping이란?
+
+Log Shipping은 **Primary DB의 트랜잭션 로그(Transaction Log)를 주기적으로 백업해서 Secondary DB에 전송하고, 거기서 복원(Restore)하는 방식**이다.
+
+핵심 아이디어는 단순하다.
+DB의 모든 변경은 트랜잭션 로그에 먼저 기록된다.
+그 로그를 그대로 다른 서버에 &quot;재생(Replay)&quot;하면, 같은 상태의 DB가 만들어진다.
+
+    [Primary DB]
+        |
+        | 1. 트랜잭션 발생 (INSERT, UPDATE, DELETE)
+        | 2. 트랜잭션 로그에 기록
+        | 3. 주기적으로 로그 백업 생성
+        |
+    [로그 백업 파일] ──── 네트워크 전송 ────&gt; [Secondary DB]
+                                                  |
+                                            4. 로그 복원 (RESTORE LOG)
+                                            5. Primary와 동일한 상태
+
+비유하자면, Primary DB가 쓰는 &quot;일기장&quot;을 복사해서 Secondary DB에 보내주고, Secondary가 그 일기를 똑같이 따라 쓰는 것이다.
+
+## 트랜잭션 로그가 뭔데?
+
+Log Shipping을 이해하려면 트랜잭션 로그부터 알아야 한다.
+
+**트랜잭션 로그(Transaction Log)**는 DB에서 발생하는 모든 변경 작업을 순서대로 기록하는 파일이다.
+SQL Server에서는 `.ldf` 파일, PostgreSQL에서는 `WAL(Write-Ahead Log)`, MySQL에서는 `Binary Log`라고 부른다.
+
+    -- 이 쿼리가 실행되면
+    UPDATE users SET name = '정' WHERE id = 1;
+
+    -- 트랜잭션 로그에는 이런 식으로 기록된다 (개념적)
+    [LSN: 000025] BEGIN TRANSACTION
+    [LSN: 000026] UPDATE users SET name = '정' WHERE id = 1 (이전값: '김')
+    [LSN: 000027] COMMIT TRANSACTION
+
+LSN(Log Sequence Number)은 로그 레코드의 순번이다.
+이 순번 덕분에 로그를 &quot;순서대로 재생&quot;할 수 있다.
+
+DB가 갑자기 꺼져도 트랜잭션 로그를 보면 어디까지 처리했는지 알 수 있다.
+이걸 **복구(Recovery)**라고 한다.
+Log Shipping은 이 복구 메커니즘을 &quot;다른 서버에서&quot; 하는 것이다.
+
+## Log Shipping의 3단계 프로세스
+
+Log Shipping은 3개의 독립적인 작업(Job)으로 구성된다.
+각 작업은 정해진 스케줄에 따라 자동으로 실행된다.
+
+**1단계: Backup (백업)**
+Primary 서버에서 실행된다.
+트랜잭션 로그를 일정 간격(예: 5분, 15분)으로 백업 파일로 만든다.
+
+    -- SQL Server 예시
+    BACKUP LOG MyDatabase
+    TO DISK = '/backup/MyDB_log_202406040900.trn'
+
+이건 전체 백업(Full Backup)이 아니라 **로그 백업(Log Backup)**이다.
+마지막 백업 이후 새로 쌓인 로그만 백업하기 때문에 파일 크기가 작고 빠르다.
+
+**2단계: Copy (복사)**
+백업 파일을 네트워크를 통해 Secondary 서버로 복사한다.
+보통 공유 폴더(SMB/NFS)나 FTP, SCP를 사용한다.
+
+    # 리눅스 예시 - SCP로 복사
+    scp /backup/MyDB_log_202406040900.trn secondary:/restore/
+
+이 단계가 실패하면(네트워크 장애 등) 로그가 밀린다.
+하지만 파일이 없어지는 건 아니니까, 네트워크가 복구되면 밀린 로그를 순서대로 보내면 된다.
+
+**3단계: Restore (복원)**
+Secondary 서버에서 실행된다.
+전송받은 로그 백업 파일을 순서대로 DB에 적용(복원)한다.
+
+    -- SQL Server 예시
+    RESTORE LOG MyDatabase
+    FROM DISK = '/restore/MyDB_log_202406040900.trn'
+    WITH NORECOVERY  -- 또는 STANDBY
+
+이 3단계가 스케줄러에 의해 반복 실행되면서 Secondary DB가 Primary를 계속 따라간다.
+
+## Primary, Secondary, Monitor 서버
+
+Log Shipping에는 최대 3종류의 서버가 참여한다.
+
+**Primary 서버**: 원본 DB가 돌아가는 서버. 읽기/쓰기 모두 가능. 로그 백업을 생성한다.
+
+**Secondary 서버**: 복제본 DB가 있는 서버. 로그를 받아서 복원한다. 하나의 Primary에 여러 Secondary를 붙일 수 있다.
+
+**Monitor 서버** (선택): Log Shipping 상태를 감시하는 서버. 백업/복사/복원이 제시간에 안 되면 알림을 보낸다. 없어도 동작하지만, 운영 환경에서는 쓰는 게 좋다.
+
+    [Primary] ──backup──&gt; [공유 폴더] ──copy──&gt; [Secondary 1]
+        |                                      [Secondary 2]
+        |                                      [Secondary 3]
+        └─── 상태 보고 ───&gt; [Monitor]
+
+## Secondary DB의 두 가지 모드
+
+Secondary DB를 어떤 상태로 유지할 것인지 선택할 수 있다.
+
+**NORECOVERY 모드**
+DB가 &quot;복원 중&quot; 상태로 유지된다.
+아무도 이 DB에 접속해서 읽을 수 없다.
+로그 복원이 가장 빠르다.
+용도: 순수한 재해 복구(DR) 전용.
+
+    RESTORE LOG MyDatabase FROM DISK = '...' WITH NORECOVERY
+
+**STANDBY 모드**
+DB가 &quot;읽기 전용&quot; 상태로 유지된다.
+SELECT 쿼리를 날릴 수 있다.
+로그 복원 시에는 잠깐 연결이 끊긴다 (사용자 강제 퇴거).
+용도: 리포팅, 분석, 읽기 분산.
+
+    RESTORE LOG MyDatabase FROM DISK = '...' WITH STANDBY = '/standby/MyDB_undo.ldf'
+
+STANDBY 모드는 복원할 때 undo 파일을 만들어서 &quot;읽기 전용이지만 접근 가능한 상태&quot;를 유지한다.
+실무에서는 STANDBY를 많이 쓴다. 복제본이 놀고 있으면 아까우니까.
+
+## Log Shipping은 비동기다
+
+중요한 특성이 하나 있다.
+Log Shipping은 **비동기(Asynchronous)** 방식이다.
+
+Primary에서 INSERT를 실행한 순간 Secondary에도 바로 반영되는 게 아니다.
+로그 백업 → 복사 → 복원이라는 과정을 거쳐야 하기 때문에, **수 분에서 수십 분의 지연(Lag)**이 생긴다.
+
+    시간축:
+    00:00  Primary에서 INSERT 실행
+    00:05  로그 백업 실행 (5분 간격 설정)
+    00:06  백업 파일 Secondary로 복사
+    00:07  Secondary에서 로그 복원
+    ──────────────────────────────────
+    지연 시간: 약 7분
+
+이 지연은 백업 주기를 짧게 하면 줄일 수 있지만, 완전히 없앨 수는 없다.
+&quot;실시간 동기화&quot;가 필요하면 Log Shipping이 아닌 다른 방식을 써야 한다.
+
+## Log Shipping의 장점
+
+**단순하다**: 백업-복사-복원이 전부다. 특별한 인프라나 에이전트가 필요 없다.
+**안정적이다**: 수십 년간 검증된 방식. 복잡한 프로토콜 없이 파일 복사만으로 동작한다.
+**네트워크 부하가 낮다**: 실시간 스트리밍이 아니라 배치(파일) 전송이라 네트워크를 적게 쓴다.
+**원거리 복제에 적합하다**: 서울-부산, 서울-싱가포르처럼 먼 거리에도 안정적으로 동작한다. 네트워크 끊김에도 자동 복구된다.
+**여러 Secondary 가능하다**: 하나의 Primary에 여러 Secondary를 붙여서 읽기 분산이나 지역별 DR을 구성할 수 있다.
+**에디션 제약이 적다**: SQL Server Standard Edition에서도 사용 가능하다 (Always On은 Enterprise가 필요).
+
+## Log Shipping의 한계
+
+**데이터 지연이 있다**: 최소 수 분의 갭이 존재한다. 이 시간 동안의 데이터는 장애 시 유실될 수 있다.
+**자동 장애 조치(Failover)가 없다**: Primary가 죽어도 Secondary가 자동으로 Primary가 되지 않는다. 수동으로 전환해야 한다.
+**테이블 단위 복제 불가**: DB 전체를 복제한다. 특정 테이블만 골라서 복제할 수 없다.
+**복원 중 접속 제한**: STANDBY 모드에서도 로그 복원 시 잠깐 연결이 끊긴다.
+
+## 어떤 상황에서 Log Shipping을 쓸까?
+
+**적합한 경우:**
+- 재해 복구(DR) 대비가 필요하지만, 실시간까지는 아닌 경우
+- 리포팅/분석용 읽기 전용 복제본이 필요한 경우
+- SQL Server Standard Edition을 쓰는 경우
+- 네트워크 환경이 불안정한 원거리 복제
+- 비용을 최소화하면서 DB 이중화가 필요한 경우
+
+**부적합한 경우:**
+- 실시간 데이터 동기화가 필요한 경우
+- 자동 Failover가 필수인 고가용성(HA) 환경
+- 특정 테이블만 선택적으로 복제해야 하는 경우
+
+## 정리
+
+Log Shipping은 &quot;트랜잭션 로그를 백업해서 보내고, 받는 쪽에서 복원한다&quot;는 단순한 원리로 동작한다.
+화려한 기술은 아니지만 안정적이고 검증되었으며, 설정이 단순하다.
+DB 복제의 기본 원리를 이해하는 출발점이기도 하다.
+
+다음 편에서는 SQL Server, PostgreSQL, MySQL에서 실제로 Log Shipping을 구축하는 방법을 다룬다.</div>
+		</div>
+	</article>
+	<script src="./article-template.js"></script>
+</body>
+</html>

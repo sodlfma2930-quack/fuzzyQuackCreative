@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>DB 복제 방식 완전 비교 — Log Shipping, Replication, Always On, CDC — Tech Blog</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;600;700&family=Noto+Sans+KR:wght@300;400;500;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+	<style>*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif; background: #f5f5f7; color: #1d1d1f; -webkit-font-smoothing: antialiased; }
+.header { background: rgba(255,255,255,.72); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-bottom: 1px solid rgba(0,0,0,.08); padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+.header__title { font-family: 'Outfit', sans-serif; font-size: 17px; font-weight: 600; color: #1d1d1f; }
+.header__back { font-size: 13px; color: #0071e3; text-decoration: none; display: flex; align-items: center; gap: 4px; transition: opacity .15s; }
+.header__back:hover { opacity: .7; }
+.hero { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 60px 20px 50px; text-align: center; color: #fff; }
+.hero__date { font-size: 13px; opacity: .75; margin-bottom: 12px; letter-spacing: .5px; }
+.hero__title { font-size: 30px; font-weight: 700; line-height: 1.35; max-width: 680px; margin: 0 auto; }
+.article { max-width: 720px; margin: -24px auto 60px; padding: 0 20px; }
+.article__body { background: #fff; border-radius: 16px; box-shadow: 0 1px 3px rgba(0,0,0,.06), 0 8px 24px rgba(0,0,0,.04); padding: 40px 36px; }
+.article__content { font-size: 16px; line-height: 2; color: #333; word-break: keep-all; }
+.article__content p { margin-bottom: 18px; } .article__content p:last-child { margin-bottom: 0; }
+.article__content h2 { font-size: 21px; font-weight: 700; color: #1d1d1f; margin: 44px 0 18px; padding-bottom: 10px; border-bottom: 2px solid #667eea; display: inline-block; }
+.article__content h2::before { content: ''; display: inline-block; width: 4px; height: 21px; background: #667eea; border-radius: 2px; margin-right: 10px; vertical-align: text-bottom; }
+.article__content pre { background: #1e1e2e; color: #cdd6f4; border-radius: 12px; padding: 20px 24px; margin: 20px 0; overflow-x: auto; font-family: 'Fira Code', monospace; font-size: 13.5px; line-height: 1.7; border: 1px solid rgba(255,255,255,.06); }
+.article__content code { font-family: 'Fira Code', monospace; font-size: 14px; background: #f0f0f5; color: #e74c8b; padding: 2px 7px; border-radius: 5px; }
+.article__content pre code { background: none; color: inherit; padding: 0; border-radius: 0; font-size: 13.5px; }
+.article__content strong { color: #1d1d1f; font-weight: 600; }
+.progress-bar { position: fixed; top: 0; left: 0; height: 3px; background: linear-gradient(90deg, #667eea, #764ba2); z-index: 200; width: 0; transition: width .1s linear; }
+@media (max-width: 600px) { .hero { padding: 40px 16px 36px; } .hero__title { font-size: 23px; } .article__body { padding: 28px 20px; border-radius: 12px; } .article__content { font-size: 15px; } .article__content h2 { font-size: 19px; } .article__content pre { padding: 16px; font-size: 12.5px; } }</style>
+</head>
+<body>
+	<div class="progress-bar" id="progressBar"></div>
+	<header class="header">
+		<div class="header__title">Tech Blog</div>
+		<a class="header__back" href="./index.html">&larr; 목록으로</a>
+	</header>
+	<div class="hero">
+		<p class="hero__date">2026.06.04 11:00</p>
+		<h1 class="hero__title">DB 복제 방식 완전 비교 &mdash; Log Shipping, Replication, Always On, CDC</h1>
+	</div>
+	<article class="article">
+		<div class="article__body">
+			<div class="article__content" id="articleContent">DB 복제 방식은 하나가 아니다.
+Log Shipping만 해도 충분한 경우가 있고, 실시간 동기화가 필요한 경우도 있다.
+이 글에서는 주요 복제 방식을 전부 비교하고, **어떤 상황에서 어떤 걸 써야 하는지** 판단 기준을 정리한다.
+
+## 한눈에 보는 비교표
+
+비교하기 전에 먼저 전체 그림을 잡자.
+
+    방식              | 지연     | 자동 Failover | 테이블 선택 | 읽기 가능 | 난이도
+    ──────────────────|──────────|──────────────|────────────|──────────|───────
+    Log Shipping      | 분 단위  | X            | X (DB 전체)| STANDBY  | 낮음
+    Transactional Rep | 초 단위  | X            | O          | O        | 중간
+    Database Mirroring| 실시간   | O (동기)     | X (DB 전체)| 제한적   | 중간
+    Always On AG      | 실시간   | O            | X (DB 전체)| O        | 높음
+    CDC               | 초 단위  | X            | O          | -        | 중간
+    PG Streaming Rep  | 초 이하  | 외부 도구    | X          | O        | 중간
+    MySQL GTID Rep    | 초 이하  | 외부 도구    | O          | O        | 중간
+
+## Log Shipping vs Transactional Replication
+
+**Transactional Replication(트랜잭션 복제)**은 SQL Server의 또 다른 복제 방식이다.
+Log Reader Agent가 트랜잭션 로그를 읽어서 Distribution DB에 저장하고, Distribution Agent가 Subscriber에 변경사항을 전달한다.
+
+    Log Shipping:
+    [Primary] → 로그 파일 백업 → 파일 복사 → [Secondary] 로그 복원
+
+    Transactional Replication:
+    [Publisher] → Log Reader → [Distributor] → Distribution Agent → [Subscriber]
+
+**핵심 차이:**
+- **복제 단위**: Log Shipping은 DB 전체, Transactional Replication은 테이블/뷰 단위(Article)로 선택 가능
+- **지연**: Log Shipping은 분 단위, Transactional Replication은 초 단위
+- **방향**: Log Shipping은 단방향만, Transactional Replication은 양방향(Peer-to-Peer) 가능
+- **Subscriber 접근**: Transactional Replication의 Subscriber는 항상 읽기 가능 (별도 모드 불필요)
+
+**Transactional Replication이 좋은 경우:**
+- 특정 테이블만 복제하고 싶을 때
+- 초 단위 지연이 필요할 때
+- 이기종 DB 간 복제 (SQL Server &rarr; Oracle 등)
+
+**Log Shipping이 여전히 좋은 경우:**
+- 전체 DB를 그대로 복제하면 충분할 때
+- 설정과 관리가 단순해야 할 때
+- DR(재해 복구)이 주 목적일 때
+
+## Log Shipping vs Database Mirroring
+
+**Database Mirroring**은 SQL Server에서 두 서버 간에 DB를 실시간으로 동기화하는 방식이다.
+트랜잭션 로그 레코드를 네트워크로 직접 전송한다.
+
+주의: Database Mirroring은 SQL Server 2012부터 **Deprecated(사용 중지 예정)** 상태다. 신규 구축에는 Always On AG를 권장한다.
+
+    Log Shipping:
+    [Primary] → 파일 백업 → 파일 전송 → [Secondary] 복원
+    (비동기, 분 단위 지연, 파일 기반)
+
+    Database Mirroring:
+    [Principal] ←→ [Mirror]
+    (동기/비동기 선택, 실시간, 네트워크 스트리밍)
+
+**핵심 차이:**
+- **동기 모드 지원**: Mirroring은 동기 모드에서 데이터 유실 제로를 보장. Log Shipping은 불가능.
+- **자동 Failover**: Mirroring은 Witness 서버를 두면 자동 Failover 가능. Log Shipping은 수동만.
+- **Mirror DB 접근**: Mirroring의 Mirror DB는 직접 읽기 불가 (Database Snapshot으로 우회). Log Shipping STANDBY 모드가 더 유연.
+- **서버 수**: Mirroring은 1:1만 가능. Log Shipping은 1:N.
+
+## Log Shipping vs Always On Availability Groups
+
+**Always On AG**는 SQL Server 2012부터 도입된 고가용성 솔루션이다.
+Database Mirroring의 후계자로, 현재 SQL Server 고가용성의 사실상 표준이다.
+
+    Log Shipping:
+    파일 기반 | 비동기 | 수동 Failover | Standard Edition
+
+    Always On AG:
+    실시간 스트리밍 | 동기/비동기 | 자동 Failover | Enterprise Edition*
+
+    * SQL Server 2016 SP1부터 Standard Edition에서도 Basic AG 지원 (DB 1개 제한)
+
+**핵심 차이:**
+- **자동 Failover**: Always On AG의 가장 큰 장점. Primary가 죽으면 Secondary가 자동으로 승격.
+- **실시간 동기화**: 동기 모드에서는 Primary와 Secondary의 데이터가 항상 일치.
+- **읽기 라우팅**: 읽기 요청을 자동으로 Secondary로 분산하는 기능 내장.
+- **여러 Secondary**: 최대 8개 Secondary 지원, 각각 동기/비동기 설정 가능.
+- **비용**: Enterprise Edition 필요 (라이센스 비용이 매우 높음).
+- **인프라**: WSFC(Windows Server Failover Clustering) 또는 Linux Pacemaker 필요.
+
+**그래서 Log Shipping이 살아남는 이유:**
+1. **비용**: Standard Edition에서 쓸 수 있다.
+2. **단순성**: WSFC 같은 클러스터 인프라가 필요 없다.
+3. **원거리 DR**: 서울-싱가포르 같은 먼 거리에서 Always On AG 동기 모드는 레이턴시 때문에 성능 저하가 크다. Log Shipping은 배치 전송이라 영향이 적다.
+4. **보조 수단**: Always On AG를 메인으로 쓰면서, 원거리 DR용으로 Log Shipping을 추가하는 조합도 흔하다.
+
+## Log Shipping vs CDC (Change Data Capture)
+
+**CDC**는 DB의 변경 내역을 추적해서 별도 테이블에 기록하는 방식이다.
+복제라기보다는 **변경 데이터 추출**에 가깝다.
+
+    Log Shipping:
+    [원본 DB] → 로그 전체 백업 → [복제 DB]  (동일한 DB 복제본 생성)
+
+    CDC:
+    [원본 DB] → 변경 내역 캡처 → [변경 테이블] → ETL → [데이터 웨어하우스, 이벤트 스트림 등]
+
+**핵심 차이:**
+- **목적이 다르다**: Log Shipping은 &quot;DB 복제본 만들기&quot;, CDC는 &quot;변경 데이터 추출하기&quot;.
+- **결과물**: Log Shipping은 동일한 DB가 하나 더 생긴다. CDC는 변경 이력이 테이블에 쌓인다.
+- **테이블 선택**: CDC는 특정 테이블만 추적 가능.
+- **변경 이력 보존**: CDC는 &quot;누가 언제 뭘 바꿨는지&quot; 이력을 보관. Log Shipping은 최종 상태만.
+
+**CDC가 적합한 경우:**
+- 데이터 웨어하우스로 변경 데이터를 보내야 할 때 (ETL 파이프라인)
+- 마이크로서비스 간 이벤트 전파 (Debezium + Kafka 패턴)
+- 감사(Audit) 로그가 필요할 때
+
+**대표적인 CDC 도구:**
+- SQL Server: 내장 CDC 기능
+- PostgreSQL: Logical Replication, Debezium
+- MySQL: Debezium, Maxwell, Canal
+- 범용: Debezium (Kafka Connect 기반)
+
+    -- Debezium + Kafka 패턴 예시
+    [MySQL] → Debezium Connector → [Kafka Topic] → Consumer → [Elasticsearch]
+                                                             → [Data Warehouse]
+                                                             → [다른 서비스 DB]
+
+## PostgreSQL: WAL Shipping vs Streaming Replication
+
+PostgreSQL에서 복제를 설정할 때 가장 많이 고민하는 선택지다.
+
+**File-based WAL Shipping**
+- WAL 세그먼트 파일(기본 16MB)이 가득 차면 전송
+- 파일 단위 전송이라 최소 지연 = WAL 세그먼트가 차는 시간
+- 트래픽이 적은 시간대에는 WAL이 안 채워져서 지연이 수십 분까지 늘어날 수 있음
+
+    archive_command = 'scp %p standby:/wal_archive/%f'
+
+**Streaming Replication**
+- WAL 레코드를 실시간으로 TCP 스트리밍
+- WAL 세그먼트가 다 차기를 기다리지 않음
+- 지연이 밀리초~초 단위
+- 동기 모드도 지원 (데이터 유실 제로)
+
+    -- Primary: postgresql.conf
+    -- Standby: primary_conninfo 설정
+    primary_conninfo = 'host=primary port=5432 user=replicator'
+
+**실무에서는:**
+Streaming Replication이 사실상 표준이다.
+File-based WAL Shipping은 추가 안전장치(Streaming이 끊겼을 때 백업)로 같이 사용하거나, 원거리 DR에서 사용한다.
+
+    -- 최적의 조합: Streaming + WAL Archiving
+    -- Primary: Streaming으로 실시간 전송 + WAL Archive로 백업
+    -- Standby: Streaming으로 받되, 끊기면 Archive에서 복구
+
+## MySQL: Binary Log vs GTID Replication
+
+MySQL의 전통적 복제는 **binlog 파일명 + 위치(Position)**로 동기화 지점을 추적한다.
+이게 불편해서 MySQL 5.6부터 **GTID(Global Transaction ID)** 기반 복제가 도입됐다.
+
+**Position-based Replication (전통 방식)**
+
+    CHANGE REPLICATION SOURCE TO
+        SOURCE_LOG_FILE = 'mysql-bin.000003',
+        SOURCE_LOG_POS = 785;
+
+- 특정 binlog 파일의 특정 위치부터 복제 시작
+- Failover 시 새 Primary의 binlog 파일명/위치를 수동으로 맞춰야 함
+- 토폴로지 변경이 번거롭다
+
+**GTID-based Replication (권장 방식)**
+
+    CHANGE REPLICATION SOURCE TO
+        SOURCE_HOST = 'primary',
+        SOURCE_AUTO_POSITION = 1;
+
+- 각 트랜잭션에 고유 ID(UUID:번호)가 부여됨
+- Replica가 &quot;나는 여기까지 처리했다&quot;를 GTID로 알려주면, 새 Primary가 알아서 이어줌
+- Failover, 토폴로지 변경이 훨씬 쉬움
+- MySQL 5.6+ 에서 사용 가능
+
+    -- GTID 활성화 (my.cnf)
+    [mysqld]
+    gtid_mode = ON
+    enforce_gtid_consistency = ON
+
+**실무에서는:**
+신규 구축이라면 GTID를 쓰지 않을 이유가 없다.
+Position 기반은 레거시 시스템에서만 남아있다.
+
+## 의사결정 흐름
+
+어떤 복제 방식을 선택해야 할지 판단하는 흐름이다.
+
+    Q1. 자동 Failover가 필요한가?
+    ├─ Yes → Q2. 예산이 충분한가?
+    │         ├─ Yes → Always On AG (SQL Server) / Patroni + Streaming Rep (PostgreSQL) / MySQL InnoDB Cluster
+    │         └─ No  → Database Mirroring 동기 모드 (레거시) / MySQL Group Replication
+    └─ No → Q3. 실시간 동기화가 필요한가?
+             ├─ Yes → Q4. 테이블 단위 선택이 필요한가?
+             │         ├─ Yes → Transactional Replication / Logical Replication / CDC
+             │         └─ No  → Streaming Replication (PG) / MySQL GTID Replication
+             └─ No → Q5. 용도가 뭔가?
+                      ├─ DR (재해 복구)     → **Log Shipping** (가장 단순하고 안정적)
+                      ├─ 읽기 분산 (리포팅) → **Log Shipping STANDBY** 또는 Streaming Rep
+                      └─ 데이터 추출 (ETL)  → **CDC** (Debezium + Kafka)
+
+## 조합해서 쓰는 실전 아키텍처
+
+실무에서는 한 가지만 쓰는 경우가 드물다. 목적에 따라 조합한다.
+
+**패턴 1: Always On AG + Log Shipping**
+같은 리전(서울)에서는 Always On AG로 고가용성을 확보하고,
+원거리(싱가포르)에는 Log Shipping으로 DR 복제본을 유지한다.
+
+    [서울 Primary] ←→ Always On AG ←→ [서울 Secondary] (자동 Failover)
+         |
+         └── Log Shipping ──→ [싱가포르 DR] (수동 Failover, 비동기)
+
+**패턴 2: Streaming Replication + CDC**
+PostgreSQL Streaming Replication으로 읽기 Replica를 유지하면서,
+CDC(Debezium)로 변경 데이터를 Kafka에 보내 다른 시스템과 동기화한다.
+
+    [Primary PG] → Streaming Rep → [Read Replica] (읽기 분산)
+         |
+         └── Debezium → [Kafka] → [Elasticsearch] (검색)
+                                 → [DW] (분석)
+                                 → [Redis] (캐시 갱신)
+
+**패턴 3: MySQL GTID Rep + ProxySQL**
+MySQL GTID 기반 복제로 여러 Replica를 만들고,
+ProxySQL로 읽기/쓰기를 자동 분리한다.
+
+    [App] → [ProxySQL] ──write──→ [Primary MySQL]
+                       ──read───→ [Replica 1]
+                       ──read───→ [Replica 2]
+
+## 정리
+
+DB 복제에 은탄환은 없다.
+Log Shipping은 단순하고 안정적이지만 실시간이 아니다.
+Always On AG는 강력하지만 비용이 높다.
+CDC는 복제가 아니라 변경 추출이라 용도가 다르다.
+
+**선택 기준을 다시 한번 정리하면:**
+- 실시간 + 자동 Failover가 필요하면 &rarr; Always On AG / Streaming Rep + Patroni
+- 실시간은 필요하지만 테이블 단위 선택이 필요하면 &rarr; Transactional Rep / CDC
+- 분 단위 지연이 괜찮고 단순하게 DR을 원하면 &rarr; **Log Shipping**
+- 변경 데이터를 다른 시스템에 보내야 하면 &rarr; **CDC (Debezium)**
+
+필요에 따라 조합하는 것이 가장 현실적인 답이다.</div>
+		</div>
+	</article>
+	<script src="./article-template.js"></script>
+</body>
+</html>

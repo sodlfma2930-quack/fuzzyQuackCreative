@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Log Shipping 실전 구축 — SQL Server, PostgreSQL, MySQL 설정 가이드 — Tech Blog</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;600;700&family=Noto+Sans+KR:wght@300;400;500;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+	<style>*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif; background: #f5f5f7; color: #1d1d1f; -webkit-font-smoothing: antialiased; }
+.header { background: rgba(255,255,255,.72); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-bottom: 1px solid rgba(0,0,0,.08); padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+.header__title { font-family: 'Outfit', sans-serif; font-size: 17px; font-weight: 600; color: #1d1d1f; }
+.header__back { font-size: 13px; color: #0071e3; text-decoration: none; display: flex; align-items: center; gap: 4px; transition: opacity .15s; }
+.header__back:hover { opacity: .7; }
+.hero { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 60px 20px 50px; text-align: center; color: #fff; }
+.hero__date { font-size: 13px; opacity: .75; margin-bottom: 12px; letter-spacing: .5px; }
+.hero__title { font-size: 30px; font-weight: 700; line-height: 1.35; max-width: 680px; margin: 0 auto; }
+.article { max-width: 720px; margin: -24px auto 60px; padding: 0 20px; }
+.article__body { background: #fff; border-radius: 16px; box-shadow: 0 1px 3px rgba(0,0,0,.06), 0 8px 24px rgba(0,0,0,.04); padding: 40px 36px; }
+.article__content { font-size: 16px; line-height: 2; color: #333; word-break: keep-all; }
+.article__content p { margin-bottom: 18px; } .article__content p:last-child { margin-bottom: 0; }
+.article__content h2 { font-size: 21px; font-weight: 700; color: #1d1d1f; margin: 44px 0 18px; padding-bottom: 10px; border-bottom: 2px solid #667eea; display: inline-block; }
+.article__content h2::before { content: ''; display: inline-block; width: 4px; height: 21px; background: #667eea; border-radius: 2px; margin-right: 10px; vertical-align: text-bottom; }
+.article__content pre { background: #1e1e2e; color: #cdd6f4; border-radius: 12px; padding: 20px 24px; margin: 20px 0; overflow-x: auto; font-family: 'Fira Code', monospace; font-size: 13.5px; line-height: 1.7; border: 1px solid rgba(255,255,255,.06); }
+.article__content code { font-family: 'Fira Code', monospace; font-size: 14px; background: #f0f0f5; color: #e74c8b; padding: 2px 7px; border-radius: 5px; }
+.article__content pre code { background: none; color: inherit; padding: 0; border-radius: 0; font-size: 13.5px; }
+.article__content strong { color: #1d1d1f; font-weight: 600; }
+.progress-bar { position: fixed; top: 0; left: 0; height: 3px; background: linear-gradient(90deg, #667eea, #764ba2); z-index: 200; width: 0; transition: width .1s linear; }
+@media (max-width: 600px) { .hero { padding: 40px 16px 36px; } .hero__title { font-size: 23px; } .article__body { padding: 28px 20px; border-radius: 12px; } .article__content { font-size: 15px; } .article__content h2 { font-size: 19px; } .article__content pre { padding: 16px; font-size: 12.5px; } }</style>
+</head>
+<body>
+	<div class="progress-bar" id="progressBar"></div>
+	<header class="header">
+		<div class="header__title">Tech Blog</div>
+		<a class="header__back" href="./index.html">&larr; 목록으로</a>
+	</header>
+	<div class="hero">
+		<p class="hero__date">2026.06.04 10:30</p>
+		<h1 class="hero__title">Log Shipping 실전 구축 &mdash; SQL Server, PostgreSQL, MySQL 설정 가이드</h1>
+	</div>
+	<article class="article">
+		<div class="article__body">
+			<div class="article__content" id="articleContent">앞선 글에서 Log Shipping의 개념을 정리했다.
+이번에는 실제로 3대 DB 엔진에서 어떻게 설정하는지를 다룬다.
+각 DB마다 용어와 도구가 다르지만, 핵심 원리는 같다: **로그를 백업하고, 보내고, 복원한다**.
+
+## SQL Server Log Shipping 구축
+
+SQL Server는 Log Shipping을 공식 기능으로 내장하고 있다.
+SSMS(SQL Server Management Studio) GUI로도 설정할 수 있고, T-SQL로도 할 수 있다.
+
+**전제 조건**
+- Primary DB의 복구 모델이 **Full** 또는 **Bulk-Logged**여야 한다. Simple 모델은 트랜잭션 로그 백업 자체가 안 된다.
+- Primary와 Secondary 간에 네트워크 공유 폴더가 필요하다.
+- SQL Server Agent가 양쪽 서버에서 실행 중이어야 한다.
+
+**Step 1: Primary DB 복구 모델 확인 및 변경**
+
+    -- 현재 복구 모델 확인
+    SELECT name, recovery_model_desc
+    FROM sys.databases
+    WHERE name = 'MyDatabase';
+
+    -- Full Recovery로 변경
+    ALTER DATABASE MyDatabase SET RECOVERY FULL;
+
+**Step 2: Primary에서 전체 백업(Full Backup) 생성**
+
+Log Shipping을 시작하기 전에 전체 백업이 필요하다.
+이 백업으로 Secondary DB를 초기화한다.
+
+    BACKUP DATABASE MyDatabase
+    TO DISK = '\\SharedFolder\Backup\MyDB_full.bak'
+    WITH INIT, COMPRESSION;
+
+**Step 3: Secondary에서 DB 복원 (NORECOVERY)**
+
+    RESTORE DATABASE MyDatabase
+    FROM DISK = '\\SharedFolder\Backup\MyDB_full.bak'
+    WITH NORECOVERY,
+    MOVE 'MyDatabase' TO 'D:\Data\MyDatabase.mdf',
+    MOVE 'MyDatabase_log' TO 'D:\Data\MyDatabase_log.ldf';
+
+`WITH NORECOVERY`가 핵심이다. DB를 &quot;복원 중&quot; 상태로 놔둬야 이후 로그를 계속 적용할 수 있다.
+
+**Step 4: SSMS에서 Log Shipping 설정**
+
+1. SSMS에서 Primary DB 우클릭 &rarr; Properties &rarr; Transaction Log Shipping
+2. &quot;Enable this as a primary database in a log shipping configuration&quot; 체크
+3. Backup Settings에서 백업 경로와 주기(예: 5분) 설정
+4. Add Secondary 클릭 &rarr; Secondary 서버 연결, 복원 모드(NORECOVERY/STANDBY) 선택
+5. 원하면 Monitor 서버도 추가
+
+**Step 4-alt: T-SQL로 수동 설정**
+
+SSMS 대신 스크립트로 하고 싶다면 시스템 저장 프로시저를 사용한다.
+
+    -- Primary에서: 로그 백업 작업 등록
+    EXEC sp_add_log_shipping_primary_database
+        @database = 'MyDatabase',
+        @backup_directory = '\\SharedFolder\LogBackup',
+        @backup_share = '\\SharedFolder\LogBackup',
+        @backup_job_name = 'LSBackup_MyDatabase',
+        @backup_retention_period = 4320,      -- 3일(분 단위)
+        @backup_threshold = 60,               -- 60분 이상 백업 안 되면 알림
+        @history_retention_period = 5760;
+
+    -- Secondary에서: 복사 작업과 복원 작업 등록
+    EXEC sp_add_log_shipping_secondary_primary
+        @primary_server = 'PrimaryServer',
+        @primary_database = 'MyDatabase',
+        @backup_source_directory = '\\SharedFolder\LogBackup',
+        @copy_job_name = 'LSCopy_MyDatabase',
+        @restore_job_name = 'LSRestore_MyDatabase';
+
+    EXEC sp_add_log_shipping_secondary_database
+        @secondary_database = 'MyDatabase',
+        @primary_server = 'PrimaryServer',
+        @primary_database = 'MyDatabase',
+        @restore_delay = 0,
+        @restore_mode = 0,                    -- 0: NORECOVERY, 1: STANDBY
+        @restore_all = 1;
+
+**Step 5: 상태 모니터링**
+
+    -- Log Shipping 상태 확인
+    SELECT * FROM msdb.dbo.log_shipping_monitor_secondary;
+
+    -- 마지막 백업/복사/복원 시간 확인
+    SELECT
+        secondary_server,
+        secondary_database,
+        last_copied_file,
+        last_copied_date,
+        last_restored_file,
+        last_restored_date
+    FROM msdb.dbo.log_shipping_monitor_secondary;
+
+## PostgreSQL WAL Shipping 구축
+
+PostgreSQL에서는 트랜잭션 로그를 **WAL(Write-Ahead Log)**이라고 부른다.
+WAL을 복제 서버로 전송하는 것이 PostgreSQL 버전의 Log Shipping이다.
+
+PostgreSQL에는 두 가지 방식이 있다:
+- **File-based WAL Shipping**: WAL 파일(16MB 세그먼트)을 통째로 복사. 전통적인 Log Shipping.
+- **Streaming Replication**: WAL 레코드를 실시간 스트리밍. 더 작은 지연.
+
+여기서는 전통적인 File-based WAL Shipping을 다룬다.
+
+**Step 1: Primary 서버 설정 (postgresql.conf)**
+
+    # WAL 아카이빙 활성화
+    wal_level = replica
+    archive_mode = on
+    archive_command = 'scp %p standby:/var/lib/postgresql/wal_archive/%f'
+
+    # %p = WAL 파일의 전체 경로
+    # %f = WAL 파일 이름만
+
+`archive_command`는 WAL 세그먼트 하나가 가득 찰 때마다 실행된다.
+SCP, rsync, aws s3 cp 등 어떤 명령이든 쓸 수 있다.
+
+    # rsync 사용 예시
+    archive_command = 'rsync -a %p standby:/var/lib/postgresql/wal_archive/%f'
+
+    # AWS S3 사용 예시
+    archive_command = 'aws s3 cp %p s3://my-wal-bucket/%f'
+
+**Step 2: Primary에서 베이스 백업 생성**
+
+    # pg_basebackup으로 전체 복제본 생성
+    pg_basebackup -h primary-host -D /var/lib/postgresql/16/main \
+        -U replication_user -Fp -Xs -P
+
+    # -Fp: plain format
+    # -Xs: WAL을 스트리밍으로 포함
+    # -P: 진행률 표시
+
+**Step 3: Standby 서버 설정**
+
+PostgreSQL 12 이상에서는 `standby.signal` 파일을 만들면 대기 모드로 시작한다.
+
+    # standby.signal 파일 생성 (내용 없어도 됨)
+    touch /var/lib/postgresql/16/main/standby.signal
+
+postgresql.conf (Standby 서버):
+
+    # WAL 아카이브에서 복원
+    restore_command = 'cp /var/lib/postgresql/wal_archive/%f %p'
+
+    # 복구 타겟 (최신까지 복구)
+    recovery_target_timeline = 'latest'
+
+    # Hot Standby: 복구 중에도 읽기 쿼리 허용
+    hot_standby = on
+
+**Step 4: Standby 시작**
+
+    systemctl start postgresql
+
+Standby는 시작하면서 자동으로 WAL 아카이브에서 파일을 하나씩 읽어서 적용한다.
+새로운 WAL 파일이 도착할 때까지 대기하고, 도착하면 즉시 적용한다.
+
+**상태 확인**
+
+    -- Primary에서: WAL 아카이브 상태
+    SELECT * FROM pg_stat_archiver;
+
+    -- Standby에서: 복구 상태
+    SELECT pg_is_in_recovery();           -- true면 Standby 상태
+    SELECT pg_last_wal_receive_lsn();     -- 마지막 수신 LSN
+    SELECT pg_last_wal_replay_lsn();      -- 마지막 적용 LSN
+    SELECT pg_last_xact_replay_timestamp(); -- 마지막 적용 시간
+
+    -- 지연 시간 계산
+    SELECT now() - pg_last_xact_replay_timestamp() AS replication_lag;
+
+## MySQL Binary Log Replication 구축
+
+MySQL은 &quot;Log Shipping&quot;이라는 공식 명칭을 쓰지 않지만, Binary Log(binlog)를 이용한 복제가 동일한 원리다.
+다만 MySQL의 복제는 파일 복사가 아니라 **네트워크 스트리밍 방식**이 기본이라서, 엄밀히는 Log Shipping보다 한 단계 진화한 형태다.
+
+**Step 1: Primary(Source) 서버 설정 (my.cnf)**
+
+    [mysqld]
+    server-id = 1
+    log_bin = /var/log/mysql/mysql-bin
+    binlog_format = ROW
+    binlog_expire_logs_seconds = 604800   # 7일 보관
+
+    # 복제할 DB 지정 (선택)
+    # binlog-do-db = mydb
+
+**Step 2: 복제용 사용자 생성**
+
+    CREATE USER 'repl_user'@'%' IDENTIFIED BY 'strong_password';
+    GRANT REPLICATION SLAVE ON *.* TO 'repl_user'@'%';
+    FLUSH PRIVILEGES;
+
+**Step 3: Primary에서 데이터 덤프 + 로그 위치 확인**
+
+    -- 현재 binlog 위치 확인
+    SHOW MASTER STATUS;
+    +------------------+----------+
+    | File             | Position |
+    +------------------+----------+
+    | mysql-bin.000003 |      785 |
+    +------------------+----------+
+
+    # mysqldump로 초기 데이터 복제
+    mysqldump -u root -p --all-databases --master-data=2 \
+        --single-transaction &gt; /backup/full_dump.sql
+
+**Step 4: Replica 서버 설정 (my.cnf)**
+
+    [mysqld]
+    server-id = 2
+    relay_log = /var/log/mysql/relay-bin
+    read_only = ON
+
+**Step 5: Replica에서 덤프 복원 + 복제 시작**
+
+    -- 덤프 복원
+    -- mysql -u root -p &lt; /backup/full_dump.sql
+
+    -- 복제 소스 설정 (MySQL 8.0.23+)
+    CHANGE REPLICATION SOURCE TO
+        SOURCE_HOST = 'primary-host',
+        SOURCE_USER = 'repl_user',
+        SOURCE_PASSWORD = 'strong_password',
+        SOURCE_LOG_FILE = 'mysql-bin.000003',
+        SOURCE_LOG_POS = 785;
+
+    -- 복제 시작
+    START REPLICA;
+
+**Step 6: 복제 상태 확인**
+
+    SHOW REPLICA STATUS\G
+
+    -- 핵심 확인 항목:
+    -- Replica_IO_Running: Yes     (binlog 수신 중)
+    -- Replica_SQL_Running: Yes    (binlog 적용 중)
+    -- Seconds_Behind_Source: 0    (지연 시간, 0이면 따라잡은 상태)
+
+## 장애 발생 시 수동 Failover
+
+Log Shipping에는 자동 Failover가 없다. Primary가 죽으면 수동으로 전환해야 한다.
+
+**SQL Server Failover 절차**
+
+    -- 1. (가능하다면) Primary에서 마지막 로그 백업
+    BACKUP LOG MyDatabase TO DISK = '...' WITH NORECOVERY;
+
+    -- 2. 마지막 로그를 Secondary에 적용
+    RESTORE LOG MyDatabase FROM DISK = '...' WITH NORECOVERY;
+
+    -- 3. Secondary DB를 온라인으로 전환
+    RESTORE DATABASE MyDatabase WITH RECOVERY;
+
+    -- 이제 이 서버가 새 Primary가 된다
+
+**PostgreSQL Failover 절차**
+
+    -- Standby를 Primary로 승격
+    SELECT pg_promote();
+
+    -- 또는 커맨드라인에서
+    -- pg_ctl promote -D /var/lib/postgresql/16/main
+
+**MySQL Failover 절차**
+
+    -- Replica에서 복제 중지
+    STOP REPLICA;
+    RESET REPLICA ALL;
+
+    -- 읽기 전용 해제
+    SET GLOBAL read_only = OFF;
+    SET GLOBAL super_read_only = OFF;
+
+## 모니터링 체크리스트
+
+운영 환경에서 Log Shipping을 쓴다면 다음 항목을 반드시 모니터링해야 한다.
+
+**필수 모니터링 항목:**
+1. 마지막 백업 시간 — 백업이 정상적으로 실행되고 있는가?
+2. 마지막 복원 시간 — 복원이 밀리고 있지 않은가?
+3. 지연 시간(Lag) — Primary와 Secondary 간 데이터 차이가 허용 범위 내인가?
+4. 디스크 용량 — 로그 백업 파일이 쌓여서 디스크가 차지 않는가?
+5. 네트워크 상태 — 파일 복사가 실패하고 있지 않은가?
+
+**알림 설정 기준 (예시):**
+- 백업이 30분 이상 안 된다 &rarr; WARNING
+- 백업이 1시간 이상 안 된다 &rarr; CRITICAL
+- 복원 지연이 1시간 이상이다 &rarr; WARNING
+- 로그 백업 디렉토리 용량이 80% 이상이다 &rarr; WARNING
+
+## 성능 튜닝 팁
+
+**1. 백업 압축 사용**
+SQL Server: `BACKUP LOG ... WITH COMPRESSION`
+파일 크기가 60~80% 줄어든다. 네트워크 전송 시간도 단축된다.
+
+**2. 백업 주기 조정**
+짧게 하면: 지연이 줄지만, 백업/복원 작업의 오버헤드가 증가한다.
+길게 하면: 오버헤드가 줄지만, 지연이 커지고 장애 시 데이터 유실 범위가 늘어난다.
+일반적으로 5~15분이 적절하다.
+
+**3. 복사 경로 최적화**
+가능하면 전용 네트워크(Replication Network)를 사용한다.
+서비스 트래픽과 복제 트래픽이 같은 네트워크를 쓰면 서로 영향을 준다.
+
+**4. 오래된 로그 백업 자동 정리**
+복원이 완료된 로그 파일은 자동으로 삭제되게 설정한다. 안 그러면 디스크가 꽉 찬다.
+
+## 정리
+
+3대 DB 엔진의 Log Shipping 설정을 살펴봤다.
+SQL Server는 기본 내장 기능으로 가장 편하고, PostgreSQL은 WAL 아카이빙 + Standby 조합으로 유연하고, MySQL은 Binlog Replication이 사실상 표준이다.
+
+어떤 DB를 쓰든 핵심 흐름은 같다:
+1. 로그 백업을 켠다
+2. 전체 백업으로 Secondary를 초기화한다
+3. 로그를 보내고 적용하는 루프를 설정한다
+4. 모니터링과 알림을 건다
+
+다음 편에서는 Log Shipping과 다른 복제 방식(Replication, Mirroring, Always On, CDC)을 비교한다.</div>
+		</div>
+	</article>
+	<script src="./article-template.js"></script>
+</body>
+</html>
