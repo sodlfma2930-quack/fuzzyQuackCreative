@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>DDD START! 정리 — 애그리거트 트랜잭션 관리, 선점 잠금과 비선점 잠금 (Chapter 8) — Tech Blog</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;600;700&family=Noto+Sans+KR:wght@300;400;500;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+	<style>*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif; background: #f5f5f7; color: #1d1d1f; -webkit-font-smoothing: antialiased; }
+.header { background: rgba(255,255,255,.72); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-bottom: 1px solid rgba(0,0,0,.08); padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+.header__title { font-family: 'Outfit', sans-serif; font-size: 17px; font-weight: 600; color: #1d1d1f; }
+.header__back { font-size: 13px; color: #0071e3; text-decoration: none; display: flex; align-items: center; gap: 4px; transition: opacity .15s; }
+.header__back:hover { opacity: .7; }
+.hero { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 60px 20px 50px; text-align: center; color: #fff; }
+.hero__date { font-size: 13px; opacity: .75; margin-bottom: 12px; letter-spacing: .5px; }
+.hero__title { font-size: 30px; font-weight: 700; line-height: 1.35; max-width: 680px; margin: 0 auto; }
+.article { max-width: 720px; margin: -24px auto 60px; padding: 0 20px; }
+.article__body { background: #fff; border-radius: 16px; box-shadow: 0 1px 3px rgba(0,0,0,.06), 0 8px 24px rgba(0,0,0,.04); padding: 40px 36px; }
+.article__content { font-size: 16px; line-height: 2; color: #333; word-break: keep-all; }
+.article__content p { margin-bottom: 18px; } .article__content p:last-child { margin-bottom: 0; }
+.article__content h2 { font-size: 21px; font-weight: 700; color: #1d1d1f; margin: 44px 0 18px; padding-bottom: 10px; border-bottom: 2px solid #667eea; display: inline-block; }
+.article__content h2::before { content: ''; display: inline-block; width: 4px; height: 21px; background: #667eea; border-radius: 2px; margin-right: 10px; vertical-align: text-bottom; }
+.article__content pre { background: #1e1e2e; color: #cdd6f4; border-radius: 12px; padding: 20px 24px; margin: 20px 0; overflow-x: auto; font-family: 'Fira Code', monospace; font-size: 13.5px; line-height: 1.7; border: 1px solid rgba(255,255,255,.06); }
+.article__content code { font-family: 'Fira Code', monospace; font-size: 14px; background: #f0f0f5; color: #e74c8b; padding: 2px 7px; border-radius: 5px; }
+.article__content pre code { background: none; color: inherit; padding: 0; border-radius: 0; font-size: 13.5px; }
+.article__content strong { color: #1d1d1f; font-weight: 600; }
+.progress-bar { position: fixed; top: 0; left: 0; height: 3px; background: linear-gradient(90deg, #667eea, #764ba2); z-index: 200; width: 0; transition: width .1s linear; }
+@media (max-width: 600px) { .hero { padding: 40px 16px 36px; } .hero__title { font-size: 23px; } .article__body { padding: 28px 20px; border-radius: 12px; } .article__content { font-size: 15px; } .article__content h2 { font-size: 19px; } .article__content pre { padding: 16px; font-size: 12.5px; } }</style>
+</head>
+<body>
+	<div class="progress-bar" id="progressBar"></div>
+	<header class="header">
+		<div class="header__title">Tech Blog</div>
+		<a class="header__back" href="./index.html">← 목록으로</a>
+	</header>
+	<div class="hero">
+		<p class="hero__date">2026.08.14 12:00</p>
+		<h1 class="hero__title">DDD START! 정리 — 애그리거트 트랜잭션 관리, 선점 잠금과 비선점 잠금 (Chapter 8)</h1>
+	</div>
+	<article class="article">
+		<div class="article__body">
+			<div class="article__content" id="articleContent">한 애그리거트를 두 사용자가 동시에 수정하면 어떻게 될까?
+운영자가 배송지 정보를 조회한 뒤 배송 상태로 변경하는 사이, 고객이 배송지를 변경해버리면?
+트랜잭션마다 리소스에 대한 **잠금(Lock)** 을 어떻게 관리하느냐가 이 장의 핵심이다.
+
+## 선점 잠금 (Pessimistic Lock)
+
+먼저 선점하는 방식이다. 한 스레드가 애그리거트를 구한 뒤 잠금을 걸면, 다른 스레드는 잠금이 해제될 때까지 대기한다.
+데이터를 수정하는 동안 다른 트랜잭션이 접근하지 못하게 **물리적으로 막는** 것이다.
+
+JPA에서는 `LockModeType.PESSIMISTIC_WRITE`를 사용한다:
+
+    Order order = entityManager.find(
+        Order.class, orderNo, LockModeType.PESSIMISTIC_WRITE);
+
+이 코드는 내부적으로 `SELECT ... FOR UPDATE` 쿼리를 실행한다.
+해당 레코드에 행 잠금을 걸어서 다른 트랜잭션이 수정하지 못하게 한다.
+
+Spring Data JPA에서는 `@Lock` 애노테이션을 사용한다:
+
+    public interface MemberRepository extends Repository<Member, MemberId> {
+        @Lock(LockModeType.PESSIMISTIC_WRITE)
+        @Query("select m from Member m where m.id = :id")
+        Optional<Member> findByIdForUpdate(@Param("id") MemberId memberId);
+    }
+
+## 선점 잠금과 교착 상태 (Deadlock)
+
+선점 잠금의 큰 위험은 **교착 상태(Deadlock)** 다.
+스레드 1이 A를 잠그고 B를 구하려 하고, 스레드 2가 B를 잠그고 A를 구하려 하면 서로 무한 대기한다.
+
+이 문제를 방지하려면 **잠금 타임아웃**을 설정해야 한다.
+JPA에서는 힌트로 설정한다:
+
+    Map<String, Object> hints = new HashMap<>();
+    hints.put("javax.persistence.lock.timeout", 2000);  // 2초
+    Order order = entityManager.find(
+        Order.class, orderNo, LockModeType.PESSIMISTIC_WRITE, hints);
+
+Spring Data JPA에서는 `@QueryHints`를 사용한다:
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @QueryHints({
+        @QueryHint(name = "javax.persistence.lock.timeout", value = "2000")
+    })
+    @Query("select m from Member m where m.id = :id")
+    Optional<Member> findByIdForUpdate(@Param("id") MemberId memberId);
+
+DBMS에 따라 타임아웃 힌트를 지원하지 않을 수도 있으므로 사용하는 DB가 관련 기능을 지원하는지 확인해야 한다.
+
+## 비선점 잠금 (Optimistic Lock)
+
+선점 잠금이 물리적으로 막는 거라면, 비선점 잠금은 **충돌을 허용하되 감지하는** 방식이다.
+동시에 접근하는 것 자체를 막지 않고, 변경할 때 실제로 충돌이 발생했는지 확인한다.
+
+핵심은 **버전(version)** 이다. 애그리거트를 수정할 때마다 버전을 1씩 증가시킨다:
+
+    UPDATE purchase_order SET ..., version = version + 1
+    WHERE number = ? AND version = 10
+
+내가 조회했을 때 버전이 10이었는데, 수정하려고 보니 이미 11이면?
+다른 누군가 먼저 수정한 것이다. 이때 수정에 실패한다.
+
+JPA에서는 `@Version` 애노테이션을 사용한다:
+
+    @Entity
+    public class Order {
+        @Id
+        private String number;
+
+        @Version
+        private long version;
+        // ...
+    }
+
+JPA가 UPDATE 쿼리를 실행할 때 자동으로 `WHERE version = :currentVersion` 조건을 추가한다.
+수정할 수 없으면 `OptimisticLockException`이 발생한다.
+
+응용 서비스에서는 이 예외를 적절히 처리해야 한다:
+
+    @Controller
+    public class OrderController {
+        @PostMapping("/changeShipping")
+        public String changeShipping(ChangeShippingRequest req) {
+            try {
+                orderService.changeShipping(req);
+                return "changeShippingSuccess";
+            } catch (OptimisticLockingFailureException ex) {
+                return "changeShippingConflict";
+            }
+        }
+    }
+
+## 비선점 잠금의 실전 흐름
+
+비선점 잠금을 실무에서 사용하려면 이런 흐름을 따른다:
+
+1. 클라이언트가 애그리거트를 조회하면서 **현재 버전**을 함께 받는다
+2. 수정 요청 시 **조회했던 버전**을 함께 전송한다
+3. 서버는 전달받은 버전과 현재 버전을 비교한다
+4. 버전이 같으면 수정하고, 다르면 **충돌을 알린다**
+
+HTML 폼에 버전을 hidden 필드로 넣는 방식이 가장 간단하다:
+
+    <input type="hidden" name="version" value="${order.version}">
+
+서비스에서 버전 비교:
+
+    public void changeShipping(ChangeShippingRequest req) {
+        Order order = orderRepository.findById(req.getOrderNo());
+        if (!order.matchVersion(req.getVersion())) {
+            throw new VersionConflictException();
+        }
+        order.changeShippingInfo(req.getShippingInfo());
+    }
+
+`VersionConflictException`은 이미 누군가 수정했다는 뜻이고, `OptimisticLockingFailureException`은 거의 동시에 수정했다는 뜻이다.
+
+## 강제 버전 증가 (Force Version Increment)
+
+루트 엔티티가 아닌 연관된 엔티티의 값이 변경되는 경우에도 논리적으로는 애그리거트가 변경된 것이다.
+하지만 JPA는 루트 엔티티의 버전만 관리하기 때문에 연관 엔티티만 변경되면 루트의 버전이 증가하지 않는다.
+
+이 문제를 해결하는 것이 **강제 버전 증가**다.
+`LockModeType.OPTIMISTIC_FORCE_INCREMENT`를 사용한다:
+
+    @Repository
+    public interface OrderRepository extends Repository<Order, OrderNo> {
+        @Lock(LockModeType.OPTIMISTIC_FORCE_INCREMENT)
+        @Query("select o from Order o where o.id = :id")
+        Optional<Order> findByIdOptimisticForceIncrement(@Param("id") OrderNo id);
+    }
+
+이 잠금 모드를 사용하면 해당 엔티티의 상태 변경 여부와 상관없이 트랜잭션 종료 시점에 무조건 버전 값을 증가시킨다.
+
+## 오프라인 선점 잠금 (Offline Pessimistic Lock)
+
+단일 트랜잭션이 아닌 **여러 트랜잭션에 걸친** 잠금이 필요할 때 사용한다.
+예를 들어, 수정 폼을 열고 나서 수정 완료할 때까지의 시간 동안 다른 사람이 수정하지 못하게 막는 것이다.
+
+이 경우 DB의 행 잠금이나 JPA의 버전 잠금으로는 해결할 수 없다.
+별도의 **잠금 관리 서비스**가 필요하다.
+
+`LockManager` 인터페이스:
+
+    public interface LockManager {
+        LockId tryLock(String type, String id) throws LockException;
+        void checkLock(LockId lockId) throws LockException;
+        void releaseLock(LockId lockId) throws LockException;
+        void extendLockExpiration(LockId lockId, long inc) throws LockException;
+    }
+
+잠금 유효 시간을 설정해서 잠금을 건 사용자가 아무 작업도 하지 않으면 자동으로 잠금이 해제되도록 한다.
+수정 폼에서 주기적으로 `extendLockExpiration()`을 호출해서 잠금 시간을 연장하는 방식을 사용한다.
+
+잠금 데이터는 DB의 별도 테이블에 저장한다:
+
+    create table locks (
+        type varchar(255),
+        id varchar(255),
+        lockid varchar(255),
+        expiration_time datetime,
+        primary key (type, id)
+    );
+
+## 정리
+
+트랜잭션 관리는 동시성 문제의 핵심이다:
+
+- **선점 잠금(Pessimistic Lock)**: `SELECT FOR UPDATE`로 물리적 차단. 교착 상태 방지를 위해 타임아웃 필수
+- **비선점 잠금(Optimistic Lock)**: `@Version`으로 충돌 감지. 수정 시 버전 비교
+- **강제 버전 증가**: 연관 엔티티 변경 시에도 루트 버전을 강제 증가
+- **오프라인 선점 잠금**: 여러 트랜잭션에 걸친 잠금은 별도 `LockManager` 구현
+
+실무에서는 대부분 비선점 잠금(Optimistic Lock)을 기본으로 사용한다. 충돌 빈도가 낮은 시스템에서 성능 손해 없이 동시성 문제를 해결할 수 있기 때문이다.</div>
+		</div>
+	</article>
+	<script src="./article-template.js"></script>
+</body>
+</html>

@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>DDD START! 정리 — CQRS, 명령 모델과 조회 모델의 분리 (Chapter 11) — Tech Blog</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;600;700&family=Noto+Sans+KR:wght@300;400;500;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+	<style>*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif; background: #f5f5f7; color: #1d1d1f; -webkit-font-smoothing: antialiased; }
+.header { background: rgba(255,255,255,.72); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-bottom: 1px solid rgba(0,0,0,.08); padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+.header__title { font-family: 'Outfit', sans-serif; font-size: 17px; font-weight: 600; color: #1d1d1f; }
+.header__back { font-size: 13px; color: #0071e3; text-decoration: none; display: flex; align-items: center; gap: 4px; transition: opacity .15s; }
+.header__back:hover { opacity: .7; }
+.hero { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 60px 20px 50px; text-align: center; color: #fff; }
+.hero__date { font-size: 13px; opacity: .75; margin-bottom: 12px; letter-spacing: .5px; }
+.hero__title { font-size: 30px; font-weight: 700; line-height: 1.35; max-width: 680px; margin: 0 auto; }
+.article { max-width: 720px; margin: -24px auto 60px; padding: 0 20px; }
+.article__body { background: #fff; border-radius: 16px; box-shadow: 0 1px 3px rgba(0,0,0,.06), 0 8px 24px rgba(0,0,0,.04); padding: 40px 36px; }
+.article__content { font-size: 16px; line-height: 2; color: #333; word-break: keep-all; }
+.article__content p { margin-bottom: 18px; } .article__content p:last-child { margin-bottom: 0; }
+.article__content h2 { font-size: 21px; font-weight: 700; color: #1d1d1f; margin: 44px 0 18px; padding-bottom: 10px; border-bottom: 2px solid #667eea; display: inline-block; }
+.article__content h2::before { content: ''; display: inline-block; width: 4px; height: 21px; background: #667eea; border-radius: 2px; margin-right: 10px; vertical-align: text-bottom; }
+.article__content pre { background: #1e1e2e; color: #cdd6f4; border-radius: 12px; padding: 20px 24px; margin: 20px 0; overflow-x: auto; font-family: 'Fira Code', monospace; font-size: 13.5px; line-height: 1.7; border: 1px solid rgba(255,255,255,.06); }
+.article__content code { font-family: 'Fira Code', monospace; font-size: 14px; background: #f0f0f5; color: #e74c8b; padding: 2px 7px; border-radius: 5px; }
+.article__content pre code { background: none; color: inherit; padding: 0; border-radius: 0; font-size: 13.5px; }
+.article__content strong { color: #1d1d1f; font-weight: 600; }
+.progress-bar { position: fixed; top: 0; left: 0; height: 3px; background: linear-gradient(90deg, #667eea, #764ba2); z-index: 200; width: 0; transition: width .1s linear; }
+@media (max-width: 600px) { .hero { padding: 40px 16px 36px; } .hero__title { font-size: 23px; } .article__body { padding: 28px 20px; border-radius: 12px; } .article__content { font-size: 15px; } .article__content h2 { font-size: 19px; } .article__content pre { padding: 16px; font-size: 12.5px; } }</style>
+</head>
+<body>
+	<div class="progress-bar" id="progressBar"></div>
+	<header class="header">
+		<div class="header__title">Tech Blog</div>
+		<a class="header__back" href="./index.html">← 목록으로</a>
+	</header>
+	<div class="hero">
+		<p class="hero__date">2026.08.14 13:30</p>
+		<h1 class="hero__title">DDD START! 정리 — CQRS, 명령 모델과 조회 모델의 분리 (Chapter 11)</h1>
+	</div>
+	<article class="article">
+		<div class="article__body">
+			<div class="article__content" id="articleContent">시스템이 제공하는 기능은 크게 두 가지로 나뉜다.
+**상태를 변경하는 기능**과 **상태를 조회하는 기능**이다.
+이 두 가지를 하나의 모델로 처리하면 복잡해지는데, CQRS는 이 둘을 분리하는 패턴이다.
+
+## 단일 모델의 단점
+
+주문 내역 조회 화면을 생각해보자.
+Order에서 주문 정보를 가져오고, Product에서 상품 이름을 가져오고, Member에서 회원 이름과 아이디를 가져와야 한다.
+**여러 애그리거트에서 데이터를 가져와야 한다.**
+
+조회 화면의 특성상 조회 속도가 빠를수록 좋은데, 여러 애그리거트에서 데이터를 가져와야 할 경우 구현 방법을 고민해야 한다.
+
+3장에서 언급한 ID를 이용해서 애그리거트를 참조하는 방식을 사용하면 즉시 로딩(eager loading)과 같은 JPA의 쿼리 관련 최적화 기능을 사용할 수 없다. 한 번의 select 쿼리로 조회 화면에 필요한 데이터를 읽어올 수 없어서 조회 속도에 문제가 생길 수 있다.
+
+애그리거트 간의 연관을 ID가 아니라 직접 참조하는 방식으로 연결해도 고민거리가 생긴다. 조회 화면의 특성에 따라 같은 연관도 즉시 로딩이나 지연 로딩(lazy loading)으로 처리해야 하기 때문이다.
+
+이런 고민이 발생하는 이유는 시스템의 상태를 변경할 때와 조회할 때 **단일 도메인 모델**을 사용하기 때문이다.
+객체 지향으로 도메인 모델을 구현할 때 주로 사용하는 ORM 기법은 `Order.cancel()`이나 `Order.changeShippingInfo()`처럼 도메인의 상태 변경을 구현하는 데는 적합하지만, 주문 상세 조회 화면처럼 여러 애그리거트에서 데이터를 가져와서 출력하는 기능을 구현하기에는 고려할 것들이 많아서 구현을 복잡하게 만드는 원인이 된다.
+
+## CQRS란
+
+**CQRS(Command Query Responsibility Segregation)** — 상태 변경을 위한 모델과 조회를 위한 모델을 분리하는 패턴이다.
+
+시스템이 제공하는 기능을 크게 두 가지로 나눌 수 있다:
+- **상태를 변경하는 기능**: 새로운 주문을 생성하거나, 배송지 정보를 변경하거나, 회원의 암호를 변경하는 기능. 현재 저장하고 있는 데이터를 변경하는 방식으로 기능을 구현한다.
+- **상태 정보를 조회하는 기능**: 주문 상세 내역 보기, 게시글 목록 보기, 회원 정보 보기, 판매 통계 보기가 이에 해당한다. 필요한 데이터를 읽어와 UI를 통해 보여주는 방식으로 구현한다.
+
+도메인 모델 관점에서 상태 변경 기능은 주로 **한 애그리거트의 상태를 변경**한다.
+예를 들어, 주문 취소와 배송지 정보 변경은 한 개의 Order 애그리거트를 변경한다.
+
+반면에 조회 기능은 한 애그리거트의 데이터를 조회할 수도 있지만, 두 개 이상의 애그리거트에서 데이터를 조회할 수도 있다. 앞서 살펴본 주문 상세 조회 기능이 이에 해당한다.
+
+이 구현 복잡도를 낮추는 간단한 방법이 바로 **상태 변경을 위한 모델과 조회를 위한 모델을 분리**하는 것이다.
+
+## 명령 모델과 조회 모델
+
+CQRS에서 명령(Command) 모델은 상태를 변경하는 도메인 로직을 수행한다.
+조회(Query) 모델은 데이터를 조회하는 데 특화된다.
+
+**명령 모델 예시** — 상태 변경에 집중:
+
+    public class Order {
+        public void cancel() { ... }
+        public void changeShippingInfo(ShippingInfo newInfo) { ... }
+    }
+
+**조회 모델 예시** — 조회에 최적화:
+
+    public class OrderSummary {
+        private String orderNumber;
+        private String ordererName;
+        private String productName;
+        private int totalAmounts;
+        private String state;
+    }
+
+명령 모델은 JPA의 `@Entity`로 도메인 모델을 구현하고, 조회 모델은 5장에서 살펴본 `@Subselect`나 MyBatis의 매퍼를 이용해서 조회 전용 데이터 타입을 구현할 수 있다.
+
+## CQRS의 장단점
+
+**장점**:
+- 명령 모델을 구현할 때 도메인 자체에 집중할 수 있다
+- 조회 성능을 향상시키는 데 유리하다. 조회 전용 모델을 사용하므로 조회에 최적화된 쿼리를 마음껏 쓸 수 있다
+- 명령 모델과 조회 모델이 서로 다른 저장소를 사용할 수 있다. 명령 모델은 RDBMS를 사용하고 조회 모델은 메모리 기반의 NoSQL을 사용할 수 있다
+
+**단점**:
+- 구현해야 할 코드가 더 많다. 단일 모델을 사용할 때는 하나의 엔티티로 모든 걸 처리하지만, CQRS는 명령 모델과 조회 모델을 각각 구현해야 한다
+- 더 많은 구현 기술이 필요하다. 명령과 조회 모델이 서로 다른 저장소를 사용하면 이를 동기화하는 메커니즘도 필요하다
+
+## 도메인이 복잡할수록 CQRS
+
+도메인이 복잡할수록 명령 기능과 조회 기능이 다루는 데이터 범위에 차이가 난다.
+이런 경우에 CQRS를 적용하면 각 모델에 맞는 구현 기술을 선택할 수 있어서 전체적인 복잡도를 낮출 수 있다.
+
+반대로 도메인이 단순하거나 트래픽이 적은 시스템이라면 굳이 CQRS를 도입할 필요가 없다.
+두 모델을 유지하는 비용이 CQRS의 장점을 넘어서기 때문이다.
+
+## 정리
+
+CQRS는 도메인 모델의 복잡도를 관리하는 전략적 패턴이다:
+
+- **단일 모델의 한계**: 상태 변경과 조회를 하나의 모델로 처리하면 양쪽 모두 타협하게 된다
+- **CQRS**: Command(상태 변경)와 Query(조회)를 위한 모델을 분리
+- **명령 모델**: 도메인 로직에 집중, JPA + ORM 기반
+- **조회 모델**: 조회 성능에 최적화, `@Subselect` / MyBatis / 네이티브 쿼리 활용
+- **별도 저장소**: 명령은 RDBMS, 조회는 NoSQL — 동기화 메커니즘(이벤트) 필요
+- **적용 기준**: 도메인이 복잡하고 트래픽이 높을수록 효과적
+
+이 책의 마지막 장으로, 앞서 다룬 이벤트(10장)와 자연스럽게 연결된다.
+이벤트로 명령 모델의 상태 변화를 조회 모델에 동기화하는 구조가 CQRS의 완성형이기 때문이다.</div>
+		</div>
+	</article>
+	<script src="./article-template.js"></script>
+</body>
+</html>

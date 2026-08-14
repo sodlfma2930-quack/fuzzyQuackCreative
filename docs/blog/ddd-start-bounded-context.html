@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>DDD START! 정리 — 도메인 모델과 BOUNDED CONTEXT, 모델의 경계를 나누는 법 (Chapter 9) — Tech Blog</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;600;700&family=Noto+Sans+KR:wght@300;400;500;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+	<style>*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif; background: #f5f5f7; color: #1d1d1f; -webkit-font-smoothing: antialiased; }
+.header { background: rgba(255,255,255,.72); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-bottom: 1px solid rgba(0,0,0,.08); padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+.header__title { font-family: 'Outfit', sans-serif; font-size: 17px; font-weight: 600; color: #1d1d1f; }
+.header__back { font-size: 13px; color: #0071e3; text-decoration: none; display: flex; align-items: center; gap: 4px; transition: opacity .15s; }
+.header__back:hover { opacity: .7; }
+.hero { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 60px 20px 50px; text-align: center; color: #fff; }
+.hero__date { font-size: 13px; opacity: .75; margin-bottom: 12px; letter-spacing: .5px; }
+.hero__title { font-size: 30px; font-weight: 700; line-height: 1.35; max-width: 680px; margin: 0 auto; }
+.article { max-width: 720px; margin: -24px auto 60px; padding: 0 20px; }
+.article__body { background: #fff; border-radius: 16px; box-shadow: 0 1px 3px rgba(0,0,0,.06), 0 8px 24px rgba(0,0,0,.04); padding: 40px 36px; }
+.article__content { font-size: 16px; line-height: 2; color: #333; word-break: keep-all; }
+.article__content p { margin-bottom: 18px; } .article__content p:last-child { margin-bottom: 0; }
+.article__content h2 { font-size: 21px; font-weight: 700; color: #1d1d1f; margin: 44px 0 18px; padding-bottom: 10px; border-bottom: 2px solid #667eea; display: inline-block; }
+.article__content h2::before { content: ''; display: inline-block; width: 4px; height: 21px; background: #667eea; border-radius: 2px; margin-right: 10px; vertical-align: text-bottom; }
+.article__content pre { background: #1e1e2e; color: #cdd6f4; border-radius: 12px; padding: 20px 24px; margin: 20px 0; overflow-x: auto; font-family: 'Fira Code', monospace; font-size: 13.5px; line-height: 1.7; border: 1px solid rgba(255,255,255,.06); }
+.article__content code { font-family: 'Fira Code', monospace; font-size: 14px; background: #f0f0f5; color: #e74c8b; padding: 2px 7px; border-radius: 5px; }
+.article__content pre code { background: none; color: inherit; padding: 0; border-radius: 0; font-size: 13.5px; }
+.article__content strong { color: #1d1d1f; font-weight: 600; }
+.progress-bar { position: fixed; top: 0; left: 0; height: 3px; background: linear-gradient(90deg, #667eea, #764ba2); z-index: 200; width: 0; transition: width .1s linear; }
+@media (max-width: 600px) { .hero { padding: 40px 16px 36px; } .hero__title { font-size: 23px; } .article__body { padding: 28px 20px; border-radius: 12px; } .article__content { font-size: 15px; } .article__content h2 { font-size: 19px; } .article__content pre { padding: 16px; font-size: 12.5px; } }</style>
+</head>
+<body>
+	<div class="progress-bar" id="progressBar"></div>
+	<header class="header">
+		<div class="header__title">Tech Blog</div>
+		<a class="header__back" href="./index.html">← 목록으로</a>
+	</header>
+	<div class="hero">
+		<p class="hero__date">2026.08.14 12:30</p>
+		<h1 class="hero__title">DDD START! 정리 — 도메인 모델과 BOUNDED CONTEXT, 모델의 경계를 나누는 법 (Chapter 9)</h1>
+	</div>
+	<article class="article">
+		<div class="article__body">
+			<div class="article__content" id="articleContent">도메인이 커지면 하나의 모델로 모든 하위 도메인을 표현하려는 시도는 반드시 실패한다.
+같은 단어라도 하위 도메인마다 의미가 다르기 때문이다.
+이 장에서는 모델의 경계를 어떻게 나누는지, 그 경계가 왜 중요한지를 다룬다.
+
+## 도메인 모델과 경계
+
+같은 **상품**이라는 용어를 생각해보자.
+카탈로그에서 상품은 상품 이미지, 상세 설명, 리뷰 같은 정보를 가진다.
+재고 관리에서 상품은 실존하는 물건을 의미하며, 재고 수량과 입출고 이력이 중요하다.
+주문에서 상품은 주문 항목의 대상이고 가격과 수량이 핵심이다.
+
+같은 용어를 쓰지만 **의미하는 바가 완전히 다르다.**
+이렇게 하위 도메인마다 같은 용어가 다른 의미를 갖기 때문에, 한 개의 모델로 모든 하위 도메인을 표현하려고 하면 오히려 모든 하위 도메인에 맞지 않는 모델이 된다.
+
+모델은 특정 컨텍스트 하에서 완전한 의미를 갖는다. 이 경계가 바로 **BOUNDED CONTEXT**다.
+
+## BOUNDED CONTEXT란
+
+BOUNDED CONTEXT는 모델의 경계를 결정한다.
+한 개의 BOUNDED CONTEXT는 논리적으로 한 개의 모델을 갖는다.
+
+이상적으로는 하위 도메인과 BOUNDED CONTEXT가 일대일로 대응되지만, 현실에서는 그렇지 않을 때도 있다.
+용어를 명확하게 구분하지 못해서 두 하위 도메인을 하나의 BOUNDED CONTEXT에서 구현하기도 한다.
+
+규모가 작은 기업은 전체 시스템을 하나의 BOUNDED CONTEXT에서 구현하기도 한다.
+이 경우에도 하위 도메인의 모델이 뒤섞이지 않도록 주의해야 한다.
+한 개의 BOUNDED CONTEXT에서 여러 하위 도메인을 다루면 하위 도메인마다 구분되는 패키지를 갖도록 구현한다.
+
+## BOUNDED CONTEXT의 구현
+
+BOUNDED CONTEXT는 도메인 모델뿐만 아니라 도메인 기능을 사용자에게 제공하는 데 필요한 **모든 구성 요소**를 포함한다.
+표현 영역, 응용 서비스, 인프라스트럭처 영역 모두 하나의 BOUNDED CONTEXT에 속한다.
+
+BOUNDED CONTEXT마다 **다른 기술 스택**을 사용할 수 있다:
+- 주문 BC는 도메인 모델의 복잡도가 높으니까 JPA를 사용하고
+- 리뷰 BC는 단순 CRUD가 주라서 MyBatis를 사용하고
+- 상품 추천 BC는 RDB가 아닌 NoSQL을 사용할 수 있다
+
+BOUNDED CONTEXT가 반드시 UI를 가져야 하는 것도 아니다.
+REST API만 제공하는 BOUNDED CONTEXT도 가능하다.
+
+## BOUNDED CONTEXT 간 통합
+
+온라인 쇼핑 사이트에서 매출 증대를 위해 상품 추천 기능을 도입한다고 하자.
+기존의 카탈로그 시스템과 새로 추가되는 추천 시스템은 서로 다른 BOUNDED CONTEXT에 속한다.
+
+두 BC를 통합하는 가장 직접적인 방법은 **REST API를 이용한 직접 통합**이다.
+카탈로그 컨텍스트에서 추천 시스템의 REST API를 호출해서 추천 상품 목록을 가져온다.
+
+도메인 서비스를 이용해서 통합하는 방식도 있다:
+
+    // 카탈로그 도메인의 서비스 인터페이스
+    public interface ProductRecommendationService {
+        List<Product> getRecommendationsOf(ProductId id);
+    }
+
+인프라스트럭처 영역에서 외부 추천 시스템을 연동하는 구현 클래스를 작성한다:
+
+    public class RecSystemClient implements ProductRecommendationService {
+        private ProductRepository productRepository;
+
+        @Override
+        public List<Product> getRecommendationsOf(ProductId id) {
+            List<RecommendationItem> items = getRecItems(id.getValue());
+            return toProducts(items);
+        }
+
+        private List<Product> toProducts(List<RecommendationItem> items) {
+            return items.stream()
+                    .map(item -> toProductId(item.getItemId()))
+                    .map(prodId -> productRepository.findById(prodId))
+                    .collect(toList());
+        }
+    }
+
+여기서 핵심은 `RecSystemClient`가 외부 시스템의 모델(`RecommendationItem`)을 카탈로그 도메인의 모델(`Product`)로 **변환**한다는 것이다. 이 변환 역할이 **Translator**다.
+
+**메시지 큐를 이용한 간접 통합**도 있다.
+두 BC가 직접 통신하지 않고, 메시지 큐(RabbitMQ, Kafka 등)를 통해 비동기적으로 데이터를 주고받는다.
+
+## BOUNDED CONTEXT 간 관계
+
+BOUNDED CONTEXT는 어떤 식으로든 연결된다. 대표적인 관계 유형들:
+
+**고객-공급자 관계 (Customer-Supplier)**
+상류(Upstream)가 하류(Downstream)에 서비스를 제공한다.
+하류 컴포넌트는 상류 서비스의 모델에 의존한다.
+상류 팀의 고객인 하류 팀이 다양한 요구를 하면 상류 팀은 이를 수용할지 결정한다.
+
+**공개 호스트 서비스 (Open Host Service, OHS)**
+상류 컴포넌트가 하류에 맞춰 API를 수정하는 대신, 상류가 정해진 인터페이스를 공개한다.
+하류 컴포넌트는 공개된 API를 사용해서 통합한다.
+
+**안티코럽션 계층 (Anti-Corruption Layer, ACL)**
+외부 시스템의 모델이 자신의 도메인 모델을 침범하지 않도록 보호하는 계층이다.
+외부 모델을 자신의 모델로 변환하는 Translator가 여기에 해당한다.
+
+**공유 커널 (Shared Kernel)**
+두 BC가 같은 모델을 공유한다. 중복을 줄이지만, 한쪽 수정이 다른 쪽에 영향을 준다.
+긴밀한 팀 간에만 제한적으로 사용해야 한다.
+
+**독립 방식 (Separate Way)**
+통합을 하지 않는 방식이다.
+서로 독립적으로 동작하며, 필요한 경우 수동으로 데이터를 연동한다.
+
+## 컨텍스트 맵
+
+전체 시스템의 BOUNDED CONTEXT와 그 관계를 한눈에 보여주는 것이 **컨텍스트 맵**이다.
+
+컨텍스트 맵을 그리면:
+- 전체 시스템의 윤곽을 파악할 수 있다
+- 어떤 BC가 어떤 BC에 의존하는지 알 수 있다
+- 어떤 관계 유형(OHS, ACL, 공유 커널 등)을 사용하는지 명확해진다
+
+컨텍스트 맵은 시스템을 더 잘 이해하고 시간이 지남에 따라 컨텍스트 간 관계를 바꿀지를 결정하는 데 도움이 된다.
+
+## 정리
+
+BOUNDED CONTEXT는 DDD에서 가장 전략적인 개념이다:
+
+- **같은 용어라도 하위 도메인마다 의미가 다르다** — 하나의 모델로 통합하면 안 된다
+- **BOUNDED CONTEXT = 모델의 경계** — 각 BC는 자체적인 모델과 구현 기술을 가진다
+- **BC 간 통합**: REST API 직접 통합, 메시지 큐 간접 통합, 도메인 서비스 + Translator
+- **BC 간 관계**: 고객-공급자, 공개 호스트 서비스(OHS), 안티코럽션 계층(ACL), 공유 커널, 독립 방식
+- **컨텍스트 맵**으로 전체 BC 관계를 시각화한다
+
+마이크로서비스가 유행하면서 BC의 중요성이 더 커졌다.
+마이크로서비스의 각 서비스가 곧 하나의 BOUNDED CONTEXT에 대응하기 때문이다.</div>
+		</div>
+	</article>
+	<script src="./article-template.js"></script>
+</body>
+</html>

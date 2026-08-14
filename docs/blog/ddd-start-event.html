@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>DDD START! 정리 — 이벤트, 도메인 간 강결합을 끊는 비동기 처리 (Chapter 10) — Tech Blog</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;600;700&family=Noto+Sans+KR:wght@300;400;500;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+	<style>*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif; background: #f5f5f7; color: #1d1d1f; -webkit-font-smoothing: antialiased; }
+.header { background: rgba(255,255,255,.72); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-bottom: 1px solid rgba(0,0,0,.08); padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+.header__title { font-family: 'Outfit', sans-serif; font-size: 17px; font-weight: 600; color: #1d1d1f; }
+.header__back { font-size: 13px; color: #0071e3; text-decoration: none; display: flex; align-items: center; gap: 4px; transition: opacity .15s; }
+.header__back:hover { opacity: .7; }
+.hero { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 60px 20px 50px; text-align: center; color: #fff; }
+.hero__date { font-size: 13px; opacity: .75; margin-bottom: 12px; letter-spacing: .5px; }
+.hero__title { font-size: 30px; font-weight: 700; line-height: 1.35; max-width: 680px; margin: 0 auto; }
+.article { max-width: 720px; margin: -24px auto 60px; padding: 0 20px; }
+.article__body { background: #fff; border-radius: 16px; box-shadow: 0 1px 3px rgba(0,0,0,.06), 0 8px 24px rgba(0,0,0,.04); padding: 40px 36px; }
+.article__content { font-size: 16px; line-height: 2; color: #333; word-break: keep-all; }
+.article__content p { margin-bottom: 18px; } .article__content p:last-child { margin-bottom: 0; }
+.article__content h2 { font-size: 21px; font-weight: 700; color: #1d1d1f; margin: 44px 0 18px; padding-bottom: 10px; border-bottom: 2px solid #667eea; display: inline-block; }
+.article__content h2::before { content: ''; display: inline-block; width: 4px; height: 21px; background: #667eea; border-radius: 2px; margin-right: 10px; vertical-align: text-bottom; }
+.article__content pre { background: #1e1e2e; color: #cdd6f4; border-radius: 12px; padding: 20px 24px; margin: 20px 0; overflow-x: auto; font-family: 'Fira Code', monospace; font-size: 13.5px; line-height: 1.7; border: 1px solid rgba(255,255,255,.06); }
+.article__content code { font-family: 'Fira Code', monospace; font-size: 14px; background: #f0f0f5; color: #e74c8b; padding: 2px 7px; border-radius: 5px; }
+.article__content pre code { background: none; color: inherit; padding: 0; border-radius: 0; font-size: 13.5px; }
+.article__content strong { color: #1d1d1f; font-weight: 600; }
+.progress-bar { position: fixed; top: 0; left: 0; height: 3px; background: linear-gradient(90deg, #667eea, #764ba2); z-index: 200; width: 0; transition: width .1s linear; }
+@media (max-width: 600px) { .hero { padding: 40px 16px 36px; } .hero__title { font-size: 23px; } .article__body { padding: 28px 20px; border-radius: 12px; } .article__content { font-size: 15px; } .article__content h2 { font-size: 19px; } .article__content pre { padding: 16px; font-size: 12.5px; } }</style>
+</head>
+<body>
+	<div class="progress-bar" id="progressBar"></div>
+	<header class="header">
+		<div class="header__title">Tech Blog</div>
+		<a class="header__back" href="./index.html">← 목록으로</a>
+	</header>
+	<div class="hero">
+		<p class="hero__date">2026.08.14 13:00</p>
+		<h1 class="hero__title">DDD START! 정리 — 이벤트, 도메인 간 강결합을 끊는 비동기 처리 (Chapter 10)</h1>
+	</div>
+	<article class="article">
+		<div class="article__body">
+			<div class="article__content" id="articleContent">주문을 취소하면 환불도 처리해야 한다. 구매를 확정하면 포인트를 적립해야 한다.
+이런 후처리 로직을 도메인 서비스에 직접 넣으면 시스템 간 **강결합**이 발생한다.
+이벤트는 이 강결합을 끊는 핵심 도구다.
+
+## 시스템 간 강결합 문제
+
+주문 취소 기능을 생각해보자:
+
+    public class Order {
+        public void cancel(RefundService refundService) {
+            verifyNotYetShipped();
+            this.state = OrderState.CANCELED;
+            this.refundStatus = State.REFUND_STARTED;
+            try {
+                refundService.refund(getPaymentId());
+                this.refundStatus = State.REFUND_COMPLETED;
+            } catch (Exception ex) {
+                // ...
+            }
+        }
+    }
+
+이 코드의 문제점:
+- **성능**: 외부 환불 서비스가 느려지면 `cancel()` 자체가 느려진다
+- **트랜잭션**: 외부 서비스에서 익셉션이 발생하면 트랜잭션을 롤백해야 할까? 환불 실패가 곧 취소 실패는 아니다
+- **확장성**: 취소 시 환불 외에 이메일 발송, 통계 업데이트 등이 추가되면 `cancel()` 메서드가 점점 비대해진다
+
+핵심 문제는 주문 도메인이 환불 도메인에 직접 의존한다는 것이다.
+
+## 이벤트란
+
+이벤트는 **"과거에 벌어진 어떤 것"** 이다.
+주문이 취소되면 `OrderCanceledEvent`가 발생한다.
+이 이벤트를 받아서 환불을 처리하면 Order는 더 이상 RefundService를 몰라도 된다.
+
+이벤트 관련 구성 요소:
+- **이벤트 생성 주체**: 도메인 객체. 상태가 바뀌면 이벤트를 발생시킨다
+- **이벤트 핸들러**: 이벤트를 받아서 후처리 로직을 실행한다
+- **이벤트 디스패처**: 이벤트 생성 주체와 핸들러를 연결해준다
+
+## 이벤트의 구성
+
+이벤트 클래스는 이런 정보를 포함한다:
+- 이벤트 **종류**: 클래스 이름으로 표현 (예: `ShippingInfoChangedEvent`)
+- **발생 시간**: timestamp
+- **추가 데이터**: 이벤트와 관련된 정보 (예: 변경된 배송지)
+
+    public class ShippingInfoChangedEvent {
+        private String orderNumber;
+        private long timestamp;
+        private ShippingInfo newShippingInfo;
+    }
+
+이벤트의 용도는 크게 두 가지다:
+- **트리거**: 후처리를 실행하는 방아쇠 역할 (주문 취소 → 환불 처리)
+- **데이터 동기화**: 한쪽 상태 변경을 다른 시스템에 전파 (배송지 변경 → 외부 배송 시스템에 반영)
+
+## 이벤트/핸들러/디스패처 구현
+
+이벤트를 구현하려면 세 가지 클래스가 필요하다.
+
+**Event 추상 클래스** (모든 이벤트의 상위 타입):
+
+    public abstract class Event {
+        private long timestamp;
+
+        public Event() {
+            this.timestamp = System.currentTimeMillis();
+        }
+
+        public long getTimestamp() {
+            return timestamp;
+        }
+    }
+
+**EventHandler 인터페이스**:
+
+    public interface EventHandler<T> {
+        void handle(T event);
+
+        default boolean canHandle(Object event) {
+            Class<?>[] typeArgs = TypeResolver.resolveRawArguments(
+                    EventHandler.class, this.getClass());
+            return typeArgs[0].isAssignableFrom(event.getClass());
+        }
+    }
+
+**Events 클래스** (디스패처):
+
+    public class Events {
+        private static ThreadLocal<List<EventHandler<?>>> handlers =
+                new ThreadLocal<>();
+        private static ThreadLocal<Boolean> publishing =
+                new ThreadLocal<Boolean>() {
+                    @Override
+                    protected Boolean initialValue() { return Boolean.FALSE; }
+                };
+
+        public static void raise(Object event) {
+            if (publishing.get()) return;
+            try {
+                publishing.set(Boolean.TRUE);
+                List<EventHandler<?>> eventHandlers = handlers.get();
+                if (eventHandlers == null) return;
+                for (EventHandler handler : eventHandlers) {
+                    if (handler.canHandle(event)) {
+                        handler.handle(event);
+                    }
+                }
+            } finally {
+                publishing.set(Boolean.FALSE);
+            }
+        }
+
+        public static void handle(EventHandler<?> handler) { ... }
+        public static void reset() { ... }
+    }
+
+이벤트 처리 흐름:
+1. 응용 서비스에서 이벤트 핸들러를 등록한다 (`Events.handle(...)`)
+2. 도메인 기능을 실행한다 (`order.cancel()`)
+3. 도메인 내부에서 이벤트를 발생시킨다 (`Events.raise(new OrderCanceledEvent(...))`)
+4. 디스패처가 핸들러의 `canHandle()`을 확인하고 `handle()`을 실행한다
+5. 응용 서비스 실행이 끝나면 `Events.reset()`으로 핸들러 목록을 초기화한다
+
+## AOP를 이용한 Events.reset()
+
+모든 응용 서비스 메서드 끝에 `Events.reset()`을 넣는 건 중복이다.
+스프링 AOP로 해결한다:
+
+    @Aspect
+    @Order(0)
+    @Component
+    public class EventsResetProcessor {
+        private ThreadLocal<Integer> nestedCount = new ThreadLocal<>() {
+            @Override
+            protected Integer initialValue() { return new Integer(0); }
+        };
+
+        @Around("@target(org.springframework.stereotype.Service) " +
+                "and within(com.myshop..*)")
+        public Object doReset(ProceedingJoinPoint joinPoint) throws Throwable {
+            nestedCount.set(nestedCount.get() + 1);
+            try {
+                return joinPoint.proceed();
+            } finally {
+                nestedCount.set(nestedCount.get() - 1);
+                if (nestedCount.get() == 0) {
+                    Events.reset();
+                }
+            }
+        }
+    }
+
+중첩 실행 횟수를 세서 가장 바깥쪽 서비스가 끝날 때만 `reset()`을 실행한다.
+
+## 동기 이벤트 처리의 문제
+
+이벤트를 동기로 처리하면 두 가지 문제가 남는다:
+
+**성능 문제**: 외부 서비스(환불 등)가 느리면 이벤트 핸들러가 오래 걸리고, 그 영향이 도메인 메서드 호출자에게 전파된다.
+
+**트랜잭션 범위 문제**: 이벤트 핸들러가 같은 트랜잭션 범위에서 실행되므로 외부 서비스에서 익셉션이 발생하면 트랜잭션을 롤백할지 커밋할지 애매해진다.
+
+이 문제를 해결하는 것이 **비동기 이벤트 처리**다.
+
+## 비동기 이벤트 처리 — 네 가지 방법
+
+비동기 이벤트 처리를 구현하는 방법은 네 가지가 있다.
+
+**1. 로컬 핸들러를 비동기로 실행하기**
+
+`ExecutorService`를 이용해서 이벤트 핸들러를 별도 스레드에서 실행한다:
+
+    // executor.submit(() -> handler.handle(event));
+
+별도 스레드로 실행하면 이벤트 발생 코드와 같은 트랜잭션 범위에 묶이지 않는다.
+단, 한 트랜잭션으로 실행해야 하는 이벤트 핸들러는 비동기로 처리하면 안 된다.
+
+**2. 메시지 큐 사용하기**
+
+RabbitMQ, Kafka 같은 메시지 큐를 사용한다.
+이벤트가 발생하면 메시지 큐에 보내고, 별도 프로세스가 메시지를 읽어서 이벤트 핸들러를 실행한다.
+
+메시지 큐의 장점:
+- 글로벌 트랜잭션 지원 (안전한 이벤트 전달)
+- 클러스터와 고가용성 지원
+- 다양한 개발 언어와 통신 프로토콜 지원
+
+단점은 글로벌 트랜잭션으로 인한 성능 저하와 시스템 복잡도 증가다.
+
+**3. 이벤트 저장소와 이벤트 포워더**
+
+이벤트를 DB에 저장한 뒤, 별도 프로그램(포워더)이 주기적으로 이벤트를 읽어서 핸들러에 전달한다.
+도메인 상태 변화와 이벤트 저장이 같은 로컬 트랜잭션으로 처리되므로 이벤트 보관이 보장된다.
+
+    @Component
+    public class EventForwarder {
+        @Scheduled(initialDelay = 1000L, fixedDelay = 1000L)
+        public void getAndSend() {
+            long nextOffset = getNextOffset();
+            List<EventEntry> events = eventStore.get(nextOffset, limitSize);
+            if (!events.isEmpty()) {
+                int processedCount = sendEvent(events);
+                if (processedCount > 0) {
+                    saveNextOffset(nextOffset + processedCount);
+                }
+            }
+        }
+    }
+
+포워더는 마지막으로 전달한 이벤트의 오프셋을 기억해서, 다음에 실행할 때 그 이후부터 읽는다.
+
+**4. 이벤트 저장소와 이벤트 제공 API**
+
+포워더 대신 외부 핸들러가 **REST API를 통해** 이벤트를 가져가는 방식이다.
+
+    @RestController
+    public class EventApi {
+        @RequestMapping(value = "/api/events", method = RequestMethod.GET)
+        public List<EventEntry> list(
+                @RequestParam(name="offset", required = true) Long offset,
+                @RequestParam(name="limit", required = true) Long limit) {
+            return eventStore.get(offset, limit);
+        }
+    }
+
+API 방식에서는 외부 핸들러가 자신이 어디까지 이벤트를 처리했는지 기억해야 한다.
+포워더 방식에서는 포워더에 그 역할이 있다.
+
+## 이벤트 적용 시 추가 고려사항
+
+이벤트를 실전에 적용할 때 고려할 다섯 가지:
+
+**1. 이벤트 소스**: 이벤트 발생 주체를 추적하려면 `EventEntry`에 `source` 필드를 추가한다.
+
+**2. 전송 실패 허용 범위**: 포워더가 전송에 실패하면 재시도하는데, 특정 이벤트에서 계속 실패하면 나머지도 못 보낸다. 재전송 횟수 제한 정책이 필요하다.
+
+**3. 이벤트 손실**: 로컬 핸들러를 비동기로 실행하면 이벤트 처리 실패 시 유실될 수 있다. 이벤트 저장소를 사용하면 트랜잭션 성공 시 이벤트가 보관되므로 손실을 방지한다.
+
+**4. 이벤트 순서**: 이벤트 저장소는 발생 순서대로 저장하고 순서대로 제공한다. 메시징 시스템은 사용 기술에 따라 순서가 보장되지 않을 수 있다.
+
+**5. 이벤트 재처리**: 동일한 이벤트를 다시 처리할 때 멱등하게 처리해야 한다. 이미 처리한 순번의 이벤트가 도착하면 무시하는 방식이 가장 간단하다.
+
+## 멱등성
+
+연산을 여러 번 적용해도 결과가 달라지지 않는 성질을 **멱등성(idempotent)** 이라고 한다.
+수학에서 절대값 함수 `abs()`가 대표적이다. `abs(x)`, `abs(abs(x))`, `abs(abs(abs(x)))` 모두 같은 결과다.
+
+이벤트 핸들러도 같은 이벤트를 여러 번 적용하더라도 시스템이 같은 상태가 되도록 구현하면 멱등성을 갖는다.
+예를 들어, 배송지 변경 이벤트를 받아서 주소를 변경하는 핸들러는 같은 이벤트를 한 번 처리하나 여러 번 처리하나 결과적으로 동일한 주소 값을 갖는다.
+
+이벤트 핸들러가 멱등성을 가지면 시스템 장애로 인해 같은 이벤트가 중복 발생해도 결과적으로 동일 상태가 된다. 이벤트 중복 발생이나 중복 처리에 대한 부담을 줄여준다.
+
+## 정리
+
+이벤트는 도메인 간 결합도를 낮추는 핵심 패턴이다:
+
+- **강결합 문제**: 도메인 로직에 외부 서비스를 직접 넣으면 성능, 트랜잭션, 확장성 모두 문제
+- **이벤트**: 도메인에서 "일어난 일"을 발행하고, 관심 있는 핸들러가 처리
+- **비동기 처리 4가지**: 로컬 비동기, 메시지 큐, 이벤트 저장소+포워더, 이벤트 저장소+API
+- **이벤트 저장소 + 포워더/API**: 로컬 트랜잭션으로 이벤트 보관을 보장하면서 비동기 처리
+- **멱등성**: 같은 이벤트를 여러 번 처리해도 결과가 같도록 설계</div>
+		</div>
+	</article>
+	<script src="./article-template.js"></script>
+</body>
+</html>

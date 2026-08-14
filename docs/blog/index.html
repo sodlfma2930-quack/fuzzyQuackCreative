@@ -62,13 +62,57 @@
 
 		<!-- 탭 네비게이션 -->
 		<div class="tabs">
-			<button class="tab-btn active" data-tab="ddd">DDD 구조<span class="tab-count">6</span></button>
+			<button class="tab-btn active" data-tab="ddd">DDD 구조<span class="tab-count">10</span></button>
 			<button class="tab-btn" data-tab="etc">기타<span class="tab-count">19</span></button>
 		</div>
 
 		<!-- DDD 구조 탭 -->
 		<div class="tab-panel active" id="tab-ddd">
 			<ul class="post-list">
+				<li>
+					<a class="post-card" href="./ddd-start-cqrs.html">
+						<div class="post-card__thumb" style="background:linear-gradient(135deg,#e0f7fa,#b2ebf2dd);">⚖️</div>
+						<div class="post-card__body">
+							<div class="post-card__date">2026.08.14 13:30</div>
+							<h2 class="post-card__title">DDD START! 정리 — CQRS, 명령 모델과 조회 모델의 분리 (Chapter 11)</h2>
+							<p class="post-card__excerpt">상태를 변경하는 기능과 조회하는 기능을 하나의 모델로 처리하면 복잡해진다. CQRS는 명령 모델과 조회 모델을 분리하여 각각에 최적화된 구현을 가능하게 한다...</p>
+						</div>
+						<div class="post-card__arrow">›</div>
+					</a>
+				</li>
+				<li>
+					<a class="post-card" href="./ddd-start-event.html">
+						<div class="post-card__thumb" style="background:linear-gradient(135deg,#fff9c4,#fff176dd);">⚡</div>
+						<div class="post-card__body">
+							<div class="post-card__date">2026.08.14 13:00</div>
+							<h2 class="post-card__title">DDD START! 정리 — 이벤트, 도메인 간 강결합을 끊는 비동기 처리 (Chapter 10)</h2>
+							<p class="post-card__excerpt">도메인 로직에 외부 서비스를 직접 넣으면 성능, 트랜잭션, 확장성 모두 문제다. 이벤트로 강결합을 끊고, 비동기 처리 4가지 방식과 멱등성까지...</p>
+						</div>
+						<div class="post-card__arrow">›</div>
+					</a>
+				</li>
+				<li>
+					<a class="post-card" href="./ddd-start-bounded-context.html">
+						<div class="post-card__thumb" style="background:linear-gradient(135deg,#f3e5f5,#ce93d8dd);">🗺️</div>
+						<div class="post-card__body">
+							<div class="post-card__date">2026.08.14 12:30</div>
+							<h2 class="post-card__title">DDD START! 정리 — 도메인 모델과 BOUNDED CONTEXT, 모델의 경계를 나누는 법 (Chapter 9)</h2>
+							<p class="post-card__excerpt">같은 용어라도 하위 도메인마다 의미가 다르다. BOUNDED CONTEXT로 모델의 경계를 나누고, BC 간 통합과 관계 유형(OHS, ACL, 공유 커널)까지...</p>
+						</div>
+						<div class="post-card__arrow">›</div>
+					</a>
+				</li>
+				<li>
+					<a class="post-card" href="./ddd-start-aggregate-transaction.html">
+						<div class="post-card__thumb" style="background:linear-gradient(135deg,#efebe9,#bcaaa4dd);">🔒</div>
+						<div class="post-card__body">
+							<div class="post-card__date">2026.08.14 12:00</div>
+							<h2 class="post-card__title">DDD START! 정리 — 애그리거트 트랜잭션 관리, 선점 잠금과 비선점 잠금 (Chapter 8)</h2>
+							<p class="post-card__excerpt">동시에 같은 애그리거트를 수정하면 어떻게 될까? 선점 잠금(Pessimistic Lock)과 비선점 잠금(Optimistic Lock), 오프라인 선점 잠금까지 트랜잭션 관리 전략...</p>
+						</div>
+						<div class="post-card__arrow">›</div>
+					</a>
+				</li>
 				<li>
 					<a class="post-card" href="./ddd-start-domain-service.html">
 						<div class="post-card__thumb" style="background:linear-gradient(135deg,#fce4ec,#f8bbd0dd);">🔀</div>
