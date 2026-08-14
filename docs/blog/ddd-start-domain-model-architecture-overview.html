@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>DDD START! 정리 — 도메인 모델부터 아키텍처 개요까지 (Chapter 1-2) — Tech Blog</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;600;700&family=Noto+Sans+KR:wght@300;400;500;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+	<style>*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif; background: #f5f5f7; color: #1d1d1f; -webkit-font-smoothing: antialiased; }
+.header { background: rgba(255,255,255,.72); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-bottom: 1px solid rgba(0,0,0,.08); padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+.header__title { font-family: 'Outfit', sans-serif; font-size: 17px; font-weight: 600; color: #1d1d1f; }
+.header__back { font-size: 13px; color: #0071e3; text-decoration: none; display: flex; align-items: center; gap: 4px; transition: opacity .15s; }
+.header__back:hover { opacity: .7; }
+.hero { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 60px 20px 50px; text-align: center; color: #fff; }
+.hero__date { font-size: 13px; opacity: .75; margin-bottom: 12px; letter-spacing: .5px; }
+.hero__title { font-size: 30px; font-weight: 700; line-height: 1.35; max-width: 680px; margin: 0 auto; }
+.article { max-width: 720px; margin: -24px auto 60px; padding: 0 20px; }
+.article__body { background: #fff; border-radius: 16px; box-shadow: 0 1px 3px rgba(0,0,0,.06), 0 8px 24px rgba(0,0,0,.04); padding: 40px 36px; }
+.article__content { font-size: 16px; line-height: 2; color: #333; word-break: keep-all; }
+.article__content p { margin-bottom: 18px; } .article__content p:last-child { margin-bottom: 0; }
+.article__content h2 { font-size: 21px; font-weight: 700; color: #1d1d1f; margin: 44px 0 18px; padding-bottom: 10px; border-bottom: 2px solid #667eea; display: inline-block; }
+.article__content h2::before { content: ''; display: inline-block; width: 4px; height: 21px; background: #667eea; border-radius: 2px; margin-right: 10px; vertical-align: text-bottom; }
+.article__content pre { background: #1e1e2e; color: #cdd6f4; border-radius: 12px; padding: 20px 24px; margin: 20px 0; overflow-x: auto; font-family: 'Fira Code', monospace; font-size: 13.5px; line-height: 1.7; border: 1px solid rgba(255,255,255,.06); }
+.article__content code { font-family: 'Fira Code', monospace; font-size: 14px; background: #f0f0f5; color: #e74c8b; padding: 2px 7px; border-radius: 5px; }
+.article__content pre code { background: none; color: inherit; padding: 0; border-radius: 0; font-size: 13.5px; }
+.article__content strong { color: #1d1d1f; font-weight: 600; }
+.progress-bar { position: fixed; top: 0; left: 0; height: 3px; background: linear-gradient(90deg, #667eea, #764ba2); z-index: 200; width: 0; transition: width .1s linear; }
+@media (max-width: 600px) { .hero { padding: 40px 16px 36px; } .hero__title { font-size: 23px; } .article__body { padding: 28px 20px; border-radius: 12px; } .article__content { font-size: 15px; } .article__content h2 { font-size: 19px; } .article__content pre { padding: 16px; font-size: 12.5px; } }</style>
+</head>
+<body>
+	<div class="progress-bar" id="progressBar"></div>
+	<header class="header">
+		<div class="header__title">Tech Blog</div>
+		<a class="header__back" href="./index.html">← 목록으로</a>
+	</header>
+	<div class="hero">
+		<p class="hero__date">2026.08.14 09:00</p>
+		<h1 class="hero__title">DDD START! 정리 — 도메인 모델부터 아키텍처 개요까지 (Chapter 1-2)</h1>
+	</div>
+	<article class="article">
+		<div class="article__body">
+			<div class="article__content" id="articleContent">DDD(Domain-Driven Design)는 소프트웨어의 복잡성을 도메인 모델 중심으로 다루는 설계 방법론이다.
+최범균 저 "DDD START!" 1-2장 핵심 내용을 정리한다.
+
+## Chapter 1 — 도메인 모델 시작
+
+**도메인**이란 소프트웨어로 해결하고자 하는 문제 영역이다.
+온라인 서점이라면 주문, 회원, 결제, 배송, 카탈로그, 리뷰 등이 하위 도메인이 된다.
+각 하위 도메인은 서로 연동하여 완전한 기능을 제공한다.
+
+**도메인 모델**은 특정 도메인을 개념적으로 표현한 것이다. 객체 모델, 상태 다이어그램 등 다양한 방식으로 표현할 수 있다.
+
+## 도메인 모델 패턴
+
+애플리케이션 아키텍처는 4개 계층으로 구성된다.
+
+**표현(Presentation)**: 사용자의 요청을 처리하고 정보를 보여준다.
+**응용(Application)**: 사용자가 요청한 기능을 실행한다. 업무 로직을 직접 구현하지 않으며 도메인 계층을 조합해서 기능을 실행한다.
+**도메인(Domain)**: 시스템이 제공할 도메인의 규칙을 구현한다.
+**인프라스트럭처(Infrastructure)**: 데이터베이스나 메시징 시스템과 같은 외부 시스템과의 연동을 처리한다.
+
+핵심 규칙을 구현한 코드는 도메인 모델에만 위치한다. 규칙이 바뀌거나 확장해야 할 때 다른 코드에 영향을 덜 주고 변경 내역을 모델에 반영할 수 있다.
+
+    public class Order {
+        private OrderState state;
+        private ShippingInfo shippingInfo;
+
+        public void changeShippingInfo(ShippingInfo newShippingInfo) {
+            if (!state.isShippingChangeable()) {
+                throw new IllegalStateException(
+                    "can't change shipping in " + state);
+            }
+            this.shippingInfo = newShippingInfo;
+        }
+    }
+
+    public enum OrderState {
+        PAYMENT_WAITING {
+            public boolean isShippingChangeable() { return true; }
+        },
+        PREPARING {
+            public boolean isShippingChangeable() { return true; }
+        },
+        SHIPPED, DELIVERING, DELIVERY_COMPLETED;
+
+        public boolean isShippingChangeable() { return false; }
+    }
+
+`OrderState`가 주문 대기 중이거나 상품 준비 중에는 배송지를 변경할 수 있다는 도메인 규칙을 구현하고 있다.
+
+## 도메인 모델 도출
+
+요구사항에서 모델을 점진적으로 만들어 나간다. 온라인 서점의 주문 요구사항 예시:
+
+- 최소 한 종류 이상의 상품을 주문해야 한다
+- 한 상품을 한 개 이상 주문할 수 있다
+- 총 주문 금액은 각 상품의 구매 가격 합을 모두 더한 금액이다
+- 주문할 때 배송지 정보를 반드시 지정해야 한다
+- 출고를 하면 배송지 정보를 변경할 수 없다
+- 출고 전에 주문을 취소할 수 있다
+
+이 요구사항에서 `Order`, `OrderLine`, `ShippingInfo` 등의 모델을 도출할 수 있다.
+
+    public class OrderLine {
+        private Product product;
+        private int price;
+        private int quantity;
+        private int amounts;
+
+        public OrderLine(Product product, int price, int quantity) {
+            this.product = product;
+            this.price = price;
+            this.quantity = quantity;
+            this.amounts = calculateAmounts();
+        }
+
+        private int calculateAmounts() {
+            return price * quantity;
+        }
+    }
+
+## 엔티티(Entity)
+
+엔티티의 가장 큰 특징은 **식별자**를 갖는다는 것이다.
+식별자는 엔티티 객체마다 고유해서 각 엔티티는 서로 다른 식별자를 갖는다.
+두 엔티티 객체의 식별자가 같으면 두 엔티티는 같다고 판단할 수 있다.
+
+식별자 생성 방식:
+- 특정 규칙에 따라 생성 (예: 날짜 + 일련번호)
+- UUID 사용
+- 값을 직접 입력 (예: 이메일 주소)
+- 일련번호 사용 (시퀀스, auto_increment)
+
+    public class Order {
+        private String orderNumber;
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) return true;
+            if (obj == null) return false;
+            if (obj.getClass() != Order.class) return false;
+            Order other = (Order) obj;
+            if (this.orderNumber == null) return false;
+            return this.orderNumber.equals(other.orderNumber);
+        }
+    }
+
+## 밸류 타입(Value)
+
+밸류 타입은 고유 식별자 없이 개념적으로 하나인 도메인 객체의 속성을 표현한다.
+`ShippingInfo`의 받는 사람 정보와 주소 정보를 밸류 타입으로 분리하면 개념을 더 잘 표현할 수 있다.
+
+    public class Receiver {
+        private String name;
+        private String phoneNumber;
+    }
+
+    public class Address {
+        private String address1;
+        private String address2;
+        private String zipcode;
+    }
+
+의미를 명확하게 하기 위해 단일 값도 밸류 타입으로 만들 수 있다.
+
+    public class Money {
+        private int value;
+
+        public Money add(Money money) {
+            return new Money(this.value + money.value);
+        }
+
+        public Money multiply(int multiplier) {
+            return new Money(value * multiplier);
+        }
+    }
+
+**밸류 타입은 불변(Immutable)으로 구현**하는 것을 권장한다.
+`Money`의 `add()` 메서드가 기존 `value`를 변경하지 않고 새로운 `Money`를 리턴하는 것이 이에 해당한다.
+불변으로 구현하면 참조 투명성과 스레드 안전을 보장한다.
+
+## set 메서드 넣지 않기
+
+도메인 모델에 `set` 메서드를 무조건 넣는 것은 좋지 않다.
+`set` 메서드는 도메인의 핵심 개념이나 의도를 코드에서 사라지게 한다.
+
+`setShippingInfo()` → 단순히 배송지 값을 설정
+`changeShippingInfo()` → 배송지 정보를 새로 변경한다는 도메인 의도가 드러남
+
+불변 밸류 타입을 사용하면 자연스럽게 `set` 메서드를 구현하지 않게 된다.
+
+## 도메인 용어 (유비쿼터스 언어)
+
+도메인에서 사용하는 용어를 코드에 반영해야 한다. 에릭 에반스는 이를 **유비쿼터스 언어(Ubiquitous Language)**라고 부른다.
+
+    // 나쁜 예
+    public enum OrderState {
+        STEP1, STEP2, STEP3, STEP4, STEP5, STEP6
+    }
+
+    // 좋은 예
+    public enum OrderState {
+        PAYMENT_WAITING, PREPARING, SHIPPED,
+        DELIVERING, DELIVERY_COMPLETED, CANCELED
+    }
+
+전문가, 관계자, 개발자가 도메인과 관련된 공통의 언어를 사용하면 소통 과정의 모호함을 줄일 수 있다.
+
+## Chapter 2 — 아키텍처 개요
+
+## 네 개의 영역
+
+**표현 영역**: 사용자의 요청을 받아 응용 영역에 전달하고, 처리 결과를 다시 사용자에게 보여준다. 스프링 MVC가 표현 영역을 위한 기술에 해당한다.
+
+**응용 영역**: 시스템이 사용자에게 제공해야 할 기능을 구현한다. 로직을 직접 수행하기보다 도메인 모델에 로직 수행을 위임한다.
+
+    public class CancelOrderService {
+        @Transactional
+        public void cancelOrder(String orderId) {
+            Order order = findOrderById(orderId);
+            if (order == null)
+                throw new OrderNotFoundException(orderId);
+            order.cancel();  // 도메인 모델에 위임
+        }
+    }
+
+**도메인 영역**: 도메인 모델을 구현한다. '배송지 변경', '결제 완료', '주문 총액 계산' 같은 핵심 로직을 구현한다.
+
+**인프라스트럭처 영역**: RDBMS 연동, 메시징 큐, 메일 발송, 외부 API 호출 등 구현 기술에 대한 것을 다룬다.
+
+## 계층 구조와 DIP (의존 역전 원칙)
+
+계층 구조는 상위 계층에서 하위 계층으로의 의존만 존재한다.
+하지만 표현, 응용, 도메인 계층이 인프라스트럭처 계층에 종속될 수 있다는 문제가 있다.
+
+**DIP**는 고수준 모듈이 저수준 모듈에 의존하지 않도록 **추상화한 인터페이스**를 사이에 둔다.
+
+    // 고수준 모듈에 인터페이스 정의
+    public interface RuleDiscounter {
+        public Money applyRules(Customer customer,
+                                List<OrderLine> orderLines);
+    }
+
+    // 저수준 모듈에서 구현
+    public class DroolsRuleDiscounter implements RuleDiscounter {
+        @Override
+        public Money applyRules(Customer customer,
+                                List<OrderLine> orderLines) {
+            // Drools 구현
+        }
+    }
+
+    // 고수준 모듈은 인터페이스에만 의존
+    public class CalculateDiscountService {
+        private RuleDiscounter ruleDiscounter;
+
+        public CalculateDiscountService(RuleDiscounter ruleDiscounter) {
+            this.ruleDiscounter = ruleDiscounter;
+        }
+
+        public Money calculateDiscount(OrderLine orderLines,
+                                        String customerId) {
+            Customer customer = findCustomer(customerId);
+            return ruleDiscounter.applyRules(customer, orderLines);
+        }
+    }
+
+DIP 적용 시 핵심 주의사항: **인터페이스는 고수준 모듈(도메인) 관점에서 도출**해야 한다.
+`RuleEngine`(저수준 관점) → `RuleDiscounter`(고수준 관점, 할인 계산이라는 도메인 개념)
+
+아키텍처 수준에서 DIP를 적용하면 인프라스트럭처 영역이 응용/도메인 영역에 의존하는 구조가 된다. 구현 기술을 변경해도 도메인과 응용 영역에 영향을 주지 않는다.
+
+단, 무조건 인프라 의존을 없애는 것이 좋은 것은 아니다. 스프링의 `@Transactional`, JPA의 `@Entity` 같은 편의 기능은 DIP의 장점을 해치지 않는 범위에서 사용하는 것이 현명하다.
+
+## 도메인 영역의 주요 구성요소
+
+**엔티티(Entity)**: 고유의 식별자를 갖는 객체. 자신의 라이프사이클을 갖는다. 주문(Order), 회원(Member), 상품(Product) 등.
+
+**밸류(Value)**: 고유의 식별자를 갖지 않는 객체. 주소(Address), 금액(Money) 등 개념적으로 하나인 속성을 표현.
+
+**애그리거트(Aggregate)**: 관련된 엔티티와 밸류 객체를 개념적으로 하나로 묶은 것. 예: 주문 + OrderLine + Orderer → '주문' 애그리거트.
+
+**리포지터리(Repository)**: 도메인 모델의 영속성을 처리. DBMS 테이블에서 엔티티 객체를 로딩하거나 저장.
+
+**도메인 서비스(Domain Service)**: 특정 엔티티에 속하지 않은 도메인 로직을 제공. 여러 엔티티와 밸류를 필요로 하는 로직.
+
+## 엔티티 vs DB 모델의 엔티티
+
+도메인 모델의 엔티티와 DB 관계형 모델의 엔티티는 같지 않다.
+
+**가장 큰 차이**: 도메인 모델의 엔티티는 데이터와 함께 **도메인 기능**을 함께 제공한다.
+단순한 데이터 구조가 아니라, 도메인 관점에서 기능을 구현하고 캡슐화해서 데이터가 임의로 변경되는 것을 막는다.
+
+    public class Order {
+        private OrderNo number;
+        private Orderer orderer;
+        private ShippingInfo shippingInfo;
+
+        // 도메인 모델 엔티티는 도메인 기능도 함께 제공
+        public void changeShippingInfo(ShippingInfo newShippingInfo) {
+            checkShippingInfoChangeable();
+            setShippingInfo(newShippingInfo);
+        }
+
+        private void setShippingInfo(ShippingInfo newShippingInfo) {
+            if (newShippingInfo == null)
+                throw new IllegalArgumentException();
+            // 밸류 타입 데이터를 변경할 때는 새로운 객체로 교체
+            this.shippingInfo = newShippingInfo;
+        }
+    }
+
+## 애그리거트
+
+도메인이 커질수록 많은 엔티티와 밸류가 출현하고, 모델은 점점 복잡해진다.
+전체 구조를 이해하는 데 도움이 되는 것이 **애그리거트**다.
+
+애그리거트는 관련 객체를 하나로 묶은 군집이다.
+주문이라는 도메인 개념은 '주문', '배송지정보', '주문자', '주문목록', '총결제 금액'의 하위 모델로 구성되는데, 이 하위 개념을 하나로 묶어서 '주문'이라는 상위 개념으로 표현할 수 있다.
+
+애그리거트는 **루트 엔티티**를 갖는다. 루트 엔티티가 애그리거트의 기능을 제공한다.
+
+    public class Order {  // 애그리거트 루트
+        public void changeShippingInfo(ShippingInfo newInfo) {
+            checkShippingInfoChangeable(); // 배송지 변경 가능 여부 확인
+            this.shippingInfo = newInfo;
+        }
+
+        private void checkShippingInfoChangeable() {
+            // 배송지 정보를 변경할 수 있는지 여부를 확인하는 도메인 규칙
+        }
+    }
+
+배송지를 변경하려면 루트 엔티티인 `Order`를 사용해야 하므로, 배송지 변경 시 항상 도메인 로직을 따르게 된다.
+
+## 리포지터리
+
+도메인 객체를 지속적으로 사용하려면 물리적인 저장소에 보관해야 한다. 이를 위한 도메인 모델이 **리포지터리**다.
+
+    public interface OrderRepository {
+        public Order findByNumber(OrderNumber number);
+        public void save(Order order);
+        public void delete(Order order);
+    }
+
+리포지터리 인터페이스는 **도메인 모델 영역**에 속하고, 실제 구현 클래스는 **인프라스트럭처 영역**에 속한다.
+
+    public class CancelOrderService {
+        private OrderRepository orderRepository;
+
+        @Transaction
+        public void cancel(OrderNumber number) {
+            Order order = orderRepository.findByNumber(number);
+            if (order == null)
+                throw new NoOrderException(number);
+            order.cancel();
+        }
+    }
+
+응용 서비스는 리포지터리를 사용해 도메인 객체를 구하고, 도메인 기능을 실행한다.
+
+## 요청 처리 흐름
+
+1. 브라우저 → Controller: HTTP 요청
+2. Controller → App Service: 요청 데이터를 응용 서비스가 요구하는 형식으로 변환해서 전달
+3. App Service → Repository: `find()` — 도메인 객체를 구함
+4. App Service → Domain Object: 도메인 로직 실행
+5. Controller → 브라우저: HTTP 응답
+
+## 모듈 구성
+
+아키텍처의 각 영역은 별도 패키지에 위치한다.
+도메인이 크면 하위 도메인으로 나누고 각 하위 도메인마다 별도 패키지를 구성한다.
+
+    com.myshop
+      ├── catalog
+      │   ├── ui / application / domain / infrastructure
+      ├── order
+      │   ├── ui / application / domain / infrastructure
+      └── member
+          ├── ui / application / domain / infrastructure
+
+`domain` 모듈은 애그리거트를 기준으로 다시 패키지를 구성한다.
+각 애그리거트와 모델과 리포지터리는 같은 패키지에 위치시킨다.
+
+한 패키지에 가능하면 10개 미만으로 타입 개수를 유지하려고 노력하고, 이 개수가 넘어가면 모듈을 분리하는 시도를 해본다.
+
+## 핵심 정리
+
+**도메인 모델 패턴**: 핵심 규칙은 도메인 모델에만 위치. 응용 서비스는 도메인에 위임만 한다.
+**엔티티 vs 밸류**: 엔티티는 식별자로 구분, 밸류는 불변으로 구현하여 개념을 명확하게 표현.
+**DIP**: 고수준 모듈이 저수준 모듈에 의존하지 않도록 인터페이스를 도메인에 둔다.
+**애그리거트**: 관련 객체를 하나로 묶어 루트 엔티티를 통해서만 접근. 복잡한 모델을 상위 수준에서 이해할 수 있게 한다.
+**리포지터리**: 인터페이스는 도메인, 구현은 인프라. 응용 서비스가 사용한다.
+**유비쿼터스 언어**: 도메인 용어를 코드에 그대로 반영하여 소통의 모호함을 줄인다.</div>
+		</div>
+	</article>
+	<script src="./article-template.js"></script>
+</body>
+</html>
