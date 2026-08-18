@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>데코레이터 캐시 패턴 — 코드 한 줄로 성능을 바꾸는 메모이제이션 기법 — Tech Blog</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;600;700&family=Noto+Sans+KR:wght@300;400;500;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+	<style>*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif; background: #f5f5f7; color: #1d1d1f; -webkit-font-smoothing: antialiased; }
+.header { background: rgba(255,255,255,.72); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-bottom: 1px solid rgba(0,0,0,.08); padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+.header__title { font-family: 'Outfit', sans-serif; font-size: 17px; font-weight: 600; color: #1d1d1f; }
+.header__back { font-size: 13px; color: #0071e3; text-decoration: none; display: flex; align-items: center; gap: 4px; transition: opacity .15s; }
+.header__back:hover { opacity: .7; }
+.hero { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 60px 20px 50px; text-align: center; color: #fff; }
+.hero__date { font-size: 13px; opacity: .75; margin-bottom: 12px; letter-spacing: .5px; }
+.hero__title { font-size: 30px; font-weight: 700; line-height: 1.35; max-width: 680px; margin: 0 auto; }
+.article { max-width: 720px; margin: -24px auto 60px; padding: 0 20px; }
+.article__body { background: #fff; border-radius: 16px; box-shadow: 0 1px 3px rgba(0,0,0,.06), 0 8px 24px rgba(0,0,0,.04); padding: 40px 36px; }
+.article__content { font-size: 16px; line-height: 2; color: #333; word-break: keep-all; }
+.article__content p { margin-bottom: 18px; } .article__content p:last-child { margin-bottom: 0; }
+.article__content h2 { font-size: 21px; font-weight: 700; color: #1d1d1f; margin: 44px 0 18px; padding-bottom: 10px; border-bottom: 2px solid #667eea; display: inline-block; }
+.article__content h2::before { content: ''; display: inline-block; width: 4px; height: 21px; background: #667eea; border-radius: 2px; margin-right: 10px; vertical-align: text-bottom; }
+.article__content pre { background: #1e1e2e; color: #cdd6f4; border-radius: 12px; padding: 20px 24px; margin: 20px 0; overflow-x: auto; font-family: 'Fira Code', monospace; font-size: 13.5px; line-height: 1.7; border: 1px solid rgba(255,255,255,.06); }
+.article__content code { font-family: 'Fira Code', monospace; font-size: 14px; background: #f0f0f5; color: #e74c8b; padding: 2px 7px; border-radius: 5px; }
+.article__content pre code { background: none; color: inherit; padding: 0; border-radius: 0; font-size: 13.5px; }
+.article__content strong { color: #1d1d1f; font-weight: 600; }
+.progress-bar { position: fixed; top: 0; left: 0; height: 3px; background: linear-gradient(90deg, #667eea, #764ba2); z-index: 200; width: 0; transition: width .1s linear; }
+@media (max-width: 600px) { .hero { padding: 40px 16px 36px; } .hero__title { font-size: 23px; } .article__body { padding: 28px 20px; border-radius: 12px; } .article__content { font-size: 15px; } .article__content h2 { font-size: 19px; } .article__content pre { padding: 16px; font-size: 12.5px; } }</style>
+</head>
+<body>
+	<div class="progress-bar" id="progressBar"></div>
+	<header class="header">
+		<div class="header__title">Tech Blog</div>
+		<a class="header__back" href="./index.html">← 목록으로</a>
+	</header>
+	<div class="hero">
+		<p class="hero__date">2026.08.18 10:00</p>
+		<h1 class="hero__title">데코레이터 캐시 패턴 — 코드 한 줄로 성능을 바꾸는 메모이제이션 기법</h1>
+	</div>
+	<article class="article">
+		<div class="article__body">
+			<div class="article__content" id="articleContent">같은 인자로 같은 함수를 100번 호출하면, 100번 다 계산해야 할까?
+당연히 아니다. 한 번만 계산하고 결과를 기억해두면 나머지 99번은 공짜다.
+이 아이디어를 **메모이제이션(Memoization)**이라 부르고, 이걸 구현하는 가장 깔끔한 방법이 **데코레이터 캐시 패턴**이다.
+
+## 데코레이터 패턴이란
+
+먼저 디자인 패턴 쪽 얘기부터 하자.
+**데코레이터 패턴**은 원래 객체를 감싸서 기능을 추가하는 구조 패턴이다.
+원본 코드를 한 줄도 건드리지 않고, 그 위에 새로운 행동을 얹는다.
+
+커피로 비유하면 이렇다:
+- 에스프레소(원본 객체)
+- 우유를 추가한 에스프레소 = 라떼(데코레이터 1)
+- 시럽을 추가한 라떼 = 바닐라 라떼(데코레이터 2)
+
+에스프레소 자체는 변하지 않았다. 감싸는 것만 바뀌었을 뿐이다.
+이걸 코드로 보면:
+
+    // 원본 — DB에서 매번 조회
+    public class ProductRepository {
+        public Product findById(Long id) {
+            return db.query("SELECT * FROM product WHERE id = ?", id);
+        }
+    }
+
+    // 데코레이터 — 캐시 계층을 씌움
+    public class CachedProductRepository extends ProductRepository {
+        private Map<Long, Product> cache = new HashMap<>();
+
+        @Override
+        public Product findById(Long id) {
+            if (cache.containsKey(id)) {
+                return cache.get(id);           // 캐시 히트 → DB 안 감
+            }
+            Product product = super.findById(id);  // 캐시 미스 → 원본 호출
+            cache.put(id, product);
+            return product;
+        }
+    }
+
+`ProductRepository`의 코드는 한 글자도 바뀌지 않았다.
+호출하는 쪽도 인터페이스가 같으니 바꿀 게 없다.
+이것이 데코레이터 패턴의 핵심이다 — **OCP(개방-폐쇄 원칙)를 지키면서 기능을 확장**한다.
+
+## 캐시의 기본 동작 원리
+
+데코레이터 캐시든 어떤 캐시든, 동작 원리는 동일하다:
+
+1. 함수가 호출되면 **인자값을 키로** 캐시를 먼저 확인한다
+2. **캐시 히트(Hit)**: 저장된 결과를 바로 리턴한다 (함수 실행 안 함)
+3. **캐시 미스(Miss)**: 함수를 실행하고, 결과를 캐시에 저장한 뒤 리턴한다
+
+이 세 단계를 "원본 함수를 감싸는 래퍼"로 구현하면 데코레이터 캐시가 된다.
+
+## Python의 @lru_cache — 언어가 제공하는 데코레이터 캐시
+
+Python에서는 이걸 언어 수준에서 제공한다. `functools` 모듈의 `@lru_cache`다.
+
+피보나치 수열로 효과를 체감해보자:
+
+    # 캐시 없이 — fib(50)을 호출하면 영원히 안 끝남
+    def fibonacci(n):
+        if n < 2:
+            return n
+        return fibonacci(n-1) + fibonacci(n-2)
+
+`fib(50)`을 계산하려면 `fib(49)` + `fib(48)`이 필요하고,
+`fib(49)`를 계산하려면 `fib(48)` + `fib(47)`이 필요하고...
+같은 값을 수십억 번 중복 계산한다. 시간 복잡도가 O(2^n)이다.
+
+    # @lru_cache 한 줄 추가 — fib(50)도 즉시 리턴
+    from functools import lru_cache
+
+    @lru_cache(maxsize=128)
+    def fibonacci(n):
+        if n < 2:
+            return n
+        return fibonacci(n-1) + fibonacci(n-2)
+
+`@lru_cache`를 한 줄 붙이면 한 번 계산한 결과를 기억한다.
+`fib(48)`은 최초 1번만 계산되고, 이후에는 캐시에서 꺼내 쓴다.
+시간 복잡도가 O(n)으로 떨어진다. **코드 한 줄로 지수 시간이 선형 시간이 된다.**
+
+`maxsize=128`은 캐시에 최대 128개의 결과만 보관하겠다는 뜻이다.
+**LRU(Least Recently Used)** — 가장 오래 안 쓴 것부터 밀어낸다.
+`maxsize=None`으로 설정하면 제한 없이 모든 결과를 보관한다.
+
+Python 3.9 이상에서는 `@cache`를 쓸 수 있다. `@lru_cache(maxsize=None)`의 단축 버전이다:
+
+    from functools import cache
+
+    @cache
+    def expensive_computation(x, y):
+        # 복잡한 계산...
+        return result
+
+## 실전에서 자주 쓰는 패턴
+
+## 1. FastAPI 설정 객체 캐싱
+
+FastAPI 공식 문서에도 나오는 패턴이다.
+설정 객체를 매 요청마다 새로 만들 필요가 없으니 캐시한다:
+
+    from functools import lru_cache
+    from pydantic_settings import BaseSettings
+
+    class Settings(BaseSettings):
+        database_url: str
+        redis_url: str
+        debug: bool = False
+
+    @lru_cache
+    def get_settings():
+        return Settings()
+
+    # FastAPI 의존성 주입에서 사용
+    @app.get("/items")
+    def read_items(settings: Settings = Depends(get_settings)):
+        return {"db": settings.database_url}
+
+`get_settings()`가 몇 번 호출되든 Settings 객체는 딱 한 번만 만들어진다.
+
+## 2. DB 조회 결과 캐싱
+
+자주 조회하지만 잘 바뀌지 않는 데이터에 적합하다:
+
+    @lru_cache(maxsize=256)
+    def get_user_profile(user_id: int):
+        return db.query("SELECT * FROM users WHERE id = %s", user_id)
+
+    # user_id=42를 10번 조회해도 DB 쿼리는 1번만 나간다
+
+## 3. API 응답 캐싱
+
+외부 API 호출은 느리고 비용이 든다. 같은 요청의 응답을 캐시하면 효과가 크다:
+
+    @lru_cache(maxsize=64)
+    def get_exchange_rate(currency: str):
+        response = requests.get(f"https://api.example.com/rate/{currency}")
+        return response.json()["rate"]
+
+## 4. 재귀 + 동적 프로그래밍
+
+피보나치 외에도 재귀적 문제에서 위력을 발휘한다:
+
+    @lru_cache(maxsize=None)
+    def combination(n, r):
+        if r == 0 or r == n:
+            return 1
+        return combination(n-1, r-1) + combination(n-1, r)
+
+    # C(100, 50)도 즉시 계산된다
+
+## Java/Spring에서의 데코레이터 캐시
+
+Java에서는 Spring의 `@Cacheable`이 같은 역할을 한다:
+
+    @Service
+    public class ProductService {
+
+        @Cacheable(value = "products", key = "#id")
+        public Product findById(Long id) {
+            // DB 조회 — 같은 id로 두 번째 호출부터는 실행되지 않음
+            return productRepository.findById(id).orElseThrow();
+        }
+
+        @CacheEvict(value = "products", key = "#id")
+        public void updateProduct(Long id, ProductDto dto) {
+            // 상품 수정 시 해당 캐시를 지움
+            Product product = productRepository.findById(id).orElseThrow();
+            product.update(dto);
+        }
+    }
+
+`@Cacheable`이 데코레이터 캐시 역할을 하고, `@CacheEvict`가 캐시 무효화를 담당한다.
+Spring은 내부적으로 AOP(관점 지향 프로그래밍)를 사용해서 메서드 호출을 가로채고, 캐시 로직을 끼워넣는다.
+원본 메서드 코드는 DB 조회 로직만 가지고 있고, 캐시는 완전히 분리되어 있다.
+
+## 캐시를 쓰면 안 되는 경우
+
+데코레이터 캐시는 만능이 아니다. **같은 입력 → 같은 출력**이 보장되어야 한다.
+
+**쓰면 안 되는 경우:**
+
+- 현재 시간에 따라 결과가 달라지는 함수
+- 랜덤 값을 리턴하는 함수
+- 외부 상태(DB, 파일)가 자주 바뀌는데 그걸 반영해야 하는 함수
+- 인자가 해시 불가능한 타입(dict, list)인 경우 (`@lru_cache`는 인자를 해시해서 키로 쓴다)
+
+**조심해야 하는 경우:**
+
+- DB 데이터를 캐시했는데 다른 곳에서 데이터를 수정하면 → **오래된 데이터(stale data)**를 리턴한다
+- 캐시 크기를 제한하지 않으면 → **메모리 누수**가 생길 수 있다
+- 멀티스레드 환경에서 → **경합 조건(race condition)**을 고려해야 한다
+
+## 캐시 무효화 전략
+
+"컴퓨터 과학에서 어려운 문제는 두 가지뿐이다: 캐시 무효화와 이름 짓기" — Phil Karlton
+
+캐시의 진짜 어려운 점은 **언제 캐시를 지울 것인가**다.
+
+**1. TTL (Time To Live)**: 일정 시간이 지나면 자동으로 만료한다. 가장 단순하고 널리 쓰인다.
+
+    # Python에서는 cachetools 라이브러리로 TTL 캐시를 쓸 수 있다
+    from cachetools import TTLCache, cached
+
+    @cached(cache=TTLCache(maxsize=128, ttl=300))  # 5분 후 만료
+    def get_user_profile(user_id: int):
+        return db.query(user_id)
+
+**2. 수동 무효화**: 데이터가 변경될 때 명시적으로 캐시를 지운다.
+
+    # Python @lru_cache는 cache_clear()를 제공한다
+    get_user_profile.cache_clear()  # 전체 캐시 삭제
+
+    # Spring의 @CacheEvict — 특정 키만 삭제
+    @CacheEvict(value = "products", key = "#id")
+
+**3. Write-Through**: 데이터를 쓸 때 캐시도 함께 갱신한다. DB와 캐시가 항상 동기화된다.
+
+**4. LRU (Least Recently Used)**: 가장 오래 안 쓴 항목부터 밀어낸다. `@lru_cache`의 기본 전략이다.
+
+## 데코레이터 패턴 + DDD
+
+DDD에서 본 리포지터리 패턴과 데코레이터 캐시는 자연스럽게 결합된다:
+
+    // 도메인 영역 — 인터페이스
+    public interface ProductRepository {
+        Product findById(ProductId id);
+        void save(Product product);
+    }
+
+    // 인프라 영역 — JPA 구현
+    public class JpaProductRepository implements ProductRepository {
+        public Product findById(ProductId id) {
+            return em.find(Product.class, id);
+        }
+    }
+
+    // 인프라 영역 — 캐시 데코레이터
+    public class CachedProductRepository implements ProductRepository {
+        private final ProductRepository delegate;
+        private final Map<ProductId, Product> cache;
+
+        public CachedProductRepository(ProductRepository delegate) {
+            this.delegate = delegate;
+            this.cache = new ConcurrentHashMap<>();
+        }
+
+        public Product findById(ProductId id) {
+            return cache.computeIfAbsent(id, delegate::findById);
+        }
+
+        public void save(Product product) {
+            delegate.save(product);
+            cache.put(product.getId(), product);  // 캐시도 갱신
+        }
+    }
+
+도메인은 `ProductRepository` 인터페이스만 알면 된다.
+캐시가 있든 없든 도메인 코드는 변하지 않는다.
+캐시를 끄고 싶으면 `CachedProductRepository` 대신 `JpaProductRepository`를 주입하면 그만이다.
+
+이것이 **DIP + 데코레이터 패턴 + 캐시**의 조합이다.
+각 관심사가 깔끔하게 분리되어 있고, 어느 하나를 바꿔도 다른 곳에 영향이 없다.
+
+## 정리
+
+- **데코레이터 캐시**는 원본 함수/객체를 감싸서 결과를 기억해두는 패턴이다
+- **메모이제이션**은 같은 입력에 같은 출력을 보장하는 순수 함수에 적합하다
+- Python의 `@lru_cache`, Spring의 `@Cacheable`이 대표적인 구현이다
+- **캐시 무효화**가 진짜 어려운 문제다 — TTL, 수동 삭제, Write-Through 중 상황에 맞게 선택한다
+- DDD의 리포지터리 패턴과 결합하면 도메인 코드 변경 없이 캐시 계층을 끼울 수 있다
+- 같은 입력이 같은 출력을 보장하지 않는 함수에는 쓰지 않는다</div>
+		</div>
+	</article>
+	<script src="./article-template.js"></script>
+</body>
+</html>
