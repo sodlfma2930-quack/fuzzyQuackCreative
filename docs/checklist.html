@@ -3,140 +3,397 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<title>체크리스트</title>
+	<title>웨딩 체크리스트</title>
 	<link rel="preconnect" href="https://fonts.googleapis.com">
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-	<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500&display=swap" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
 	<style>
 		*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-		body {
-			font-family: 'Noto Sans KR', -apple-system, sans-serif;
-			background: #0a0a0a; color: #f5f5f7;
-			min-height: 100vh;
+		:root {
+			--bg: #0a0a0a; --card: #1c1c1e; --line: #2c2c2e; --line2: #48484a;
+			--text: #f5f5f7; --sub: #a1a1a6; --mute: #636366; --accent: #b5a696; --ok: #30d158;
 		}
-		.container { max-width: 600px; margin: 0 auto; padding: 40px 20px; }
-		.header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; }
+		body { font-family: 'Noto Sans KR', -apple-system, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+		a { color: var(--accent); }
+		.container { max-width: 640px; margin: 0 auto; padding: 32px 16px 80px; }
+
+		.header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
 		.header h1 { font-size: 22px; font-weight: 500; }
 		.back { color: #86868b; font-size: 13px; text-decoration: none; }
-		.back:hover { color: #f5f5f7; }
-		.add-row { display: flex; gap: 8px; margin-bottom: 24px; }
-		.add-row input {
-			flex: 1; padding: 12px 16px; border-radius: 10px;
-			border: 1px solid #2c2c2e; background: #1c1c1e; color: #f5f5f7;
-			font-family: inherit; font-size: 14px; outline: none;
-		}
-		.add-row input:focus { border-color: #48484a; }
-		.add-row input::placeholder { color: #636366; }
-		.btn {
-			padding: 10px 20px; border-radius: 10px; border: none;
-			background: #2c2c2e; color: #f5f5f7; font-family: inherit;
-			font-size: 13px; font-weight: 500; cursor: pointer; transition: background .2s;
-		}
-		.btn:hover { background: #3a3a3c; }
-		.btn--save { background: #b5a696; color: #0a0a0a; }
-		.btn--save:hover { background: #c4b8aa; }
-		.list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 24px; }
-		.item {
-			display: flex; align-items: center; gap: 12px;
-			padding: 14px 16px; background: #1c1c1e; border-radius: 10px;
-			border: 1px solid #2c2c2e; transition: background .15s;
-		}
-		.item.checked { opacity: 0.5; }
-		.item.checked .item__text { text-decoration: line-through; }
-		.item input[type="checkbox"] {
-			width: 18px; height: 18px; accent-color: #b5a696; cursor: pointer; flex-shrink: 0;
-		}
-		.item__text { flex: 1; font-size: 14px; }
-		.item__delete {
-			background: none; border: none; color: #636366; cursor: pointer;
-			font-size: 16px; padding: 4px; line-height: 1; transition: color .2s;
-		}
-		.item__delete:hover { color: #ff453a; }
-		.empty { text-align: center; padding: 40px 0; color: #636366; font-size: 14px; }
-		.save-bar { position: sticky; bottom: 20px; }
-		.toast {
-			position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
-			padding: 10px 24px; background: #b5a696; color: #0a0a0a;
-			border-radius: 999px; font-size: 13px; font-weight: 500;
-			opacity: 0; transition: opacity .3s; pointer-events: none;
-		}
-		.toast.show { opacity: 1; }
+		.back:hover { color: var(--text); }
+
+		.summary { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 20px; margin-bottom: 20px; }
+		.summary__top { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-bottom: 14px; }
+		.dday { font-size: 28px; font-weight: 700; color: var(--accent); font-variant-numeric: tabular-nums; }
+		.wedding-info { font-size: 12px; color: var(--sub); text-align: right; line-height: 1.6; }
+		.stat { display: flex; justify-content: space-between; font-size: 13px; color: var(--sub); margin: 10px 0 6px; }
+		.stat b { color: var(--text); font-weight: 500; font-variant-numeric: tabular-nums; }
+		.bar { height: 6px; background: var(--line); border-radius: 999px; overflow: hidden; }
+		.bar__fill { height: 100%; background: var(--accent); border-radius: 999px; transition: width .3s; }
+
+		.tabs { display: flex; gap: 6px; margin-bottom: 16px; position: sticky; top: 0; background: var(--bg); padding: 8px 0; z-index: 5; }
+		.tab { flex: 1; padding: 10px 0; border-radius: 10px; border: 1px solid var(--line); background: transparent; color: var(--sub); font-family: inherit; font-size: 13px; cursor: pointer; }
+		.tab.active { background: var(--card); color: var(--text); border-color: var(--line2); }
+		.panel { display: none; flex-direction: column; gap: 12px; }
+		.panel.active { display: flex; }
+
+		details.month { background: var(--card); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
+		details.month > summary { list-style: none; cursor: pointer; padding: 16px; }
+		details.month > summary::-webkit-details-marker { display: none; }
+		.month__head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+		.month__title { font-size: 16px; font-weight: 500; }
+		.month__title small { font-size: 12px; color: var(--mute); margin-left: 6px; font-weight: 400; }
+		.month__bar { margin-top: 10px; }
+		.month__body { padding: 0 8px 12px; }
+		.month.done .month__title::after { content: ' ✓'; color: var(--ok); }
+
+		.item { display: flex; align-items: flex-start; gap: 12px; padding: 11px 8px; border-radius: 10px; cursor: pointer; }
+		.item:hover { background: #242426; }
+		.item input { width: 18px; height: 18px; accent-color: var(--accent); cursor: pointer; flex-shrink: 0; margin-top: 2px; }
+		.item__main { flex: 1; min-width: 0; }
+		.item__text { font-size: 14px; line-height: 1.4; }
+		.item__note { font-size: 12px; color: var(--mute); margin-top: 2px; }
+		.item.checked .item__text { text-decoration: line-through; color: var(--mute); }
+		.item__del { background: none; border: none; color: var(--mute); cursor: pointer; font-size: 16px; padding: 0 4px; line-height: 1; }
+		.item__del:hover { color: #ff453a; }
+
+		.add-row { display: flex; gap: 6px; padding: 8px 8px 0; }
+		.add-row input { min-width: 0; padding: 9px 12px; border-radius: 8px; border: 1px solid var(--line); background: var(--bg); color: var(--text); font-family: inherit; font-size: 13px; outline: none; }
+		.add-row input:focus { border-color: var(--line2); }
+		.add-row input::placeholder { color: var(--mute); }
+		.add-row .add-text { flex: 1; }
+		.add-row button { padding: 0 14px; border-radius: 8px; border: none; background: var(--line); color: var(--text); font-family: inherit; font-size: 13px; cursor: pointer; }
+		.add-row button:hover { background: #3a3a3c; }
+
+		.card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 16px; }
+		.card__title { font-size: 15px; font-weight: 500; margin-bottom: 4px; display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+		.card__count { font-size: 12px; color: var(--sub); font-weight: 400; font-variant-numeric: tabular-nums; }
+		.card__sub { font-size: 12px; color: var(--sub); margin-bottom: 10px; line-height: 1.6; }
+		.card .item { padding: 9px 4px; }
+		.facts { list-style: none; font-size: 13px; line-height: 1.5; }
+		.facts li { display: flex; gap: 12px; padding: 7px 0; border-top: 1px solid var(--line); }
+		.facts li:first-child { border-top: none; }
+		.facts .k { color: var(--mute); width: 76px; flex-shrink: 0; }
+		.facts .v { flex: 1; min-width: 0; word-break: keep-all; overflow-wrap: anywhere; }
+		.tag { display: inline-block; font-size: 11px; padding: 2px 7px; border-radius: 4px; background: #0d3b1e; color: var(--ok); margin-left: 4px; vertical-align: 1px; }
+		.tag--due { background: #3a2f1e; color: #ffb340; }
+		.tip { font-size: 12px; color: var(--mute); line-height: 1.6; text-align: center; margin-top: 8px; }
 	</style>
 </head>
 <body>
-	<div class="container">
-		<div class="header">
-			<h1>체크리스트</h1>
-			<a class="back" href="./home.html">홈으로</a>
-		</div>
-		<div class="add-row">
-			<input type="text" id="newItem" placeholder="할 일을 입력하세요" autocomplete="off">
-			<button type="button" class="btn" id="addBtn">추가</button>
-		</div>
-		<div class="list" id="list"></div>
-		<div class="save-bar">
-			<button type="button" class="btn btn--save" style="width:100%" id="saveBtn">저장</button>
-		</div>
+<div class="container">
+	<div class="header">
+		<h1>웨딩 체크리스트</h1>
+		<a class="back" href="./home.html">홈으로</a>
 	</div>
-	<div class="toast" id="toast">저장되었습니다</div>
-	<script>
-		const listEl = document.getElementById('list');
-		const input = document.getElementById('newItem');
-		let items = JSON.parse(localStorage.getItem('fqc_checklist') || '[]');
 
-		function render() {
-			if (items.length === 0) {
-				listEl.innerHTML = '<div class="empty">아직 항목이 없습니다</div>';
-				return;
-			}
-			listEl.innerHTML = items.map((it, i) => `
-				<div class="item ${it.checked ? 'checked' : ''}">
-					<input type="checkbox" ${it.checked ? 'checked' : ''} data-i="${i}">
-					<span class="item__text">${esc(it.text)}</span>
-					<button type="button" class="item__delete" data-del="${i}">&times;</button>
+	<section class="summary">
+		<div class="summary__top">
+			<div class="dday" id="dday">D-</div>
+			<div class="wedding-info">2027.04.10 (토) 15:30<br>로터스101</div>
+		</div>
+		<div class="stat"><span>할 일</span><b id="statDone"></b></div>
+		<div class="bar"><div class="bar__fill" id="barDone"></div></div>
+	</section>
+
+	<div class="tabs" role="tablist">
+		<button class="tab" data-tab="months">월별 할 일</button>
+		<button class="tab" data-tab="prep">준비 정보</button>
+		<button class="tab" data-tab="contracts">계약 완료</button>
+	</div>
+
+	<div class="panel" id="panel-months"></div>
+	<div class="panel" id="panel-prep"></div>
+	<div class="panel" id="panel-contracts"></div>
+
+	<p class="tip">체크하면 바로 저장돼. 단, 이 기기 브라우저에만 저장되니까 다른 폰에서는 따로 체크해야 해.</p>
+</div>
+
+<script>
+const MONTHS = [
+	{ id: '2026-12', label: '12월', year: 2026, month: 12, items: [
+		{ id: 'd1', text: 'B형간염 3차 접종' },
+		{ id: 'd2', text: '청첩장', note: '100장 · 준비 정보 탭 참고' },
+		{ id: 'd4', text: '혼주 액세서리 + 넥타이' },
+		{ id: 'd5', text: '2부 예복' },
+		{ id: 'd6', text: '렌트' },
+		{ id: 'd8', text: '투어' },
+	]},
+	{ id: '2027-01', label: '1월', year: 2027, month: 1, items: [
+		{ id: 'j1', text: '상견례' },
+		{ id: 'j2', text: '혼주한복', note: '온누리 · 1/2 15:00 예약' },
+		{ id: 'j3', text: '무료 시식' },
+		{ id: 'j6', text: '호주 숙소 2일' },
+		{ id: 'j7', text: '식전영상', note: '길이 · 필름메이커 · 가로/세로 정하기' },
+		{ id: 'j8', text: '정장' },
+	]},
+	{ id: '2027-02', label: '2월', year: 2027, month: 2, items: [
+		{ id: 'f1', text: '설' },
+		{ id: 'f2', text: '청모' },
+		{ id: 'f3', text: '드레스 가봉 · 드메 잔금', note: '2/26 예상 · 부가세 별도' },
+		{ id: 'f4', text: '식권 및 식장 리허설', note: '축가 가사 리허설 확인' },
+		{ id: 'f5', text: '공항버스 예매' },
+	]},
+	{ id: '2027-03', label: '3월', year: 2027, month: 3, items: [
+		{ id: 'm1', text: '식순 구성' },
+		{ id: 'm2', text: '카메라' },
+		{ id: 'm3', text: '관리 마사지' },
+		{ id: 'm4', text: '하객 식대 정리' },
+		{ id: 'm5', text: '신행 환전 및 준비', note: '홈의 신혼여행 메뉴 참고' },
+		{ id: 'm6', text: '포토테이블' },
+		{ id: 'm7', text: '비자 2인' },
+	]},
+	{ id: '2027-04', label: '4월', year: 2027, month: 4, items: [
+		{ id: 'a1', text: '답례' },
+		{ id: 'a2', text: '교통비' },
+		{ id: 'a3', text: '속눈썹펌' },
+		{ id: 'a4', text: '본식스냅 잔금', note: '본식 1주 전까지' },
+	]},
+];
+
+const PREP = [
+	{ id: 'hall', title: '웨딩홀 확인사항', sub: '로터스101에 물어볼 것', items: [
+		{ id: 'h1', text: '방명록 노트 제공되는지' },
+		{ id: 'h2', text: '포토테이블 액자 제공되는지' },
+		{ id: 'h3', text: '축사·축가 때 가사는 어떻게 띄우는지' },
+	]},
+	{ id: 'day', title: '본식 당일 준비', sub: '전날까지 챙길 것', items: [
+		{ id: 'w1', text: '한복 하루 전 픽업', note: '털보 담당' },
+		{ id: 'w2', text: '반지' },
+		{ id: 'w3', text: '2부 옷 + 구두' },
+		{ id: 'w4', text: '업체 비상연락망 정리 후 공유' },
+		{ id: 'w5', text: '현금 준비', note: '헬퍼비 · 교통비' },
+	]},
+	{ id: 'shoot', title: '웨딩촬영 · 하우알유두잉', sub: '대구 중구 동성로2길 30-9 2층 · 14:30', items: [
+		{ id: 's0', text: '독사진 꼭 찍기' },
+		{ id: 's1', text: '반지' },
+		{ id: 's2', text: '누브라' },
+		{ id: 's3', text: '구두' },
+		{ id: 's4', text: '귀걸이' },
+		{ id: 's5', text: '털보 정장 + 구두' },
+	]},
+];
+
+const INFO = [
+	{ title: '혼주한복 · 온누리', facts: [
+		['예약', '1월 2일 15:00'],
+		['대여', '가방·신발도 가능 (20~30만)'],
+		['픽업', '2박 3일 대여 → 전날 픽업, 당일 반납'],
+	]},
+	{ title: '청첩장 100장', facts: [
+		['종이', '디어디어'],
+		['모바일', '바른손 레터비'],
+		['배분', '털보네 30 · 털보 10 · 오리네 10 · 오리 10 · 회사 40'],
+	]},
+];
+
+const CONTRACTS = [
+	{ title: '웨딩홀 · 로터스101', facts: [
+		['일시', '2027.04.10 15:30'],
+		['계약금', '50만 <span class="tag">완료</span>'],
+	]},
+	{ title: '드메 + 혼주헤메 + 부케', facts: [
+		['업체', '모니카블랑쉬 / 루브메이크업'],
+		['계약금', '50만 <span class="tag">완료</span>'],
+		['잔금', '215만 (부가세 별도) <span class="tag tag--due">본식 전까지</span>'],
+		['메이크업', '도연 부원장 지정'],
+	]},
+	{ title: '본식스냅 · 에밀리아스타일', facts: [
+		['총액', '82만 (95 − 얼리 10 − 당일 3)'],
+		['계약금', '30만 <span class="tag">완료</span>'],
+		['잔금', '52만 <span class="tag tag--due">본식 1주 전</span>'],
+	]},
+	{ title: '반지 · 모멘토', facts: [
+		['총액', '245만'],
+		['구성', '메인 195 + 가드링 50'],
+	]},
+	{ title: '신랑 예복', facts: [['금액', '37만']] },
+	{ title: '신행 항공 · 숙소', facts: [
+		['항공', '인천→마닐라 33 · 마닐라→시드니 73<br>시드니→퀸즈타운 82 · 오클랜드→인천 145'],
+		['항공 합계', '333만'],
+		['숙소', '필리핀 2일 15만'],
+	]},
+];
+
+const STORE_KEY = 'fqc_wedding_v1';
+const TAB_KEY = 'fqc_wedding_tab';
+
+function load() {
+	try {
+		const s = JSON.parse(localStorage.getItem(STORE_KEY));
+		if (s && s.checked && s.custom) return s;
+	} catch (e) {}
+	const state = { checked: {}, custom: {} };
+	// 예전 체크리스트에 적어 둔 항목은 12월 목록에 옮겨 둔다.
+	try {
+		const old = JSON.parse(localStorage.getItem('fqc_checklist') || '[]');
+		if (Array.isArray(old) && old.length) {
+			state.custom['2026-12'] = old.filter(o => o && o.text).map((o, i) => {
+				const id = 'c-old-' + i;
+				if (o.checked) state.checked[id] = true;
+				return { id, text: String(o.text) };
+			});
+		}
+	} catch (e) {}
+	return state;
+}
+let state = load();
+function save() {
+	try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch (e) {}
+}
+
+function esc(s) {
+	const d = document.createElement('div');
+	d.textContent = s;
+	return d.innerHTML;
+}
+const monthItems = m => m.items.concat(state.custom[m.id] || []);
+
+function itemHtml(it, deletable) {
+	const note = it.note ? `<div class="item__note">${esc(it.note)}</div>` : '';
+	const del = deletable ? `<button class="item__del" data-del="${it.id}" aria-label="삭제">&times;</button>` : '';
+	return `<label class="item ${state.checked[it.id] ? 'checked' : ''}">
+		<input type="checkbox" data-id="${it.id}" ${state.checked[it.id] ? 'checked' : ''}>
+		<div class="item__main"><div class="item__text">${esc(it.text)}</div>${note}</div>
+		${del}
+	</label>`;
+}
+
+function currentMonthId() {
+	const now = new Date();
+	const key = now.getFullYear() * 100 + now.getMonth() + 1;
+	const m = MONTHS.find(m => m.year * 100 + m.month >= key);
+	return (m || MONTHS[MONTHS.length - 1]).id;
+}
+
+const openMonths = new Set([currentMonthId()]);
+
+function renderMonths() {
+	document.getElementById('panel-months').innerHTML = MONTHS.map(m => {
+		const items = monthItems(m);
+		const done = items.filter(i => state.checked[i.id]).length;
+		const pct = items.length ? done / items.length * 100 : 0;
+		const custom = state.custom[m.id] || [];
+		return `<details class="month ${items.length && done === items.length ? 'done' : ''}" data-month="${m.id}" ${openMonths.has(m.id) ? 'open' : ''}>
+			<summary>
+				<div class="month__head">
+					<span class="month__title">${m.label}<small>${done}/${items.length}</small></span>
 				</div>
-			`).join('');
-		}
+				<div class="bar month__bar"><div class="bar__fill" style="width:${pct}%"></div></div>
+			</summary>
+			<div class="month__body">
+				${m.items.map(i => itemHtml(i, false)).join('')}
+				${custom.map(i => itemHtml(i, true)).join('')}
+				<div class="add-row">
+					<input class="add-text" placeholder="할 일 추가" data-add-text="${m.id}">
+					<button data-add="${m.id}">추가</button>
+				</div>
+			</div>
+		</details>`;
+	}).join('');
+}
 
-		function esc(s) {
-			const d = document.createElement('div');
-			d.textContent = s;
-			return d.innerHTML;
-		}
+function factsHtml(facts) {
+	return `<ul class="facts">${facts.map(([k, v]) => `<li><span class="k">${k}</span><span class="v">${v}</span></li>`).join('')}</ul>`;
+}
 
-		input.addEventListener('keydown', e => { if (e.key === 'Enter') addItem(); });
-		document.getElementById('addBtn').addEventListener('click', addItem);
+function renderPrep() {
+	const checkCards = PREP.map(g => {
+		const done = g.items.filter(i => state.checked[i.id]).length;
+		return `<div class="card">
+			<div class="card__title">${g.title}<span class="card__count">${done}/${g.items.length}</span></div>
+			<div class="card__sub">${g.sub}</div>
+			${g.items.map(i => itemHtml(i, false)).join('')}
+		</div>`;
+	});
+	const infoCards = INFO.map(c => `<div class="card"><div class="card__title">${c.title}</div>${factsHtml(c.facts)}</div>`);
+	document.getElementById('panel-prep').innerHTML = checkCards.concat(infoCards).join('');
+}
 
-		function addItem() {
-			const text = input.value.trim();
-			if (!text) return;
-			items.push({ text, checked: false });
-			input.value = '';
-			render();
-		}
+function renderContracts() {
+	document.getElementById('panel-contracts').innerHTML = CONTRACTS
+		.map(c => `<div class="card"><div class="card__title">${c.title}</div>${factsHtml(c.facts)}</div>`).join('');
+}
 
-		listEl.addEventListener('change', e => {
-			if (e.target.dataset.i !== undefined) {
-				items[+e.target.dataset.i].checked = e.target.checked;
-				render();
-			}
-		});
+function renderSummary() {
+	const all = MONTHS.flatMap(monthItems).concat(PREP.flatMap(g => g.items));
+	const done = all.filter(i => state.checked[i.id]).length;
+	document.getElementById('statDone').textContent = `${done} / ${all.length}`;
+	document.getElementById('barDone').style.width = (all.length ? done / all.length * 100 : 0) + '%';
 
-		listEl.addEventListener('click', e => {
-			if (e.target.dataset.del !== undefined) {
-				items.splice(+e.target.dataset.del, 1);
-				render();
-			}
-		});
+	const wedding = new Date(2027, 3, 10);
+	const today = new Date(); today.setHours(0, 0, 0, 0);
+	const d = Math.round((wedding - today) / 86400000);
+	document.getElementById('dday').textContent = d > 0 ? `D-${d}` : d === 0 ? 'D-DAY' : `D+${-d}`;
+}
 
-		document.getElementById('saveBtn').addEventListener('click', () => {
-			localStorage.setItem('fqc_checklist', JSON.stringify(items));
-			const toast = document.getElementById('toast');
-			toast.classList.add('show');
-			setTimeout(() => toast.classList.remove('show'), 2000);
-		});
+function render() {
+	renderMonths();
+	renderPrep();
+	renderContracts();
+	renderSummary();
+}
 
+document.addEventListener('change', e => {
+	const id = e.target.dataset && e.target.dataset.id;
+	if (!id) return;
+	if (e.target.checked) state.checked[id] = true; else delete state.checked[id];
+	save();
+	render();
+});
+
+document.addEventListener('click', e => {
+	const del = e.target.dataset.del;
+	if (del) {
+		e.preventDefault();
+		for (const k in state.custom) state.custom[k] = state.custom[k].filter(i => i.id !== del);
+		delete state.checked[del];
+		save();
 		render();
-	</script>
+		return;
+	}
+	if (e.target.dataset.add) addItem(e.target.dataset.add);
+});
+
+document.addEventListener('keydown', e => {
+	if (e.key === 'Enter' && !e.isComposing && e.target.dataset.addText) {
+		addItem(e.target.dataset.addText);
+	}
+});
+
+document.addEventListener('toggle', e => {
+	const id = e.target.dataset && e.target.dataset.month;
+	if (!id) return;
+	if (e.target.open) openMonths.add(id); else openMonths.delete(id);
+}, true);
+
+function addItem(monthId) {
+	const textEl = document.querySelector(`[data-add-text="${monthId}"]`);
+	const text = textEl.value.trim();
+	if (!text) return;
+	(state.custom[monthId] = state.custom[monthId] || []).push({
+		id: 'c-' + Date.now().toString(36),
+		text,
+	});
+	save();
+	render();
+	const next = document.querySelector(`[data-add-text="${monthId}"]`);
+	if (next) next.focus();
+}
+
+function showTab(name) {
+	document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === name));
+	document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.id === 'panel-' + name));
+	try { localStorage.setItem(TAB_KEY, name); } catch (e) {}
+}
+document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => showTab(t.dataset.tab)));
+
+render();
+let firstTab = 'months';
+try { firstTab = localStorage.getItem(TAB_KEY) || 'months'; } catch (e) {}
+showTab(document.getElementById('panel-' + firstTab) ? firstTab : 'months');
+// 신혼여행 페이지에서 체크하고 뒤로 오면 그 상태를 다시 읽는다.
+window.addEventListener('pageshow', e => { if (e.persisted) { state = load(); render(); } });
+</script>
 </body>
 </html>

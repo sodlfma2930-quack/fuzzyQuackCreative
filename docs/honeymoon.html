@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>신혼여행</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+	<style>
+		*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+		:root {
+			--bg: #0a0a0a; --card: #1c1c1e; --line: #2c2c2e; --line2: #48484a;
+			--text: #f5f5f7; --sub: #a1a1a6; --mute: #636366; --accent: #b5a696; --warn: #ffb340;
+		}
+		body { font-family: 'Noto Sans KR', -apple-system, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+		.container { max-width: 640px; margin: 0 auto; padding: 32px 16px 80px; display: flex; flex-direction: column; gap: 16px; }
+
+		.header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+		.header h1 { font-size: 22px; font-weight: 500; }
+		.back { color: #86868b; font-size: 13px; text-decoration: none; }
+		.back:hover { color: var(--text); }
+
+		.card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 20px 16px; }
+		.card__title { font-size: 15px; font-weight: 500; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+		.card__count { font-size: 12px; color: var(--sub); font-weight: 400; font-variant-numeric: tabular-nums; }
+
+		.summary__top { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-bottom: 6px; }
+		.dday { font-size: 28px; font-weight: 700; color: var(--accent); font-variant-numeric: tabular-nums; }
+		.period { font-size: 12px; color: var(--sub); text-align: right; line-height: 1.6; }
+		.route { font-size: 13px; color: var(--sub); margin-bottom: 14px; }
+		.bar { height: 6px; background: var(--line); border-radius: 999px; overflow: hidden; }
+		.bar__fill { height: 100%; background: var(--accent); border-radius: 999px; transition: width .3s; }
+
+		.legs { list-style: none; margin-left: 4px; border-left: 1px solid var(--line2); }
+		.leg { position: relative; display: flex; gap: 10px; padding: 8px 0 8px 14px; }
+		.leg::before { content: ''; position: absolute; left: -4px; top: 14px; width: 7px; height: 7px; border-radius: 50%; background: var(--accent); }
+		.leg__date { width: 38px; flex-shrink: 0; font-size: 13px; color: var(--sub); font-variant-numeric: tabular-nums; line-height: 1.4; }
+		.leg__date small { display: block; font-size: 11px; color: var(--mute); }
+		.leg__main { flex: 1; min-width: 0; }
+		.leg__title { font-size: 14px; line-height: 1.4; }
+		.leg__time { font-size: 12px; color: var(--accent); margin-left: 6px; font-variant-numeric: tabular-nums; }
+		.leg__sub { font-size: 12px; color: var(--mute); margin-top: 2px; line-height: 1.5; word-break: keep-all; }
+		.leg__warn { font-size: 12px; color: var(--warn); margin-top: 2px; }
+		.foot { font-size: 11px; color: var(--mute); margin-top: 8px; }
+
+		.item { display: flex; align-items: flex-start; gap: 12px; padding: 10px 4px; border-radius: 10px; cursor: pointer; }
+		.item:hover { background: #242426; }
+		.item input { width: 18px; height: 18px; accent-color: var(--accent); cursor: pointer; flex-shrink: 0; margin-top: 2px; }
+		.item__main { flex: 1; min-width: 0; }
+		.item__text { font-size: 14px; line-height: 1.4; }
+		.item__note { font-size: 12px; color: var(--mute); margin-top: 2px; }
+		.item.checked .item__text { text-decoration: line-through; color: var(--mute); }
+		.tip { font-size: 12px; color: var(--mute); line-height: 1.6; text-align: center; }
+	</style>
+</head>
+<body>
+<div class="container">
+	<div class="header">
+		<h1>신혼여행</h1>
+		<a class="back" href="./home.html">홈으로</a>
+	</div>
+
+	<section class="card">
+		<div class="summary__top">
+			<div class="dday" id="dday">D-</div>
+			<div class="period">2027.04.11 (일) ~ 04.24 (토)<br>13박 14일</div>
+		</div>
+		<div class="route">필리핀 2박 → 호주 2박 → 뉴질랜드 8박 (기내 1박)</div>
+		<div class="bar"><div class="bar__fill" id="bar"></div></div>
+	</section>
+
+	<section class="card">
+		<div class="card__title">일정</div>
+		<ul class="legs" id="legs"></ul>
+		<p class="foot">? 표시는 캘린더 캡처에서 잘려 안 보인 자리라 항공권으로 확인해야 해.</p>
+	</section>
+
+	<section class="card">
+		<div class="card__title">챙길 것<span class="card__count" id="count"></span></div>
+		<div id="items"></div>
+	</section>
+
+	<p class="tip">체크 상태는 체크리스트 페이지와 같은 저장소를 써서, 겹치는 항목은 양쪽에 같이 반영돼.<br>단, 이 기기 브라우저에만 저장돼.</p>
+</div>
+
+<script>
+// 출발 시각은 캘린더 기준이고, ? 는 캡처에서 잘려 안 보인 자리.
+const LEGS = [
+	{ date: '4/10', dow: '토', title: '본식 끝나고 인천공항으로', sub: '다음 날 06:35 출발이라 04:30 전에는 공항 도착' },
+	{ date: '4/11', dow: '일', title: '인천 → 마닐라', time: '06:35', sub: '필리핀 2박 · 숙소 예약 완료 (15만) · 항공 33만' },
+	{ date: '4/13', dow: '화', title: '마닐라 → 시드니', time: '23:0?', sub: '야간 비행이라 기내 1박 · 항공 73만' },
+	{ date: '4/14', dow: '수', title: '시드니 도착', sub: '호주 2박 · 숙소는 1월에 예약' },
+	{ date: '4/16', dow: '금', title: '시드니 → 퀸즈타운', time: '11:35?', sub: '뉴질랜드 8박 · 항공 82만 · 입국 때 음식물 신고가 엄격함', warn: '퀸즈타운 → 오클랜드 이동 수단이 아직 비어 있어' },
+	{ date: '4/22', dow: '목', title: '생일 🎂' },
+	{ date: '4/24', dow: '토', title: '오클랜드 → 인천', time: '11:05', sub: '항공 145만' },
+];
+
+// month 가 있는 항목은 checklist.html 의 월별 할 일과 같은 id 라 체크가 공유된다. 문구를 바꾸면 거기도 같이 바꿀 것.
+const ITEMS = [
+	{ id: 'f5', month: '2월', text: '공항버스 예매' },
+	{ id: 'n1', text: '4/10 밤 공항 이동 방법 정하기', note: '심야 이동이 빠듯하면 공항 근처 숙박도 고려' },
+	{ id: 'n4', text: '여권 유효기간 6개월 이상인지 확인' },
+	{ id: 'm7', month: '3월', text: '비자 2인', note: '호주 ETA · 뉴질랜드 NZeTA + IVL (필리핀은 무비자 30일)' },
+	{ id: 'n5', text: '필리핀 eTravel 등록', note: '입국 72시간 전부터 온라인으로' },
+	{ id: 'j6', month: '1월', text: '호주 숙소 2일' },
+	{ id: 'n2', text: '뉴질랜드 숙소 8박', note: '4/16 ~ 4/24' },
+	{ id: 'n3', text: '퀸즈타운 → 오클랜드 이동', note: '국내선, 또는 렌트 편도 + 쿡해협 페리 중 정하기' },
+	{ id: 'd6', month: '12월', text: '렌트' },
+	{ id: 't6', text: '렌트 보증금', note: '운전자 본인 명의 신용카드' },
+	{ id: 't3', text: '국제운전면허증', note: '국내 면허증도 같이 · 뉴질랜드는 좌측통행' },
+	{ id: 'd8', month: '12월', text: '투어' },
+	{ id: 'm5', month: '3월', text: '신행 환전 및 준비', note: '페소 · 호주달러 · 뉴질랜드달러' },
+	{ id: 't7', text: '여행자 보험' },
+	{ id: 'n6', text: '멀티 어댑터', note: '필리핀 A·C형 / 호주·뉴질랜드 I형' },
+	{ id: 'n7', text: '3개국 유심 또는 eSIM' },
+	{ id: 'n8', text: '옷은 두 계절로', note: '필리핀은 한여름, 4월 퀸즈타운은 쌀쌀한 가을' },
+];
+
+const STORE_KEY = 'fqc_wedding_v1';
+
+// checklist.html 이 쓰는 다른 필드(custom 등)를 지우지 않도록 통째로 읽고 쓴다.
+function load() {
+	try {
+		const s = JSON.parse(localStorage.getItem(STORE_KEY));
+		if (s && s.checked) return s;
+	} catch (e) {}
+	return { checked: {}, custom: {} };
+}
+let state = load();
+function save() {
+	try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch (e) {}
+}
+
+function esc(s) {
+	const d = document.createElement('div');
+	d.textContent = s;
+	return d.innerHTML;
+}
+
+function render() {
+	document.getElementById('legs').innerHTML = LEGS.map(l => `<li class="leg">
+		<span class="leg__date">${l.date}<small>${l.dow}</small></span>
+		<div class="leg__main">
+			<div class="leg__title">${l.title}${l.time ? `<span class="leg__time">${l.time}</span>` : ''}</div>
+			${l.sub ? `<div class="leg__sub">${l.sub}</div>` : ''}
+			${l.warn ? `<div class="leg__warn">${l.warn}</div>` : ''}
+		</div>
+	</li>`).join('');
+
+	document.getElementById('items').innerHTML = ITEMS.map(it => {
+		const on = !!state.checked[it.id];
+		const notes = [it.month && `체크리스트 ${it.month} 할 일`, it.note].filter(Boolean).join(' · ');
+		return `<label class="item ${on ? 'checked' : ''}">
+			<input type="checkbox" data-id="${it.id}" ${on ? 'checked' : ''}>
+			<div class="item__main"><div class="item__text">${esc(it.text)}</div>${notes ? `<div class="item__note">${esc(notes)}</div>` : ''}</div>
+		</label>`;
+	}).join('');
+
+	const done = ITEMS.filter(i => state.checked[i.id]).length;
+	document.getElementById('count').textContent = `${done}/${ITEMS.length}`;
+	document.getElementById('bar').style.width = done / ITEMS.length * 100 + '%';
+
+	const start = new Date(2027, 3, 11);
+	const today = new Date(); today.setHours(0, 0, 0, 0);
+	const d = Math.round((start - today) / 86400000);
+	document.getElementById('dday').textContent = d > 0 ? `D-${d}` : d === 0 ? 'D-DAY' : `D+${-d}`;
+}
+
+document.addEventListener('change', e => {
+	const id = e.target.dataset && e.target.dataset.id;
+	if (!id) return;
+	state = load();
+	if (e.target.checked) state.checked[id] = true; else delete state.checked[id];
+	save();
+	render();
+});
+
+// 체크리스트에서 체크하고 뒤로 오면 그 상태를 다시 읽는다.
+window.addEventListener('pageshow', e => { if (e.persisted) { state = load(); render(); } });
+
+render();
+</script>
+</body>
+</html>
