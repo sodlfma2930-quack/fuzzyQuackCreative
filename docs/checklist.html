@@ -37,6 +37,27 @@
 		.panel { display: none; flex-direction: column; gap: 12px; }
 		.panel.active { display: flex; }
 
+		.switch { display: flex; gap: 4px; background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 4px; margin-bottom: 16px; }
+		.switch button { flex: 1; padding: 10px 0; border: none; border-radius: 9px; background: transparent; color: var(--sub); font-family: inherit; font-size: 14px; font-weight: 500; cursor: pointer; }
+		.switch button.active { background: var(--line2); color: var(--text); }
+		.view { display: none; }
+		.view.active { display: block; }
+		#view-honeymoon.active { display: flex; flex-direction: column; gap: 12px; }
+
+		.period { font-size: 12px; color: var(--sub); text-align: right; line-height: 1.6; }
+		.route { font-size: 13px; color: var(--sub); margin-bottom: 14px; }
+		.legs { list-style: none; margin-left: 4px; border-left: 1px solid var(--line2); }
+		.leg { position: relative; display: flex; gap: 10px; padding: 8px 0 8px 14px; }
+		.leg::before { content: ''; position: absolute; left: -4px; top: 14px; width: 7px; height: 7px; border-radius: 50%; background: var(--accent); }
+		.leg__date { width: 38px; flex-shrink: 0; font-size: 13px; color: var(--sub); font-variant-numeric: tabular-nums; line-height: 1.4; }
+		.leg__date small { display: block; font-size: 11px; color: var(--mute); }
+		.leg__main { flex: 1; min-width: 0; }
+		.leg__title { font-size: 14px; line-height: 1.4; }
+		.leg__time { font-size: 12px; color: var(--accent); margin-left: 6px; font-variant-numeric: tabular-nums; }
+		.leg__sub { font-size: 12px; color: var(--mute); margin-top: 2px; line-height: 1.5; word-break: keep-all; }
+		.leg__warn { font-size: 12px; color: #ffb340; margin-top: 2px; }
+		.foot { font-size: 11px; color: var(--mute); margin-top: 8px; }
+
 		details.month { background: var(--card); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
 		details.month > summary { list-style: none; cursor: pointer; padding: 16px; }
 		details.month > summary::-webkit-details-marker { display: none; }
@@ -87,6 +108,12 @@
 		<a class="back" href="./home.html">홈으로</a>
 	</div>
 
+	<div class="switch">
+		<button data-view="wedding">웨딩</button>
+		<button data-view="honeymoon">신혼여행</button>
+	</div>
+
+	<div class="view" id="view-wedding">
 	<section class="summary">
 		<div class="summary__top">
 			<div class="dday" id="dday">D-</div>
@@ -105,6 +132,29 @@
 	<div class="panel" id="panel-months"></div>
 	<div class="panel" id="panel-prep"></div>
 	<div class="panel" id="panel-contracts"></div>
+	</div>
+
+	<div class="view" id="view-honeymoon">
+		<section class="summary" style="margin-bottom: 0">
+			<div class="summary__top">
+				<div class="dday" id="hm-dday">D-</div>
+				<div class="period">2027.04.11 (일) ~ 04.24 (토)<br>13박 14일</div>
+			</div>
+			<div class="route">필리핀 2박 → 호주 2박 → 뉴질랜드 8박 (기내 1박)</div>
+			<div class="bar"><div class="bar__fill" id="hm-bar"></div></div>
+		</section>
+
+		<section class="card">
+			<div class="card__title">일정</div>
+			<ul class="legs" id="hm-legs"></ul>
+			<p class="foot">? 표시는 캘린더 캡처에서 잘려 안 보인 자리라 항공권으로 확인해야 해.</p>
+		</section>
+
+		<section class="card">
+			<div class="card__title">챙길 것<span class="card__count" id="hm-count"></span></div>
+			<div id="hm-items"></div>
+		</section>
+	</div>
 
 	<p class="tip">체크하면 바로 저장돼. 단, 이 기기 브라우저에만 저장되니까 다른 폰에서는 따로 체크해야 해.</p>
 </div>
@@ -120,18 +170,16 @@ const MONTHS = [
 		{ id: 'd8', text: '투어' },
 	]},
 	{ id: '2027-01', label: '1월', year: 2027, month: 1, items: [
-		{ id: 'j1', text: '상견례' },
-		{ id: 'j2', text: '혼주한복', note: '온누리 · 1/2 15:00 예약' },
-		{ id: 'j3', text: '무료 시식' },
+		{ id: 'j2', text: '혼주한복', note: '1/2 15:00 · 은혜주단' },
+		{ id: 'j1', text: '상견례', note: '1/2 17:00 · 백년회로' },
 		{ id: 'j6', text: '호주 숙소 2일' },
 		{ id: 'j7', text: '식전영상', note: '길이 · 필름메이커 · 가로/세로 정하기' },
 		{ id: 'j8', text: '정장' },
 	]},
 	{ id: '2027-02', label: '2월', year: 2027, month: 2, items: [
 		{ id: 'f1', text: '설' },
-		{ id: 'f2', text: '청모' },
-		{ id: 'f3', text: '드레스 가봉 · 드메 잔금', note: '2/26 예상 · 부가세 별도' },
-		{ id: 'f4', text: '식권 및 식장 리허설', note: '축가 가사 리허설 확인' },
+		{ id: 'f3', text: '드레스 가봉 및 잔금', note: '2/26 14:00 · 부가세 별도' },
+		{ id: 'j3', text: '무료 시식', note: '2/27' },
 		{ id: 'f5', text: '공항버스 예매' },
 	]},
 	{ id: '2027-03', label: '3월', year: 2027, month: 3, items: [
@@ -139,7 +187,7 @@ const MONTHS = [
 		{ id: 'm2', text: '카메라' },
 		{ id: 'm3', text: '관리 마사지' },
 		{ id: 'm4', text: '하객 식대 정리' },
-		{ id: 'm5', text: '신행 환전 및 준비', note: '홈의 신혼여행 메뉴 참고' },
+		{ id: 'm5', text: '신행 환전 및 준비', note: '신혼여행 탭 참고' },
 		{ id: 'm6', text: '포토테이블' },
 		{ id: 'm7', text: '비자 2인' },
 	]},
@@ -148,6 +196,7 @@ const MONTHS = [
 		{ id: 'a2', text: '교통비' },
 		{ id: 'a3', text: '속눈썹펌' },
 		{ id: 'a4', text: '본식스냅 잔금', note: '본식 1주 전까지' },
+		{ id: 'f4', text: '식권 및 식장 리허설', note: '축가 가사 리허설 확인' },
 	]},
 ];
 
@@ -157,32 +206,31 @@ const PREP = [
 		{ id: 'h2', text: '포토테이블 액자 제공되는지' },
 		{ id: 'h3', text: '축사·축가 때 가사는 어떻게 띄우는지' },
 	]},
-	{ id: 'day', title: '본식 당일 준비', sub: '전날까지 챙길 것', items: [
+	{ id: 'day', title: '본식 준비사항', sub: '전날까지 챙길 것', items: [
 		{ id: 'w1', text: '한복 하루 전 픽업', note: '털보 담당' },
 		{ id: 'w2', text: '반지' },
 		{ id: 'w3', text: '2부 옷 + 구두' },
-		{ id: 'w4', text: '업체 비상연락망 정리 후 공유' },
-		{ id: 'w5', text: '현금 준비', note: '헬퍼비 · 교통비' },
+		{ id: 'w8', text: '흰 넥타이 구매', note: '드레스샵은 보타이만 빌려줌' },
+		{ id: 'w4', text: '업체 비상연락망 정리 후 공유', note: '드메샵 · 스냅' },
+		{ id: 'w5', text: '현금 준비', note: '헬퍼비 · 교통비 · 코디비 15만' },
 	]},
-	{ id: 'shoot', title: '웨딩촬영 · 하우알유두잉', sub: '대구 중구 동성로2길 30-9 2층 · 14:30', items: [
-		{ id: 's0', text: '독사진 꼭 찍기' },
-		{ id: 's1', text: '반지' },
-		{ id: 's2', text: '누브라' },
-		{ id: 's3', text: '구두' },
-		{ id: 's4', text: '귀걸이' },
-		{ id: 's5', text: '털보 정장 + 구두' },
+	{ id: 'request', title: '본식 요청사항', sub: '업체에 전달할 것', items: [], facts: [
+		['헤어', '가슴까지 정리, 숱 조금 치고 층 없애기'],
+		['속눈썹펌', '바짝 말고 자연스럽게 J컬'],
+		['메이크업', '맑고 뽀용하게 · 핫핑크 · 여쿨라'],
+		['본식 스냅', '신부대기실에서 반지 끼워주는 사진<br>단체사진은 가족 → 친구 → 직계 순서'],
+		['드레스샵', '보타이만 대여, 흰 넥타이는 따로 구매<br>코디비 15만 당일 현금 · 출장비(3만) 없음'],
 	]},
 ];
 
 const INFO = [
-	{ title: '혼주한복 · 온누리', facts: [
-		['예약', '1월 2일 15:00'],
-		['대여', '가방·신발도 가능 (20~30만)'],
-		['픽업', '2박 3일 대여 → 전날 픽업, 당일 반납'],
+	{ title: '혼주한복 · 은혜주단', facts: [
+		['예약', '1월 2일 15:00 (같은 날 17:00 상견례)'],
+		['대여', '가방·신발도 가능 (20~30만) · 온누리 기준이라 다시 확인'],
+		['픽업', '2박 3일 대여 → 전날 픽업, 당일 반납 · 온누리 기준이라 다시 확인'],
 	]},
 	{ title: '청첩장 100장', facts: [
-		['종이', '디어디어'],
-		['모바일', '바른손 레터비'],
+		['업체', '<a href="https://deardeer.kr/product/1229" target="_blank" rel="noopener">디얼디어</a>'],
 		['배분', '털보네 30 · 털보 10 · 오리네 10 · 오리 10 · 회사 40'],
 	]},
 ];
@@ -301,9 +349,10 @@ function renderPrep() {
 	const checkCards = PREP.map(g => {
 		const done = g.items.filter(i => state.checked[i.id]).length;
 		return `<div class="card">
-			<div class="card__title">${g.title}<span class="card__count">${done}/${g.items.length}</span></div>
+			<div class="card__title">${g.title}${g.items.length ? `<span class="card__count">${done}/${g.items.length}</span>` : ''}</div>
 			<div class="card__sub">${g.sub}</div>
 			${g.items.map(i => itemHtml(i, false)).join('')}
+			${g.facts ? factsHtml(g.facts) : ''}
 		</div>`;
 	});
 	const infoCards = INFO.map(c => `<div class="card"><div class="card__title">${c.title}</div>${factsHtml(c.facts)}</div>`);
@@ -327,11 +376,70 @@ function renderSummary() {
 	document.getElementById('dday').textContent = d > 0 ? `D-${d}` : d === 0 ? 'D-DAY' : `D+${-d}`;
 }
 
+// 출발 시각은 캘린더 기준이고, ? 는 캡처에서 잘려 안 보인 자리.
+const LEGS = [
+	{ date: '4/10', dow: '토', title: '본식 끝나고 인천공항으로', sub: '다음 날 06:35 출발이라 04:30 전에는 공항 도착' },
+	{ date: '4/11', dow: '일', title: '인천 → 마닐라', time: '06:35', sub: '필리핀 2박 · 숙소 예약 완료 (15만) · 항공 33만' },
+	{ date: '4/13', dow: '화', title: '마닐라 → 시드니', time: '23:0?', sub: '야간 비행이라 기내 1박 · 항공 73만' },
+	{ date: '4/14', dow: '수', title: '시드니 도착', sub: '호주 2박 · 숙소는 1월에 예약' },
+	{ date: '4/16', dow: '금', title: '시드니 → 퀸즈타운', time: '11:35?', sub: '뉴질랜드 8박 · 항공 82만 · 입국 때 음식물 신고가 엄격함', warn: '퀸즈타운 → 오클랜드 이동 수단이 아직 비어 있어' },
+	{ date: '4/22', dow: '목', title: '생일 🎂' },
+	{ date: '4/24', dow: '토', title: '오클랜드 → 인천', time: '11:05', sub: '항공 145만' },
+];
+
+// month 가 있는 항목은 MONTHS 의 같은 id 라 웨딩 탭과 체크가 공유된다.
+const HONEY_ITEMS = [
+	{ id: 'f5', month: '2월', text: '공항버스 예매' },
+	{ id: 'n1', text: '4/10 밤 공항 이동 방법 정하기', note: '심야 이동이 빠듯하면 공항 근처 숙박도 고려' },
+	{ id: 'n4', text: '여권 유효기간 6개월 이상인지 확인' },
+	{ id: 'm7', month: '3월', text: '비자 2인', note: '호주 ETA · 뉴질랜드 NZeTA + IVL (필리핀은 무비자 30일)' },
+	{ id: 'n5', text: '필리핀 eTravel 등록', note: '입국 72시간 전부터 온라인으로' },
+	{ id: 'j6', month: '1월', text: '호주 숙소 2일' },
+	{ id: 'n2', text: '뉴질랜드 숙소 8박', note: '4/16 ~ 4/24' },
+	{ id: 'n3', text: '퀸즈타운 → 오클랜드 이동', note: '국내선, 또는 렌트 편도 + 쿡해협 페리 중 정하기' },
+	{ id: 'd6', month: '12월', text: '렌트' },
+	{ id: 't6', text: '렌트 보증금', note: '운전자 본인 명의 신용카드' },
+	{ id: 't3', text: '국제운전면허증', note: '국내 면허증도 같이 · 뉴질랜드는 좌측통행' },
+	{ id: 'd8', month: '12월', text: '투어' },
+	{ id: 'm5', month: '3월', text: '신행 환전 및 준비', note: '페소 · 호주달러 · 뉴질랜드달러' },
+	{ id: 't7', text: '여행자 보험' },
+	{ id: 'n6', text: '멀티 어댑터', note: '필리핀 A·C형 / 호주·뉴질랜드 I형' },
+	{ id: 'n7', text: '3개국 유심 또는 eSIM' },
+	{ id: 'n8', text: '옷은 두 계절로', note: '필리핀은 한여름, 4월 퀸즈타운은 쌀쌀한 가을' },
+];
+
+function renderHoneymoon() {
+	document.getElementById('hm-legs').innerHTML = LEGS.map(l => `<li class="leg">
+		<span class="leg__date">${l.date}<small>${l.dow}</small></span>
+		<div class="leg__main">
+			<div class="leg__title">${l.title}${l.time ? `<span class="leg__time">${l.time}</span>` : ''}</div>
+			${l.sub ? `<div class="leg__sub">${l.sub}</div>` : ''}
+			${l.warn ? `<div class="leg__warn">${l.warn}</div>` : ''}
+		</div>
+	</li>`).join('');
+
+	document.getElementById('hm-items').innerHTML = HONEY_ITEMS.map(it => itemHtml({
+		id: it.id,
+		text: it.text,
+		note: [it.month && `웨딩 ${it.month} 할 일과 같이 체크됨`, it.note].filter(Boolean).join(' · '),
+	}, false)).join('');
+
+	const done = HONEY_ITEMS.filter(i => state.checked[i.id]).length;
+	document.getElementById('hm-count').textContent = `${done}/${HONEY_ITEMS.length}`;
+	document.getElementById('hm-bar').style.width = done / HONEY_ITEMS.length * 100 + '%';
+
+	const start = new Date(2027, 3, 11);
+	const today = new Date(); today.setHours(0, 0, 0, 0);
+	const d = Math.round((start - today) / 86400000);
+	document.getElementById('hm-dday').textContent = d > 0 ? `D-${d}` : d === 0 ? 'D-DAY' : `D+${-d}`;
+}
+
 function render() {
 	renderMonths();
 	renderPrep();
 	renderContracts();
 	renderSummary();
+	renderHoneymoon();
 }
 
 document.addEventListener('change', e => {
@@ -392,8 +500,20 @@ render();
 let firstTab = 'months';
 try { firstTab = localStorage.getItem(TAB_KEY) || 'months'; } catch (e) {}
 showTab(document.getElementById('panel-' + firstTab) ? firstTab : 'months');
-// 신혼여행 페이지에서 체크하고 뒤로 오면 그 상태를 다시 읽는다.
-window.addEventListener('pageshow', e => { if (e.persisted) { state = load(); render(); } });
+
+const VIEW_KEY = 'fqc_wedding_view';
+function showView(name) {
+	document.querySelectorAll('.switch button').forEach(b => b.classList.toggle('active', b.dataset.view === name));
+	document.querySelectorAll('.view').forEach(v => v.classList.toggle('active', v.id === 'view-' + name));
+	try { localStorage.setItem(VIEW_KEY, name); } catch (e) {}
+}
+document.querySelectorAll('.switch button').forEach(b => b.addEventListener('click', () => {
+	showView(b.dataset.view);
+	history.replaceState(null, '', '#' + b.dataset.view);
+}));
+let firstView = location.hash.slice(1);
+if (!firstView) { try { firstView = localStorage.getItem(VIEW_KEY) || ''; } catch (e) {} }
+showView(document.getElementById('view-' + firstView) ? firstView : 'wedding');
 </script>
 </body>
 </html>
